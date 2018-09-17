@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="{lang}">
+    <head>
+        <meta charset="utf-8">
+        <title>{ctfname} - ${lc_authorize}</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                font-size: 14pt;
+            }
+            .form-item {
+                margin: 2px;
+            }
+            .form-label {
+                font-weight: bolder;
+            }
+        </style>
+    </head>
+    <body>
+        <form action="/auth" method="POST">
+            <div class="form-item">
+                <div class="form-label">Username:</div>
+                <input type="text" name="username" placeholder="Username">
+            </div>
+
+            <div class="form-item">
+                <div class="form-label">Password:</div>
+                <input type="password" name="username" placeholder="Password">
+            </div>
+
+            <div class="form-item">
+                <input type="submit" value="Sign in">
+            </div>
+        </form>
+        <a href="/signup">Not a registered user? Sign up</a>
+    </body>
+</html>
