@@ -1,37 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import sqlite3
+
 import tornado.ioloop
 import tornado.web
-import sqlite3
-import os
 
+from localization import Localization
+from template import Template
 
-class TemplateFormatError(Exception):
-    pass
-
-
-def format_template(template, **kwargs):
-    formatted = ''
-    i = 0
-
-    while i < len(template):
-        if i + 2 < len(template) and template[i:i+3] == '${{':
-            i += 3
-            word = ''
-            try:
-                while template[i:i+2] != '}}':
-                    word += template[i]
-                    i += 1
-                i += 1
-            except IndexError:
-                raise TemplateFormatError('Unexpected end of format sequence')
-        i += 1
-
-
-def get_template(name, **kwargs):
-    with open(os.path.join('templates', name)) as f:
-        return format_template(f.read(), **kwargs)
+lc = None
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -41,7 +19,7 @@ class MainHandler(tornado.web.RequestHandler):
 
 class LoginHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write(get_template('login.html', lang='en', ctfname='TestCTF', lc_authorize='Authorize'))
+        self.write(Template('login.html').render(lc))
 
 
 def make_app():
@@ -52,6 +30,10 @@ def make_app():
 
 
 def main():
+    global lc
+    lc = Localization()
+    lc.select_languages(['ru_RU', 'en_US'])
+
     app = make_app()
     app.listen(8888)
     tornado.ioloop.IOLoop.current().start()
