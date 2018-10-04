@@ -1,41 +1,33 @@
 <!doctype html>
-<html lang="${{lang}}">
-
+<html lang="{{ lc_lang_code }}">
     <head>
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-
+        <link rel="shortcut icon" href="/static/favicon.png">
+        <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
         <meta charset="utf-8">
-        <title>${{conf_ctfname}}
-            - ${{lc_signin}}</title>
+        <title>{{ conf_ctfname }} - {{ lc_signin }}</title>
     </head>
 
     <body>
         <div class="container">
             <h1>
-                ${{conf_ctfname}}
-                - ${{lc_signin}}
+                {{ conf_ctfname }} - {{ lc_signin }}
             </h1>
             <form action="/auth" method="POST">
                 <div class="form-group">
-                    <label for="input-username">Username</label>
-                    <input type="text" class="form-control" id="input-username" name="username" placeholder="Username">
+                    <label for="input-username">{{ lc_username }}</label>
+                    <input type="text" class="form-control" id="input-username" name="username" placeholder="{{ lc_username }}">
                 </div>
 
                 <div class="form-group">
-                    <label for="input-password">Password</label>
-                    <input type="password" class="form-control" id="input-password" name="password" placeholder="Password">
+                    <label for="input-password">{{ lc_password }}</label>
+                    <input type="password" class="form-control" id="input-password" name="password" placeholder="{{ lc_password }}">
                 </div>
 
                 <input type="submit" class="btn btn-primary" value="Sign in">
             </form>
-            <a href="/signup">Not a registered user? Sign up</a>
+            <a href="/signup">{{ lc_maybe_signup }}</a>
         </div>
 
-        <!-- Some scripts required by bootstrap -->
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     </body>
-
 </html>

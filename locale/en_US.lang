@@ -5,3 +5,13 @@ native_name = English (US)
 
 [data]
 signin = Sign in
+auth_error = Authentication error
+no_username = No username specified
+no_password = No password specified
+invalid_username_or_password = Invalid username or password
+return_to_home = Return to homepage
+home_page = Home page
+lang_code = en
+username = Username
+password = Password
+maybe_signup = Not a registered user? Sign up

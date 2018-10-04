@@ -36,3 +36,12 @@ class Localization:
             if lang in self.languages and key in self.languages[lang]['data']:
                 return self.languages[lang]['data'][key]
         return key
+
+    def get_dict(self):
+        result = {}
+        for lang in self.selected_languages:
+            if lang in self.languages:
+                for k, v in self.languages[lang]['data'].items():
+                    if k not in result:
+                        result[k] = v
+        return result
