@@ -15,3 +15,4 @@ lang_code = en
 username = Username
 password = Password
 maybe_signup = Not a registered user? Sign up
+session_already_exists = Session already exists

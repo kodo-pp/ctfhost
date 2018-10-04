@@ -8,24 +8,26 @@
         <title>{{ conf_ctfname }} - {{ lc_home_page }}</title>
     </head>
     <body>
-        <div class="topbar">
-            <div class="topbar-logo">
-                {{ conf_ctfname }}
+        <div class="container">
+            <div class="topbar">
+                <div class="topbar-logo">
+                    {{ conf_ctfname }}
+                </div>
+                <div class="topbar-content">
+                    {% if user_signed_in %}
+                        Signed in
+                    {% else %}
+                        <div class="topbar-btn">
+                            <a href="/login">Sign in</a>
+                        </div>
+                        <div class="topbar-btn">
+                            <a href="/signup">Sign up</a>
+                        </div>
+                    {% end %}
+                </div>
             </div>
-            <div class="topbar-content">
-                {% if user_signed_in %}
-                    Signed in
-                {% else %}
-                    <div class="topbar-btn">
-                        <a href="/login">Sign in</a>
-                    </div>
-                    <div class="topbar-btn">
-                        <a href="/signup">Sign up</a>
-                    </div>
-                {% end %}
-            </div>
-        </div>
         <h1>{{ conf_welcome_message.format(ctf_name=conf_ctfname) }}</h1>
+        </div>
     </body>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
 </html>

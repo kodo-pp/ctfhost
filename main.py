@@ -10,7 +10,9 @@ import tornado.ioloop
 import tornado.web
 
 from localization import Localization
+from configuration import configuration
 from template import render_template
+import auth
 
 lc = None
 
@@ -33,33 +35,17 @@ class AuthHandler(tornado.web.RequestHandler):
         if password is None:
             self.write(render_template('auth_error.html', lc, error=lc.get('no_passord')))
             return
-        if not authenticate_user(username, password):
-            self.write(render_template('auth_error.html', lc, error=lc.get('invalid_username_or_password')))
-        else:
-            self.redirect('/', permanent=True)
+
+        try:
+            session = auth.authenticate_user(username, password)
+        except auth.BaseAuthenticationError as e:
+            self.write(render_template('auth_error.html', lc, error=lc.get(e.text)))
+            return
+        self.set_cookie('session_id', session.id, expires=session.expires_at)
 
 class FaviconHandler(tornado.web.RequestHandler):
     def get(self):
         self.redirect('/static/favicon.png', permanent=True)
-
-def create_session(username):
-    session_id = hashlib.sha512(os.urandom(16)).hexdigest()
-    expires_at = int(time.time()) + 86400
-    db = sqlite3.connect('db/users.db')
-    cur = db.cursor()
-    cur.execute('INSERT INTO sessions VALUES (NULL, ?, ?, ?)', (session_id, username, expires_at))
-    db.commit()
-    db.close()
-
-def authenticate_user(username, password):
-    auth_db = {
-        'user': 'pass',
-        'root': '12345',
-    }
-    if username in auth_db and password == auth_db[username]:
-        return create_session(username)
-    else:
-        return None
 
 def make_app():
     return tornado.web.Application([

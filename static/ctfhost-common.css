@@ -1,10 +1,9 @@
 .topbar {
     display: block;
     height: 40px;
-    background-color: #00AAFF;
+    background-color: #444444;
     color: white;
     padding-left: 3px;
-    padding-right: 3px;
 }
 .topbar-content {
     float: right;
@@ -13,21 +12,21 @@
 .topbar .topbar-logo {
     font-size: 20pt;
     float: left;
+    cursor: default;
 }
 
 .topbar .topbar-btn {
-    background-color: #0077FF;
-    height: 39px;
+    transition: ease-in-out 0.1s;
+    background-color: #8F8F8F;
+    height: 40px;
     color: white;
-    border: 1px solid #006FEF;
     padding: 4px 7px 4px 7px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    border-radius: 4px;
     cursor: pointer;
     float: right;
-    margin: 0px 0px 0px 3px;
+    margin: 0px 0px 0px 4px;
 }
 
 .topbar .topbar-btn a {
@@ -37,11 +36,9 @@
 }
 
 .topbar .topbar-btn:hover {
-    background-color: #0055EE;
-    border-color: #004FDF;
+    background-color: #777777;
 }
 
 .topbar .topbar-btn:active {
-    background-color: #0033CC;
-    border-color: #002FBF;
+    background-color: #666666;
 }
