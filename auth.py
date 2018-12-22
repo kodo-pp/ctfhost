@@ -78,7 +78,7 @@ def create_session(username):
     expires_at = int(time.time()) + configuration['session_duration']
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
-        cur.execute('DELETE FROM sessions WHERE expires < ?', (int(time.time(),)))
+        cur.execute('DELETE FROM sessions WHERE expires < ?', (int(time.time()),))
         cur.execute('SELECT rowid FROM sessions WHERE username = ?', (username,))
         if len(cur.fetchall()) > 0:
             print('Session for user "{}" already exists'.format(username))
