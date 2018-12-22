@@ -19,10 +19,14 @@ lc = None
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write(render_template('index.html', lc, user_signed_in=False))
+        self.write(render_template('index.html', lc, session=auth.load_session(self.get_cookie('session_id'))))
 
 class LoginHandler(tornado.web.RequestHandler):
     def get(self):
+        session_id = self.get_cookie('session_id')
+        if auth.load_session(session_id) is not None:
+            self.redirect('/', permanent=True)
+            return
         self.write(render_template('login.html', lc))
 
 class AuthHandler(tornado.web.RequestHandler):

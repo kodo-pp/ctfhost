@@ -22,9 +22,42 @@ class AuthenticationError(BaseAuthenticationError):
     def __init__(self):
         self.text = 'invalid_username_or_password'
 
-class SessionAlreadyExists(BaseAuthenticationError):
+class SessionCache:
     def __init__(self):
-        self.text = 'session_already_exists'
+        self.cache = {}
+
+    def add(self, session):
+        self.cache[session.id] = session
+
+    def get(self, session_id):
+        if session_id not in self.cache:
+            return None
+        if self.cache[session_id].expires_at <= time.time():
+            self.cache.pop(session_id)
+            return None
+        return self.cache[session_id]
+
+def load_session(session_id):
+    if session_id is None:
+        return None
+    cached_session = session_cache.get(session_id)
+    if cached_session is not None:
+        return cached_session
+
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute(
+            'SELECT username, expires FROM sessions WHERE expires > ? AND session_id = ?',
+            (int(time.time()), session_id)
+        )
+
+        (username, session_expires_at) = cur.fetchone()
+        if session_expires_at is None:
+            return None
+        else:
+            sess = Session(session_id, username, session_expires_at)
+            session_cache.add(sess)
+            return sess
 
 def create_session(username):
     session_id = hashlib.sha512(os.urandom(16)).hexdigest()
@@ -34,10 +67,13 @@ def create_session(username):
         cur.execute('SELECT rowid FROM sessions WHERE expires > ?', (int(time.time()),))
         if len(cur.fetchall()) > 0:
             print('Session for user "{}" already exists'.format(username))
-            raise SessionAlreadyExists()
+            print('Deleting it')
+            cur.execute('DELETE FROM sessions WHERE username = ?', (username,))
         cur.execute('INSERT INTO sessions VALUES (?, ?, ?)', (session_id, username, expires_at))
         db.commit()
-    return Session(session_id, username, expires_at)
+    sess = Session(session_id, username, expires_at)
+    session_cache.add(sess)
+    return sess
 
 def authenticate_user(username, password):
     password_hash = hashlib.sha512(password.encode()).hexdigest()
@@ -54,3 +90,5 @@ def authenticate_user(username, password):
         else:
             print('User "{}" logged in'.format(username))
             return create_session(username)
+
+session_cache = SessionCache()

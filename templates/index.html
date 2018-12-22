@@ -14,8 +14,8 @@
                     {{ conf_ctfname }}
                 </div>
                 <div class="topbar-content">
-                    {% if user_signed_in %}
-                        Signed in
+                    {% if session is not None %}
+                        Signed in as {{ session.username }}
                     {% else %}
                         <div class="topbar-btn">
                             <a href="/login">Sign in</a>
