@@ -2,31 +2,25 @@
 <html lang="{{ lc_lang_code }}" dir="ltr">
     <head>
         <link rel="shortcut icon" href="/static/favicon.png">
-        <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/w3css/w3.css">
         <link rel="stylesheet" href="/static/ctfhost-common.css">
         <meta charset="utf-8">
         <title>{{ conf_ctfname }} - {{ lc_home_page }}</title>
     </head>
     <body>
-        <div class="container">
-            <div class="topbar">
-                <div class="topbar-logo">
-                    {{ conf_ctfname }}
-                </div>
-                <div class="topbar-content">
-                    {% if session is not None %}
-                        Signed in as {{ session.username }}
-                    {% else %}
-                        <div class="topbar-btn">
-                            <a href="/login">Sign in</a>
-                        </div>
-                        <div class="topbar-btn">
-                            <a href="/signup">Sign up</a>
-                        </div>
-                    {% end %}
-                </div>
-            </div>
-        <h1>{{ conf_welcome_message.format(ctf_name=conf_ctfname) }}</h1>
+        <div class="w3-bar w3-dark-grey">
+            <span class="w3-bar-item w3-green">Home</span>
+            {% if session is not None %}
+                <span class="w3-bar-item">Signed in as {{ session.username }}</span>
+            {% if session is not None %}
+                Signed in as {{ session.username }}
+            {% else %}
+                <a class="w3-bar-item w3-button" href="/login">Sign in</a>
+                <a class="w3-bar-item w3-button" href="/signup">Sign up</a>
+            {% end %}
+        </div>
+        <div class="w3-container w3-vlack">
+            <h1>{{ conf_welcome_message.format(ctf_name=conf_ctfname) }}</h1>
         </div>
     </body>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>

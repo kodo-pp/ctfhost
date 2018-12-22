@@ -46,6 +46,7 @@ class AuthHandler(tornado.web.RequestHandler):
             self.write(render_template('auth_error.html', lc, error=lc.get(e.text)))
             return
         self.set_cookie('session_id', session.id, expires=session.expires_at)
+        self.redirect('/', permanent=True)
 
 class FaviconHandler(tornado.web.RequestHandler):
     def get(self):
