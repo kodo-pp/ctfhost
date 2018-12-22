@@ -12,12 +12,13 @@
             <span class="w3-bar-item w3-green">Home</span>
             {% if session is not None %}
                 <span class="w3-bar-item w3-light-grey">Signed in as {{ session.username }}</span>
+                <a class="w3-bar-item w3-button" href="/lout">Log out</a>
             {% else %}
                 <a class="w3-bar-item w3-button" href="/login">Sign in</a>
                 <a class="w3-bar-item w3-button" href="/signup">Sign up</a>
             {% end %}
         </div>
-        <div class="w3-container w3-vlack">
+        <div class="w3-container">
             <h1>{{ conf_welcome_message.format(ctf_name=conf_ctfname) }}</h1>
         </div>
     </body>

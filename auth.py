@@ -37,6 +37,7 @@ class SessionCache:
             return None
         return self.cache[session_id]
 
+
 def load_session(session_id):
     if session_id is None:
         return None
@@ -51,7 +52,10 @@ def load_session(session_id):
             (int(time.time()), session_id)
         )
 
-        (username, session_expires_at) = cur.fetchone()
+        ls = cur.fetchone()
+        if ls is None:
+            return None
+        (username, session_expires_at) = ls
         if session_expires_at is None:
             return None
         else:
@@ -59,19 +63,13 @@ def load_session(session_id):
             session_cache.add(sess)
             return sess
 
-def validate_session(session_id, username):
+
+def logout(session_id):
+    print('Deleting session {}'.format(session_id))
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
-        cur.execute(
-            'SELECT expires FROM sessions WHERE session_id = ? AND username = ? AND expires > ?',
-            (session_id, username, int(time.time()))
-        )
-        result = cur.fetchall()
-        return len(result) > 0, result
+        cur.execute('DELETE FROM sessions WHERE session_id = ?', (session_id,))
 
-def get_session(session_id, username):
-    ok, expires = validate_session(session_id, username)
-    return Session(session_id, username, expires) if ok else None
 
 def create_session(username):
     session_id = hashlib.sha512(os.urandom(16)).hexdigest()
@@ -89,6 +87,7 @@ def create_session(username):
     sess = Session(session_id, username, expires_at)
     session_cache.add(sess)
     return sess
+
 
 def authenticate_user(username, password):
     password_hash = hashlib.sha512(password.encode()).hexdigest()

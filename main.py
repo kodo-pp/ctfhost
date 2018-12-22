@@ -29,6 +29,16 @@ class LoginHandler(tornado.web.RequestHandler):
             return
         self.write(render_template('login.html', lc))
 
+class LogoutHandler(tornado.web.RequestHandler):
+    def get(self):
+        session_id = self.get_cookie('session_id')
+        if auth.load_session(session_id) is None:
+            self.write(render_template('auth_error.html', lc, error=lc.get('logout_no_session')))
+            return
+        auth.logout(session_id)
+        self.clear_cookie('session_id')
+        self.redirect('/')
+
 class AuthHandler(tornado.web.RequestHandler):
     def post(self):
         username = self.get_argument('username', None)
@@ -56,11 +66,12 @@ def make_app():
     return tornado.web.Application([
         (r'/', MainHandler),
         (r'/login', LoginHandler),
+        (r'/lout', LogoutHandler), # /logout не работает под firefox за nginx reverse proxy (КАК???)
         (r'/auth', AuthHandler),
         (r'/', LoginHandler),
         (r'/favicon.ico', FaviconHandler),
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': './static'})
-    ])
+    ], debug=True)
 
 
 def main():
