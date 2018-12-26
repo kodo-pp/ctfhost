@@ -9,9 +9,9 @@
     </head>
     <body>
         <div class="w3-bar w3-dark-grey">
-            <span class="w3-bar-item w3-green">Home</span>
+            <span class="w3-bar-item w3-green">{{ lc_home_page }}</span>
             {% if session is not None %}
-                <span class="w3-bar-item w3-light-grey">Signed in as {{ session.username }}</span>
+                <span class="w3-bar-item w3-light-grey">{{ lc_signed_in_as.format(session.username) }}</span>
                 <a class="w3-bar-item w3-button" href="/lout">Log out</a>
             {% else %}
                 <a class="w3-bar-item w3-button" href="/login">Sign in</a>
