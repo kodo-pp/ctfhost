@@ -22,6 +22,10 @@ class AuthenticationError(BaseAuthenticationError):
     def __init__(self):
         self.text = 'invalid_username_or_password'
 
+class BaseRegistrationError(Exception):
+    def __init__(self):
+        self.text = 'basic_registration_error'
+
 class SessionCache:
     def __init__(self):
         self.cache = {}
@@ -89,6 +93,15 @@ def create_session(username):
     return sess
 
 
+def get_user_list():
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute('SELECT username FROM users')
+        ls = cur.fetchall()
+    for i in ls:
+        yield i[0]
+
+
 def authenticate_user(username, password):
     password_hash = hashlib.sha512(password.encode()).hexdigest()
     with closing(sqlite3.connect(configuration['db_path'])) as db:
@@ -106,5 +119,28 @@ def authenticate_user(username, password):
         else:
             print('User "{}" logged in'.format(username))
             return create_session(username)
+
+
+def register_user(username, password, disp_name=None, email=None):
+    if disp_name == '':
+        disp_name = None
+    if email == '':
+        email = None
+    password_hash = hashlib.sha512(password.encode()).hexdigest()
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute(
+            'SELECT rowid FROM users WHERE username = ?',
+            (username,)
+        )
+        if len(cur.fetchall()) != 0:
+            print('Attempted to register already registered user: "{}"'.format(username))
+            raise BaseRegistrationError()
+        print('Registering user "{}"'.format(username))
+        cur.execute(
+            'INSERT INTO users VALUES (?, ?, ?, ?, 0)',
+            (username, password_hash, disp_name, email)
+        )
+        db.commit()
 
 session_cache = SessionCache()

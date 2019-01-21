@@ -73,6 +73,7 @@ class RegHandler(tornado.web.RequestHandler):
         password_c = self.get_argument('password-c', None)
         disp_name = self.get_argument('disp-name', None)
         email = self.get_argument('email', None)
+        
         if username is None or username == '':
             self.write(render_template('reg_error.html', lc, error=lc.get('no_username')))
             return
@@ -82,15 +83,11 @@ class RegHandler(tornado.web.RequestHandler):
         if password != password_c:
             self.write(render_template('reg_error.html', lc, error=lc.get('password_c_failed')))
             return
+        if username in auth.get_user_list():
+            self.write(render_template('reg_error.html', lc, error=lc.get('user_already_exists')))
+            return
 
         auth.register_user(username=username, password=password, disp_name=disp_name, email=email)
-
-        try:
-            session = auth.authenticate_user(username, password)
-        except auth.BaseAuthenticationError as e:
-            self.write(render_template('auth_error.html', lc, error=lc.get(e.text)))
-            return
-        self.set_cookie('session_id', session.id, expires=session.expires_at)
         self.redirect('/', permanent=True)
 
 class FaviconHandler(tornado.web.RequestHandler):
