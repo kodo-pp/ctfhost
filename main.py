@@ -102,6 +102,7 @@ def make_app():
         (r'/lout', LogoutHandler), # /logout не работает под firefox за nginx reverse proxy (КАК???)
         (r'/auth', AuthHandler),
         (r'/reg', RegHandler),
+        (r'/tasks', RegHandler),
         (r'/favicon.ico', FaviconHandler),
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': './static'})
     ], debug=True)

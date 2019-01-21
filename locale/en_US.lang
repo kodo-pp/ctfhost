@@ -26,3 +26,5 @@ email                               = E-mail
 this_text_should_never_be_displayed = This text should never be displayed
 signed_in_as                        = Signed in as {}
 user_already_exists                 = User with that username already exists
+tasks                               = Tasks
+logout                              = Log out

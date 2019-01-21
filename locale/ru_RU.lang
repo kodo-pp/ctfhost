@@ -1,0 +1,30 @@
+[information]
+id                                  = ru_RU
+name                                = Russian
+native_name                         = Русский
+
+[data]
+signin                              = Войти
+signup                              = Зарегистрироваться
+auth_error                          = Ошибка при авторизации
+reg_error                           = Ошибка при регистрации
+no_username                         = Имя пользователя не указано
+no_password                         = Пароль не указан
+password_c_failed                   = Пароль и его подтверждение не совпадают
+invalid_username_or_password        = Неверное имя пользователя или пароль
+return_to_home                      = Вернуться на главную
+home_page                           = Главная
+lang_code                           = ru
+username                            = Имя пользователя
+password                            = Пароль
+password_confirmation               = Подтверждение пароля
+maybe_signup                        = Нет учётной записи? Зарегистрируйтесь
+maybe_signin                        = Уже есть учётная запись? Войдите в систему
+session_already_exists              = Вы уже вошли в систему
+disp_name                           = Полное имя (будет отображаться в турнирной таблице и в профиле)
+email                               = E-mail
+this_text_should_never_be_displayed = Этот текст не должен быть виден
+signed_in_as                        = Вы вошли в систему как {}
+user_already_exists                 = Имя пользователя уже занято
+tasks                               = Задания
+logout                              = Выйти

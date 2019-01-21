@@ -12,15 +12,15 @@
             <span class="w3-bar-item w3-green">{{ lc_home_page }}</span>
             {% if session is not None %}
                 <span class="w3-bar-item w3-light-grey">{{ lc_signed_in_as.format(session.username) }}</span>
-                <a class="w3-bar-item w3-button" href="/lout">Log out</a>
+                <a class="w3-bar-item w3-button" href="/tasks">{{ lc_tasks }}</a>
+                <a class="w3-bar-item w3-button" href="/lout">{{ lc_logout }}</a>
             {% else %}
-                <a class="w3-bar-item w3-button" href="/login">Sign in</a>
-                <a class="w3-bar-item w3-button" href="/signup">Sign up</a>
+                <a class="w3-bar-item w3-button" href="/login">{{ lc_signin }}</a>
+                <a class="w3-bar-item w3-button" href="/signup">{{ lc_signup }}</a>
             {% end %}
         </div>
         <div class="w3-container">
             <h1>{{ conf_welcome_message.format(ctf_name=conf_ctfname) }}</h1>
         </div>
     </body>
-    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
 </html>

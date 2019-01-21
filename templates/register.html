@@ -10,9 +10,9 @@
 
     <body>
         <div class="w3-bar w3-dark-grey">
-            <a class="w3-bar-item w3-button" href="/home">Home</a>
-            <a class="w3-bar-item w3-button" href="/login">Sign in</a>
-            <span class="w3-bar-item w3-green">Sign up</span>
+            <a class="w3-bar-item w3-button" href="/">{{ lc_home_page }}</a>
+            <a class="w3-bar-item w3-button" href="/login">{{ lc_signin }}</a>
+            <span class="w3-bar-item w3-green">{{ lc_signup }}</span>
         </div>
         <div class="w3-container">
             <h1>
@@ -41,7 +41,7 @@
                 <input type="email" class="w3-input w3-border" id="input-email" name="email" placeholder="{{ lc_email }}">
             </p>
             <p>
-                <input type="submit" class="w3-btn w3-green" value="Sign up">
+                <input type="submit" class="w3-btn w3-green" value="{{ lc_signup }}">
             </p>
             <p>
                 <a href="/login">{{ lc_maybe_signin }}</a>
