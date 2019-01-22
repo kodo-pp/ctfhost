@@ -7,3 +7,7 @@
     grid-column-start: 7;
     grid-column-end: 8;
 }
+
+.hidden {
+    display: none;
+}

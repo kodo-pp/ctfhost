@@ -32,3 +32,6 @@ input_flag                          = Enter flag...
 submit_flag                         = Submit flag
 admin_error                         = Administrative action error
 not_admin                           = Current user is not an administrator
+admin_page                          = Administrator panel
+admintab_tasks                      = Tasks
+admintab_teams                      = Teams

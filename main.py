@@ -28,7 +28,7 @@ class AdminHandler(tornado.web.RequestHandler):
         if session is None or not session.is_admin:
             self.write(render_template('admin_error.html', lc, error=lc.get('not_admin')))
             return
-        self.write(render_template('index.html', lc, session=session))
+        self.write(render_template('admin.html', lc, session=session))
 
 class LoginHandler(tornado.web.RequestHandler):
     def get(self):

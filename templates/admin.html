@@ -6,6 +6,44 @@
         <link rel="stylesheet" href="/static/ctfhost-common.css">
         <meta charset="utf-8">
         <title>{{ conf_ctfname }} - {{ lc_admin_page }}</title>
+        <script>
+            function select_tab(tab_name)
+            {
+                let tabs = document.querySelectorAll('#tabset>.w3-bar-item');
+                for (let tab of tabs) {
+                    if (tab.id == 'tab-' + tab_name) {
+                        tab.classList.remove('w3-button');
+                        tab.classList.add('w3-green');
+                    } else {
+                        tab.classList.add('w3-button');
+                        tab.classList.remove('w3-green');
+                    }
+                }
+
+                let tabcontents = document.querySelectorAll('#tabcontents>div');
+                for (let tabc of tabcontents) {
+                    if (tabc.id == 'tabcontent-' + tab_name) {
+                        tabc.classList.remove('hidden');
+                    } else {
+                        tabc.classList.add('hidden');
+                    }
+                }
+            }
+
+            function setup_tabs()
+            {
+                let tabs = document.querySelectorAll('#tabset>.w3-bar-item');
+                for (let tab of tabs) {
+                    console.log(tab);
+                    let tab_name = tab.id.replace(/^tab-/, '');
+                    tab.addEventListener('click', function() {
+                        select_tab(tab_name);
+                    });
+                }
+            }
+
+            window.addEventListener('load', setup_tabs);
+        </script>
     </head>
     <body>
         <div class="w3-bar w3-dark-grey">
@@ -17,6 +55,18 @@
         </div>
         <div class="w3-container">
             <h1>{{ lc_admin_page }}</h1>
+            <div class="w3-bar w3-dark-grey" id="tabset">
+                <span class="w3-bar-item w3-button" id="tab-tasks">{{ lc_admintab_tasks }}</span>
+                <span class="w3-bar-item w3-button" id="tab-teams">{{ lc_admintab_teams }}</span>
+            </div>
+            <div id="tabcontents">
+                <div class="w3-container w3-light-grey hidden" id="tabcontent-tasks">
+                    Tasks
+                </div>
+                <div class="w3-container w3-light-grey hidden" id="tabcontent-teams">
+                    Teams
+                </div>
+            </div>
         </div>
     </body>
 </html>
