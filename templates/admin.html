@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="{{ lc_lang_code }}" dir="ltr">
+    <head>
+        <link rel="shortcut icon" href="/static/favicon.png">
+        <link rel="stylesheet" href="/static/w3css/w3.css">
+        <link rel="stylesheet" href="/static/ctfhost-common.css">
+        <meta charset="utf-8">
+        <title>{{ conf_ctfname }} - {{ lc_admin_page }}</title>
+    </head>
+    <body>
+        <div class="w3-bar w3-dark-grey">
+            <a class="w3-bar-item w3-button" href="/">{{ lc_home_page }}</a>
+            <a class="w3-bar-item w3-button" href="/tasks">{{ lc_tasks }}</a>
+            <span class="w3-bar-item w3-green">{{ lc_admin_page }}</span>
+            <a class="w3-bar-item w3-button w3-right" href="/lout">{{ lc_logout }}</a>
+            <span class="w3-bar-item w3-light-grey w3-right">{{ lc_signed_in_as.format(session.username) }}</span>
+        </div>
+        <div class="w3-container">
+            <h1>{{ lc_admin_page }}</h1>
+        </div>
+    </body>
+</html>

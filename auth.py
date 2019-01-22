@@ -6,12 +6,15 @@ import time
 import os
 from contextlib import closing
 
+from loguru import logger
+
 from configuration import configuration
 
 class Session:
-    def __init__(self, id, username, expires_at):
+    def __init__(self, id, username, expires_at, is_admin):
         self.id = id
         self.username = username
+        self.is_admin = is_admin
         self.expires_at = expires_at
 
 class BaseAuthenticationError(Exception):
@@ -25,6 +28,7 @@ class AuthenticationError(BaseAuthenticationError):
 class BaseRegistrationError(Exception):
     def __init__(self):
         self.text = 'basic_registration_error'
+
 
 class SessionCache:
     def __init__(self):
@@ -63,16 +67,30 @@ def load_session(session_id):
         if session_expires_at is None:
             return None
         else:
-            sess = Session(session_id, username, session_expires_at)
+            cur.execute('SELECT is_admin FROM users WHERE username = ?', (username,))
+            is_admin = bool(cur.fetchone()[0])
+            sess = Session(session_id, username, session_expires_at, is_admin)
             session_cache.add(sess)
             return sess
 
 
 def logout(session_id):
-    print('Deleting session {}'.format(session_id))
+    logger.info('Deleting session {}'.format(session_id))
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute('DELETE FROM sessions WHERE session_id = ?', (session_id,))
+
+
+def get_user_info(username):
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute('SELECT full_name, email, is_admin FROM users WHERE username = ?', (username,))
+        full_name, email, is_admin = cur.fetchone()
+        return {
+            'full_name': full_name,
+            'email': email,
+            'is_admin': bool(is_admin),
+        }
 
 
 def create_session(username):
@@ -83,12 +101,12 @@ def create_session(username):
         cur.execute('DELETE FROM sessions WHERE expires < ?', (int(time.time()),))
         cur.execute('SELECT rowid FROM sessions WHERE username = ?', (username,))
         if len(cur.fetchall()) > 0:
-            print('Session for user "{}" already exists'.format(username))
-            print('Deleting it')
+            logger.info('Session for user "{}" already exists, deleting it'.format(username))
             cur.execute('DELETE FROM sessions WHERE username = ?', (username,))
         cur.execute('INSERT INTO sessions VALUES (?, ?, ?)', (session_id, username, expires_at))
         db.commit()
-    sess = Session(session_id, username, expires_at)
+    is_admin = get_user_info(username)['is_admin']
+    sess = Session(session_id, username, expires_at, is_admin)
     session_cache.add(sess)
     return sess
 
@@ -111,13 +129,13 @@ def authenticate_user(username, password):
             (username, password_hash)
         )
         if len(cur.fetchall()) == 0:
-            print('Failed login attempt: username "{}", password "{}"'.format(
+            logger.info('Failed login attempt: username "{}", password "{}"'.format(
                 username,
                 '<hidden>' if configuration['hide_password_in_logs'] else password)
             )
             raise AuthenticationError()
         else:
-            print('User "{}" logged in'.format(username))
+            logger.info('User "{}" logged in'.format(username))
             return create_session(username)
 
 
@@ -134,9 +152,9 @@ def register_user(username, password, disp_name=None, email=None):
             (username,)
         )
         if len(cur.fetchall()) != 0:
-            print('Attempted to register already registered user: "{}"'.format(username))
+            logger.error('Attempted to register already registered user: "{}"'.format(username))
             raise BaseRegistrationError()
-        print('Registering user "{}"'.format(username))
+        logger.info('Registering user "{}"'.format(username))
         cur.execute(
             'INSERT INTO users VALUES (?, ?, ?, ?, 0)',
             (username, password_hash, disp_name, email)

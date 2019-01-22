@@ -22,6 +22,14 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(render_template('index.html', lc, session=auth.load_session(self.get_cookie('session_id'))))
 
+class AdminHandler(tornado.web.RequestHandler):
+    def get(self):
+        session = auth.load_session(self.get_cookie('session_id'))
+        if session is None or not session.is_admin:
+            self.write(render_template('admin_error.html', lc, error=lc.get('not_admin')))
+            return
+        self.write(render_template('index.html', lc, session=session))
+
 class LoginHandler(tornado.web.RequestHandler):
     def get(self):
         session_id = self.get_cookie('session_id')
@@ -108,6 +116,7 @@ class FaviconHandler(tornado.web.RequestHandler):
 def make_app():
     return tornado.web.Application([
         (r'/', MainHandler),
+        (r'/admin', AdminHandler),
         (r'/login', LoginHandler),
         (r'/signup', RegisterHandler),
         (r'/lout', LogoutHandler), # /logout не работает под firefox за nginx reverse proxy (КАК???)
