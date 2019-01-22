@@ -42,6 +42,21 @@
                 }
             }
 
+            function edit_task(task_name)
+            {
+                let text = '';
+                let title = '';
+                let value = 100;
+                if (task_name !== null) {
+                    let loaded_task = load_task(task_name);
+                    text = loaded_task.text;
+                    title = loaded_task.title;
+                    value = loaded_task.value;
+                }
+                open_task_editor(task_name, text, title, value);
+                // TODO: write a simple task editor
+            }
+
             window.addEventListener('load', setup_tabs);
         </script>
     </head>
@@ -60,11 +75,25 @@
                 <span class="w3-bar-item w3-button" id="tab-teams">{{ lc_admintab_teams }}</span>
             </div>
             <div id="tabcontents">
-                <div class="w3-container w3-light-grey hidden" id="tabcontent-tasks">
-                    Tasks
+                <div class="w3-container hidden" id="tabcontent-tasks">
+                    <h2>{{ lc_admintab_tasks }}</h2>
+                    <p>
+                        <a class="w3-button w3-green" href="javascript:edit_task(null)">{{ lc_admin_task_add }}</a>
+                    </p>
+                    {% for task in tasks.get_task_list() %}
+                        <p>
+                            <div class="w3-container w3-light-grey">
+                                <p>{{ task.title }} [{{ task.value }}]</p>
+                                <p>
+                                    <a class="w3-button w3-blue">{{ lc_admin_task_edit }}</a>
+                                    <a class="w3-button w3-red">{{ lc_admin_task_delete }}</a>
+                                </p>
+                            </div>
+                        </p>
+                    {% end %}
                 </div>
-                <div class="w3-container w3-light-grey hidden" id="tabcontent-teams">
-                    Teams
+                <div class="w3-container hidden" id="tabcontent-teams">
+                    <h2>{{ lc_admintab_teams }}</h2>
                 </div>
             </div>
         </div>
