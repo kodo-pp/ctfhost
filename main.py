@@ -131,7 +131,7 @@ def make_app():
 def main():
     global lc
     lc = Localization()
-    lc.select_languages(['ru_RU', 'en_US'])
+    lc.select_languages(configuration['lang_list'])
 
     app = make_app()
     app.listen(8888)

@@ -5,12 +5,15 @@
         <link rel="stylesheet" href="/static/w3css/w3.css">
         <link rel="stylesheet" href="/static/ctfhost-common.css">
         <meta charset="utf-8">
-        <title>{{ conf_ctfname }} - {{ lc_home_page }}</title>
+        <title>{{ conf_ctfname }} - {{ lc_tasks }}</title>
     </head>
     <body>
         <div class="w3-bar w3-dark-grey">
             <a class="w3-bar-item w3-button" href="/">{{ lc_home_page }}</a>
             <span class="w3-bar-item w3-green">{{ lc_tasks }}</span>
+            {% if session.is_admin %}
+                <a class="w3-bar-item w3-button" href="/admin">{{ lc_admin_page }}</a>
+            {% end %}
             <a class="w3-bar-item w3-button w3-right" href="/lout">{{ lc_logout }}</a>
             <span class="w3-bar-item w3-light-grey w3-right">{{ lc_signed_in_as.format(session.username) }}</span>
         </div>
