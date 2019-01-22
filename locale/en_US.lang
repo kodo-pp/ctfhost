@@ -28,3 +28,5 @@ signed_in_as                        = Signed in as {}
 user_already_exists                 = User with that username already exists
 tasks                               = Tasks
 logout                              = Log out
+input_flag                          = Enter flag...
+submit_flag                         = Submit flag

@@ -1,44 +1,9 @@
-.topbar {
-    display: block;
-    height: 40px;
-    background-color: #444444;
-    color: white;
-    padding-left: 3px;
-}
-.topbar-content {
-    float: right;
+.ctfhost-combo-input-text {
+    grid-column-start: 1;
+    grid-column-end: 7;
 }
 
-.topbar .topbar-logo {
-    font-size: 20pt;
-    float: left;
-    cursor: default;
-}
-
-.topbar .topbar-btn {
-    transition: ease-in-out 0.1s;
-    background-color: #8F8F8F;
-    height: 40px;
-    color: white;
-    padding: 4px 7px 4px 7px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    cursor: pointer;
-    float: right;
-    margin: 0px 0px 0px 4px;
-}
-
-.topbar .topbar-btn a {
-    color: inherit;
-    text-decoration: inherit;
-    outline: inherit;
-}
-
-.topbar .topbar-btn:hover {
-    background-color: #777777;
-}
-
-.topbar .topbar-btn:active {
-    background-color: #666666;
+.ctfhost-combo-input-submit {
+    grid-column-start: 7;
+    grid-column-end: 8;
 }

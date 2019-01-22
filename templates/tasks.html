@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="{{ lc_lang_code }}" dir="ltr">
+    <head>
+        <link rel="shortcut icon" href="/static/favicon.png">
+        <link rel="stylesheet" href="/static/w3css/w3.css">
+        <link rel="stylesheet" href="/static/ctfhost-common.css">
+        <meta charset="utf-8">
+        <title>{{ conf_ctfname }} - {{ lc_home_page }}</title>
+    </head>
+    <body>
+        <div class="w3-bar w3-dark-grey">
+            <a class="w3-bar-item w3-button" href="/">{{ lc_home_page }}</a>
+            <span class="w3-bar-item w3-green">{{ lc_tasks }}</span>
+            <a class="w3-bar-item w3-button w3-right" href="/lout">{{ lc_logout }}</a>
+            <span class="w3-bar-item w3-light-grey w3-right">{{ lc_signed_in_as.format(session.username) }}</span>
+        </div>
+        <div class="w3-container">
+            <h1>{{ lc_tasks }}</h1>
+            {% for task in tasks %}
+                <p>
+                <div class="w3-container w3-light-grey">
+                    <h3>{{ task.title }} [{{ task.value }}]</h3>
+                    {{ task.text }}
+                    <p>
+                        <form style="display: grid">
+                            <input
+                                type="text"
+                                class="w3-input w3-border ctfhost-combo-input-text"
+                                placeholder="{{ lc_input_flag }}"
+                            >
+                            <input
+                                type="submit"
+                                class="w3-input w3-border w3-green w3-button ctfhost-combo-input-submit"
+                                value="{{ lc_submit_flag }}"
+                            >
+                        </form>
+                    </p>
+                </div>
+                </p>
+            {% end %}
+        </div>
+    </body>
+</html>

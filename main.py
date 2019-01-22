@@ -13,6 +13,7 @@ from localization import Localization
 from configuration import configuration
 from template import render_template
 import auth
+import tasks
 
 lc = None
 
@@ -90,6 +91,16 @@ class RegHandler(tornado.web.RequestHandler):
         auth.register_user(username=username, password=password, disp_name=disp_name, email=email)
         self.redirect('/', permanent=True)
 
+class TasksHandler(tornado.web.RequestHandler):
+    def get(self):
+        session_id = self.get_cookie('session_id')
+        session = auth.load_session(session_id)
+        if session is None:
+            self.redirect('/login')
+            return
+        task_list = tasks.get_task_list()
+        self.write(render_template('tasks.html', lc, session=session, tasks=task_list))
+
 class FaviconHandler(tornado.web.RequestHandler):
     def get(self):
         self.redirect('/static/favicon.png', permanent=True)
@@ -102,7 +113,7 @@ def make_app():
         (r'/lout', LogoutHandler), # /logout не работает под firefox за nginx reverse proxy (КАК???)
         (r'/auth', AuthHandler),
         (r'/reg', RegHandler),
-        (r'/tasks', RegHandler),
+        (r'/tasks', TasksHandler),
         (r'/favicon.ico', FaviconHandler),
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': './static'})
     ], debug=True)
