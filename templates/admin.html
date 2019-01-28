@@ -4,6 +4,8 @@
         <link rel="shortcut icon" href="/static/favicon.png">
         <link rel="stylesheet" href="/static/w3css/w3.css">
         <link rel="stylesheet" href="/static/ctfhost-common.css">
+        <link rel="stylesheet" href="/static/task-editor.css">
+        <script src="/static/admin/task-editor.js"></script>
         <meta charset="utf-8">
         <title>{{ conf_ctfname }} - {{ lc_admin_page }}</title>
         <script>
@@ -44,9 +46,9 @@
 
             function edit_task(task_name)
             {
-                let text = '';
-                let title = '';
-                let value = 100;
+                let text = null;
+                let title = null;
+                let value = null;
                 if (task_name !== null) {
                     let loaded_task = load_task(task_name);
                     text = loaded_task.text;
@@ -57,10 +59,50 @@
                 // TODO: write a simple task editor
             }
 
+            function error_message(msg)
+            {
+                let error_message = '{{ lc_error }}: ' + msg;
+                alert(error_message);
+            }
+
             window.addEventListener('load', setup_tabs);
         </script>
     </head>
     <body>
+        <div id="task-editor-overlay">
+            <div id="task-editor-box">
+                <h3>{{ lc_task_editor }}</h3>
+                <input type="hidden" id="task-editor-taskname-input">
+                <p>
+                    <label for="task-editor-title-input">{{ lc_taskeditor_title }}</label>
+                    <input
+                        type="text"
+                        id="task-editor-title-input"
+                        placeholder="{{ lc_taskeditor_title }}"
+                        class="w3-input w3-border"
+                    >
+                </p>
+                <p>
+                    <label for="task-editor-value-input">{{ lc_taskeditor_value }}</label>
+                    <input
+                        type="number"
+                        step=1
+                        id="task-editor-value-input"
+                        placeholder="{{ lc_taskeditor_value }}"
+                        class="w3-input w3-border"
+                    >
+                </p>
+                <p>
+                    <label for="task-editor-text-input">{{ lc_taskeditor_text }}</label>
+                    <textarea id="task-editor-text-input" class="w3-input w3-border">
+                    </textarea>
+                </p>
+                <p>
+                    <a id="task-editor-cancel-button" class="w3-button w3-red">{{ lc_taskeditor_cancel }}</a>
+                    <a id="task-editor-submit-button" class="w3-button w3-green">{{ lc_taskeditor_submit }}</a>
+                </p>
+            </div>
+        </div>
         <div class="w3-bar w3-dark-grey">
             <a class="w3-bar-item w3-button" href="/">{{ lc_home_page }}</a>
             <a class="w3-bar-item w3-button" href="/tasks">{{ lc_tasks }}</a>

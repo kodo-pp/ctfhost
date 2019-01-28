@@ -1,0 +1,24 @@
+#task-editor-overlay {
+    display: none;
+}
+
+#task-editor-overlay.task-editor-active {
+    display: block !important;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+    z-index: 999;
+}
+
+#task-editor-overlay #task-editor-box {
+    background-color: white;
+    width: 70%;
+    margin: 15% auto;
+    padding: 30px;
+    border: 1px solid grey;
+    display: block;
+}
