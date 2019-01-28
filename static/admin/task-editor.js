@@ -23,7 +23,7 @@ function make_http_request(address, data)
 }
 
 
-function open_task_editor(task_name, text, title, value)
+function open_task_editor(task_id, text, title, value)
 {
     let overlay = document.querySelector('#task-editor-overlay');
     if (overlay === null) {
@@ -36,12 +36,12 @@ function open_task_editor(task_name, text, title, value)
     
     overlay.classList.add('task-editor-active');
 
-    let in_taskname = document.querySelector('#task-editor-overlay #task-editor-taskname-input');
+    let in_taskid   = document.querySelector('#task-editor-overlay #task-editor-taskid-input');
     let in_title    = document.querySelector('#task-editor-overlay #task-editor-title-input');
     let in_value    = document.querySelector('#task-editor-overlay #task-editor-value-input');
     let in_text     = document.querySelector('#task-editor-overlay #task-editor-text-input');
 
-    in_taskname.value = task_name;
+    in_taskid.value   = task_id;
     in_title.value    = title;
     in_value.value    = value;
     in_text.value     = text;
@@ -96,13 +96,18 @@ function run_task_editor_cancel()
 
 function task_editor_submit()
 {
-    let task_name = document.querySelector('#task-editor-overlay #task-editor-taskname-input').valueOf();
-    let text      = document.querySelector('#task-editor-overlay #task-editor-text-input').valueOf();
-    let title     = document.querySelector('#task-editor-overlay #task-editor-title-input').valueOf();
-    let value = parseInt(document.querySelector('#task-editor-overlay #task-editor-value-input').valueOf());
+    let task_id   = document.querySelector('#task-editor-overlay #task-editor-taskid-input').value;
+    let text      = document.querySelector('#task-editor-overlay #task-editor-text-input').value;
+    let title     = document.querySelector('#task-editor-overlay #task-editor-title-input').value;
+    let value = parseInt(document.querySelector('#task-editor-overlay #task-editor-value-input').value);
+
+    console.log(task_id);
+    console.log(text);
+    console.log(title);
+    console.log(value);
 
     let data = JSON.stringify({
-        'task_name': task_name,
+        'task_id': task_id,
         'text': text,
         'title': title,
         'value': value,

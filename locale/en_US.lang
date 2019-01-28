@@ -45,3 +45,7 @@ taskeditor_text                     = Task text
 taskeditor_submit                   = Save task
 taskeditor_cancel                   = Cancel
 task_editor                         = Task editor
+invalid_api_call                    = Invalid API call
+no_such_api_function                = No such API function
+api_invalid_data_type               = Invalid data type for parameter '{param}' (expected {expected})
+int                                 = integer

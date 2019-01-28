@@ -1,4 +1,4 @@
-#task-editor-overlay {
+#task-editor-overlay {  
     display: none;
 }
 
@@ -16,9 +16,16 @@
 
 #task-editor-overlay #task-editor-box {
     background-color: white;
-    width: 70%;
-    margin: 15% auto;
+    width: 80%;
+    margin: auto;
+    margin-top: 10%;
     padding: 30px;
     border: 1px solid grey;
     display: block;
+}
+
+#task-editor-overlay textarea {
+    resize: vertical;
+    height: 300px;
+    font-family: monospace;
 }

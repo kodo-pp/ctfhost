@@ -108,3 +108,5 @@ venv.bak/
 
 # DB
 *.db
+db/tasks
+db/tasks-etc

@@ -5,13 +5,17 @@ import sqlite3
 import hashlib
 import os
 import time
+import json
+from traceback import print_exc
 
 import tornado.ioloop
 import tornado.web
+from loguru import logger
 
 from localization import Localization
 from configuration import configuration
 from template import render_template
+from api import api
 import auth
 import tasks
 
@@ -21,6 +25,28 @@ lc = None
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(render_template('index.html', lc, session=auth.load_session(self.get_cookie('session_id'))))
+
+class ApiHandler(tornado.web.RequestHandler):
+    def post(self, *a):
+        path = self.request.path
+        path_parts = list(filter(lambda s: s != '', path.split('/')))
+        if len(path_parts) != 2:
+            self.write(json.dumps({'success': False, 'error_message': lc.get('invalid_api_call')}))
+            return
+        api_function = path_parts[-1]
+        try:
+            api.handle(api_function, args={'http_handler': self})
+        except KeyError:
+            self.write(json.dumps({'success': False, 'error_message': lc.get('no_such_api_function')}))
+            return
+        except BaseException as e:
+            self.write(json.dumps({'success': False, 'error_message': lc.get(str(e))}))
+            logger.error('Exception occured while serving an API call: {}', str(e))
+            print_exc(e)
+            return
+
+    def get(self, *a):
+        self.post(*a)
 
 class AdminHandler(tornado.web.RequestHandler):
     def get(self):
@@ -117,6 +143,7 @@ def make_app():
     return tornado.web.Application([
         (r'/', MainHandler),
         (r'/admin', AdminHandler),
+        (r'/api/(.*)', ApiHandler),
         (r'/login', LoginHandler),
         (r'/signup', RegisterHandler),
         (r'/lout', LogoutHandler), # /logout не работает под firefox за nginx reverse proxy (КАК???)
@@ -132,6 +159,7 @@ def main():
     global lc
     lc = Localization()
     lc.select_languages(configuration['lang_list'])
+    api.set_locale(lc)
 
     app = make_app()
     app.listen(8888)

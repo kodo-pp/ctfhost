@@ -44,18 +44,18 @@
                 }
             }
 
-            function edit_task(task_name)
+            function edit_task(task_id)
             {
                 let text = null;
                 let title = null;
                 let value = null;
-                if (task_name !== null) {
-                    let loaded_task = load_task(task_name);
+                if (task_id !== null) {
+                    let loaded_task = load_task(task_id);
                     text = loaded_task.text;
                     title = loaded_task.title;
                     value = loaded_task.value;
                 }
-                open_task_editor(task_name, text, title, value);
+                open_task_editor(task_id, text, title, value);
                 // TODO: write a simple task editor
             }
 
@@ -72,7 +72,7 @@
         <div id="task-editor-overlay">
             <div id="task-editor-box">
                 <h3>{{ lc_task_editor }}</h3>
-                <input type="hidden" id="task-editor-taskname-input">
+                <input type="hidden" id="task-editor-taskid-input">
                 <p>
                     <label for="task-editor-title-input">{{ lc_taskeditor_title }}</label>
                     <input
