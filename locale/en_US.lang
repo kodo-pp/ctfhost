@@ -49,3 +49,5 @@ invalid_api_call                    = Invalid API call
 no_such_api_function                = No such API function
 api_invalid_data_type               = Invalid data type for parameter '{param}' (expected {expected})
 int                                 = integer
+api_call_not_allowed                = You are not allowed to use this API function
+task_does_not_exist                 = Task with id '{task_id}' does not exist

@@ -28,6 +28,7 @@ class MainHandler(tornado.web.RequestHandler):
 
 class ApiHandler(tornado.web.RequestHandler):
     def post(self, *a):
+        session = auth.load_session(self.get_cookie('session_id'))
         path = self.request.path
         path_parts = list(filter(lambda s: s != '', path.split('/')))
         if len(path_parts) != 2:
@@ -35,14 +36,14 @@ class ApiHandler(tornado.web.RequestHandler):
             return
         api_function = path_parts[-1]
         try:
-            api.handle(api_function, args={'http_handler': self})
+            api.handle(api_function, session=session, args={'http_handler': self})
         except KeyError:
             self.write(json.dumps({'success': False, 'error_message': lc.get('no_such_api_function')}))
             return
         except BaseException as e:
             self.write(json.dumps({'success': False, 'error_message': lc.get(str(e))}))
             logger.error('Exception occured while serving an API call: {}', str(e))
-            print_exc(e)
+            print_exc()
             return
 
     def get(self, *a):

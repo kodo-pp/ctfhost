@@ -101,11 +101,6 @@ function task_editor_submit()
     let title     = document.querySelector('#task-editor-overlay #task-editor-title-input').value;
     let value = parseInt(document.querySelector('#task-editor-overlay #task-editor-value-input').value);
 
-    console.log(task_id);
-    console.log(text);
-    console.log(title);
-    console.log(value);
-
     let data = JSON.stringify({
         'task_id': task_id,
         'text': text,
@@ -127,6 +122,9 @@ function task_editor_submit()
     
     // Task submitted successfully, close the editor
     close_task_editor();
+    
+    // Reload the page
+    location.reload();
 }
 
 

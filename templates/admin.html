@@ -36,27 +36,42 @@
             {
                 let tabs = document.querySelectorAll('#tabset>.w3-bar-item');
                 for (let tab of tabs) {
-                    console.log(tab);
                     let tab_name = tab.id.replace(/^tab-/, '');
                     tab.addEventListener('click', function() {
                         select_tab(tab_name);
                     });
                 }
+                select_tab('tasks');
+            }
+
+            function load_task(task_id)
+            {
+                return make_http_request('/api/get_task', JSON.stringify({'task_id': task_id}));
             }
 
             function edit_task(task_id)
             {
-                let text = null;
-                let title = null;
-                let value = null;
-                if (task_id !== null) {
-                    let loaded_task = load_task(task_id);
-                    text = loaded_task.text;
-                    title = loaded_task.title;
-                    value = loaded_task.value;
-                }
-                open_task_editor(task_id, text, title, value);
-                // TODO: write a simple task editor
+                setTimeout(function() {
+                    try {
+                        let text = null;
+                        let title = null;
+                        let value = null;
+                        if (task_id !== null) {
+                            let loaded_task = load_task(task_id);
+                            text = loaded_task.task.text;
+                            title = loaded_task.task.title;
+                            value = loaded_task.task.value;
+                        }
+                        open_task_editor(task_id, text, title, value);
+                    } catch (e) {
+                        error_message(e.message);
+                    }
+                }, 0);
+            }
+
+            function delete_task(task_id)
+            {
+                error_message('Deleting task is not implemented (TODO)');
             }
 
             function error_message(msg)
@@ -80,6 +95,7 @@
                         id="task-editor-title-input"
                         placeholder="{{ lc_taskeditor_title }}"
                         class="w3-input w3-border"
+                        required
                     >
                 </p>
                 <p>
@@ -90,6 +106,8 @@
                         id="task-editor-value-input"
                         placeholder="{{ lc_taskeditor_value }}"
                         class="w3-input w3-border"
+                        pattern="[1-9][0-9]*"
+                        required
                     >
                 </p>
                 <p>
@@ -127,8 +145,14 @@
                             <div class="w3-container w3-light-grey">
                                 <p>{{ task.title }} [{{ task.value }}]</p>
                                 <p>
-                                    <a class="w3-button w3-blue">{{ lc_admin_task_edit }}</a>
-                                    <a class="w3-button w3-red">{{ lc_admin_task_delete }}</a>
+                                    <a
+                                        class="w3-button w3-blue"
+                                        onclick="edit_task({{ task.task_id }})"
+                                    >{{ lc_admin_task_edit }}</a>
+                                    <a
+                                        class="w3-button w3-red"
+                                        onclick="delete_task({{ task.task_id }})"
+                                    >{{ lc_admin_task_delete }}</a>
                                 </p>
                             </div>
                         </p>
