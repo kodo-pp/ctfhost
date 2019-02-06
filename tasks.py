@@ -2,6 +2,7 @@ import sqlite3
 import json
 import os
 import re
+import shutil
 from contextlib import closing
 
 from loguru import logger
@@ -126,6 +127,43 @@ def api_get_task(api, sess, args):
     http.write(json.dumps({'success': True, 'task': task.to_dict()}))
 
 
+def api_delete_task(api, sess, args):
+    http = args['http_handler']
+    request = json.loads(http.request.body)
+    task_id = request['task_id']
+
+    try:
+        task_id = int(task_id)
+    except (ValueError, TypeError) as e:
+        http.write(json.dumps({
+            'success': False,
+            'error_message': api.lc.get('api_invalid_data_type').format(
+                expected=api.lc.get('int'),
+                param='task_id',
+            )
+        }))
+        return
+    try:
+        delete_task(task_id)
+    except TaskNotFoundError:
+        http.write(json.dumps({
+            'success': False,
+            'error_message': api.lc.get('task_does_not_exist').format(task_id=task_id)
+        }))
+        return
+    
+    http.write(json.dumps({'success': True}))
+
+
+def delete_task(task_id):
+    if type(task_id) is not int:
+        # Security measure, because this function can potentially do something
+        raise TaskNotFoundError()
+    if not task_exists(task_id):
+        raise TaskNotFoundError()
+    shutil.rmtree(os.path.join(configuration['tasks_path'], str(task_id)))
+
+
 def task_exists(task_id):
     assert type(task_id) is int
     return os.access(os.path.join(configuration['tasks_path'], str(task_id), 'task.json'), os.R_OK)
@@ -172,4 +210,5 @@ def write_task(task):
 
 
 api.add('add_or_update_task', api_add_or_update_task, access_level=ADMIN)
-api.add('get_task', api_get_task, access_level=USER)
+api.add('delete_task',        api_delete_task,        access_level=ADMIN)
+api.add('get_task',           api_get_task,           access_level=USER)
