@@ -11,6 +11,11 @@ class ApiPermissionError(Exception):
         super().__init__(*a)
 
 
+class ApiKeyError(Exception):
+    def __init__(self, *a):
+        super().__init__(*a)
+
+
 class Api:
     def __init__(self):
         self.handlers = {}
@@ -36,7 +41,10 @@ class Api:
             access_level = ADMIN
         else:
             access_level = USER
-        required_access_level, func = self.handlers[name]
+        try:
+            required_access_level, func = self.handlers[name]
+        except KeyError:
+            raise ApiKeyError(name)
         if access_level < required_access_level:
             raise ApiPermissionError(self.lc.get('api_call_not_allowed').format(api_func=name))
         func(self, session, args)

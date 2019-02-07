@@ -22,17 +22,17 @@ class Task:
         self.title = info['title']
         self.text = info['text']
         self.value = info['value']
+        self.labels = info['labels']
 
     def to_dict(self, complete=True):
         return {
             'task_id': self.task_id,
-            'title': self.title,
-            'text': self.text,
-            'value': self.value,
+            **self.to_dict(complete=False),
         } if complete else {
             'title': self.title,
             'text': self.text,
             'value': self.value,
+            'labels': self.labels,
         }
 
 
@@ -40,14 +40,17 @@ def get_task_list():
     tasks_path = configuration['tasks_path']
     os.makedirs(tasks_path, exist_ok=True)
     for task_dir in os.listdir(tasks_path):
-        if not os.path.isdir(os.path.join(tasks_path, task_dir)):
-            continue
-        if re.match(r'^[1-9][0-9]*$', task_dir) is None:
-            continue
-        if not os.access(os.path.join(tasks_path, task_dir, 'task.json'), os.R_OK):
-            continue
-        task_id = int(task_dir)
-        yield read_task(task_id)
+        try:
+            if not os.path.isdir(os.path.join(tasks_path, task_dir)):
+                continue
+            if re.match(r'^[1-9][0-9]*$', task_dir) is None:
+                continue
+            if not os.access(os.path.join(tasks_path, task_dir, 'task.json'), os.R_OK):
+                continue
+            task_id = int(task_dir)
+            yield read_task(task_id)
+        except Exception as e:
+            logger.warning('Error loading task info: {}', repr(e))
 
 
 def api_add_or_update_task(api, sess, args):
@@ -57,6 +60,7 @@ def api_add_or_update_task(api, sess, args):
     text    = request['text']
     title   = request['title']
     value   = request['value']
+    labels  = request['labels']
 
     if task_id is None or task_id == '':
         task_id = allocate_task_id()
@@ -91,10 +95,11 @@ def api_add_or_update_task(api, sess, args):
         task.text = text
         task.title = title
         task.value = value
+        task.labels = labels
         write_task(task)
     else:
         logger.info('Creating task {}', task_id)
-        task = Task(task_id, {'title': title, 'text': text, 'value': value})
+        task = Task(task_id, {'title': title, 'text': text, 'value': value, 'labels': labels})
         write_task(task)
     http.write(json.dumps({'success': True}))
 

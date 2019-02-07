@@ -42,6 +42,7 @@ error                               = Error
 taskeditor_title                    = Task title
 taskeditor_value                    = Task value
 taskeditor_text                     = Task text
+taskeditor_labels                   = Labels (space-separated list)
 taskeditor_submit                   = Save task
 taskeditor_cancel                   = Cancel
 task_editor                         = Task editor

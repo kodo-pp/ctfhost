@@ -15,7 +15,7 @@ from loguru import logger
 from localization import Localization
 from configuration import configuration
 from template import render_template
-from api import api
+from api import api, ApiKeyError
 import auth
 import tasks
 
@@ -37,7 +37,7 @@ class ApiHandler(tornado.web.RequestHandler):
         api_function = path_parts[-1]
         try:
             api.handle(api_function, session=session, args={'http_handler': self})
-        except KeyError:
+        except ApiKeyError:
             self.write(json.dumps({'success': False, 'error_message': lc.get('no_such_api_function')}))
             return
         except BaseException as e:

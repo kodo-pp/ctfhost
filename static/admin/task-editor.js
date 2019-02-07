@@ -23,7 +23,7 @@ function make_http_request(address, data)
 }
 
 
-function open_task_editor(task_id, text, title, value)
+function open_task_editor(task_id, text, title, value, labels)
 {
     let overlay = document.querySelector('#task-editor-overlay');
     if (overlay === null) {
@@ -40,11 +40,13 @@ function open_task_editor(task_id, text, title, value)
     let in_title    = document.querySelector('#task-editor-overlay #task-editor-title-input');
     let in_value    = document.querySelector('#task-editor-overlay #task-editor-value-input');
     let in_text     = document.querySelector('#task-editor-overlay #task-editor-text-input');
+    let in_labels   = document.querySelector('#task-editor-overlay #task-editor-labels-input');
 
     in_taskid.value   = task_id;
     in_title.value    = title;
     in_value.value    = value;
     in_text.value     = text;
+    in_labels.value   = labels.join(' ');
     
     let submit_button = document.querySelector('#task-editor-overlay #task-editor-submit-button');
     let cancel_button = document.querySelector('#task-editor-overlay #task-editor-cancel-button');
@@ -99,13 +101,16 @@ function task_editor_submit()
     let task_id   = document.querySelector('#task-editor-overlay #task-editor-taskid-input').value;
     let text      = document.querySelector('#task-editor-overlay #task-editor-text-input').value;
     let title     = document.querySelector('#task-editor-overlay #task-editor-title-input').value;
-    let value = parseInt(document.querySelector('#task-editor-overlay #task-editor-value-input').value);
+    let labels_s  = document.querySelector('#task-editor-overlay #task-editor-labels-input').value;
+    let labels    = labels_s.split(' ').filter(Boolean);
+    let value     = parseInt(document.querySelector('#task-editor-overlay #task-editor-value-input').value);
 
     let data = JSON.stringify({
         'task_id': task_id,
         'text': text,
         'title': title,
         'value': value,
+        'labels': labels,
     });
 
     let response;

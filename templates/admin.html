@@ -56,13 +56,15 @@
                         let text = null;
                         let title = null;
                         let value = null;
+                        let labels = [];
                         if (task_id !== null) {
                             let loaded_task = load_task(task_id);
                             text = loaded_task.task.text;
                             title = loaded_task.task.title;
                             value = loaded_task.task.value;
+                            labels = loaded_task.task.labels;
                         }
-                        open_task_editor(task_id, text, title, value);
+                        open_task_editor(task_id, text, title, value, labels);
                     } catch (e) {
                         error_message(e.message);
                     }
@@ -123,6 +125,15 @@
                         class="w3-input w3-border"
                         pattern="[1-9][0-9]*"
                         required
+                    >
+                </p>
+                <p>
+                    <label for="task-editor-labels-input">{{ lc_taskeditor_labels }}</label>
+                    <input
+                        type="text"
+                        id="task-editor-labels-input"
+                        placeholder="{{ lc_taskeditor_labels }}"
+                        class="w3-input w3-border"
                     >
                 </p>
                 <p>
