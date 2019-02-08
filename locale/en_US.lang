@@ -53,3 +53,5 @@ int                                 = integer
 api_call_not_allowed                = You are not allowed to use this API function
 task_does_not_exist                 = Task with id '{task_id}' does not exist
 confirm_task_deletion               = Do you really want to delete this task?
+task_show                           = Show
+task_hide                           = Hide

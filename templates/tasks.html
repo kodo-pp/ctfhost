@@ -6,6 +6,31 @@
         <link rel="stylesheet" href="/static/ctfhost-common.css">
         <meta charset="utf-8">
         <title>{{ conf_ctfname }} - {{ lc_tasks }}</title>
+        <script>
+            function toggle_task(task_id)
+            {
+                let inner = document.getElementById(`task-id${task_id}-inner`);
+                let toggle_btn = document.getElementById(`task-id${task_id}-toggle-btn`);
+                if (!inner) {
+                    throw Error(`No inner element for task with id ${id} found`);
+                }
+                if (!toggle_btn) {
+                    throw Error(`No toggle button for task with id ${id} found`);
+                }
+
+                if (inner.classList.contains('hidden')) {
+                    toggle_btn.classList.remove('w3-green');
+                    toggle_btn.classList.add('w3-grey');
+                    toggle_btn.innerHTML = '{{ lc_task_hide }}';
+                } else {
+                    toggle_btn.classList.remove('w3-grey');
+                    toggle_btn.classList.add('w3-green');
+                    toggle_btn.innerHTML = '{{ lc_task_show }}';
+                }
+
+                inner.classList.toggle('hidden');
+            }
+        </script>
     </head>
     <body>
         <div class="w3-bar w3-dark-grey">
@@ -23,21 +48,31 @@
                 <p>
                 <div class="w3-container w3-light-grey">
                     <h3>{{ task.title }} [{{ task.value }}]</h3>
-                    {{ task.text }}
-                    <p>
-                        <form style="display: grid">
-                            <input
-                                type="text"
-                                class="w3-input w3-border ctfhost-combo-input-text"
-                                placeholder="{{ lc_input_flag }}"
-                            >
-                            <input
-                                type="submit"
-                                class="w3-input w3-border w3-green w3-button ctfhost-combo-input-submit"
-                                value="{{ lc_submit_flag }}"
-                            >
-                        </form>
-                    </p>
+                    {% for label in task.labels %}
+                        <span class="ctfhost-task-view-label">{{ label }}</span>
+                    {% end %}
+                    <p><a
+                        href="javascript:toggle_task({{ task.task_id }});"
+                        class="w3-button w3-green"
+                        id="task-id{{ task.task_id }}-toggle-btn"
+                    >{{ lc_task_show }}</a></p>
+                    <div id="task-id{{ task.task_id }}-inner" class="hidden">
+                        <p>{{ task.text }}</p>
+                        <p>
+                            <form style="display: grid">
+                                <input
+                                    type="text"
+                                    class="w3-input w3-border ctfhost-combo-input-text"
+                                    placeholder="{{ lc_input_flag }}"
+                                >
+                                <input
+                                    type="submit"
+                                    class="w3-input w3-border w3-green w3-button ctfhost-combo-input-submit"
+                                    value="{{ lc_submit_flag }}"
+                                >
+                            </form>
+                        </p>
+                    </div>
                 </div>
                 </p>
             {% end %}

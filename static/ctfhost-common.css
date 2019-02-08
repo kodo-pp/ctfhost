@@ -8,6 +8,16 @@
     grid-column-end: 8;
 }
 
+.ctfhost-task-view-label {
+    cursor: default;
+    display: inline-block;
+    background-color: #777;
+    color: white;
+    padding: 2px 7px 2px 7px;
+    margin-right: 5px;
+}
+
 .hidden {
     display: none;
 }
+.
