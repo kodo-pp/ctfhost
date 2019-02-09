@@ -141,6 +141,27 @@
                     <textarea id="task-editor-text-input" class="w3-input w3-border">
                     </textarea>
                 </p>
+                <p>{{ lc_flags }}</p>
+                <div id="task-editor-flags">
+                    <div class="w3-row-padding" id="flag0">
+                        <div class="w3-col s4 m4 l4">
+                            <select id="flag_type0" onchange="update_flagtype_internal(0)" class="w3-input w3-border">
+                                <option value="string" selected>{{ lc_flagtype_string }}</option>
+                                <option value="regex">{{ lc_flagtype_regex }}</option>
+                                <option value="program">{{ lc_flagtype_program }}</option>
+                            </select>
+                        </div>
+                        <div class="w3-col s6 m6 l6">
+                            <input id="flag_data0" type="text" class="w3-input w3-border">
+                        </div>
+                        <div class="w3-col s2 m2 l2">
+                            <a class="w3-button w3-red" href="javascript:delete_flag(0)">{{ lc_delete_flag }}</a>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    <a href="javascript:add_flag()" class="w3-button w3-green">{{ lc_add_flag }}</a>
+                </p>
                 <p>
                     <a id="task-editor-cancel-button" class="w3-button w3-red">{{ lc_taskeditor_cancel }}</a>
                     <a id="task-editor-submit-button" class="w3-button w3-green">{{ lc_taskeditor_submit }}</a>

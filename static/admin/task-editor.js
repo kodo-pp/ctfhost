@@ -1,3 +1,5 @@
+var flags = []
+
 function ActionError(text)
 {
     this.message = text;
@@ -104,6 +106,7 @@ function task_editor_submit()
     let labels_s  = document.querySelector('#task-editor-overlay #task-editor-labels-input').value;
     let labels    = labels_s.split(' ').filter(Boolean);
     let value     = parseInt(document.querySelector('#task-editor-overlay #task-editor-value-input').value);
+    /* global flags */
 
     let data = JSON.stringify({
         'task_id': task_id,
@@ -111,6 +114,7 @@ function task_editor_submit()
         'title': title,
         'value': value,
         'labels': labels,
+        'flags': flags
     });
 
     let response;

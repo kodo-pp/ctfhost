@@ -22,7 +22,7 @@ import tasks
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write(render_template('index.html', lc, session=auth.load_session(self.get_cookie('session_id'))))
+        self.write(render_template('index.html', session=auth.load_session(self.get_cookie('session_id'))))
 
 class ApiHandler(tornado.web.RequestHandler):
     def post(self, *a):

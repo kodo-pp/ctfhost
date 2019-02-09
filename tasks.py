@@ -17,6 +17,10 @@ class TaskNotFoundError(Exception):
         super().__init__(*a)
 
 
+def check_flag_with_program(prog, flag):
+    raise NotImplemented('Checker program is not yet implemented')
+
+
 class Task:
     def __init__(self, task_id, info):
         self.task_id = task_id
@@ -40,8 +44,6 @@ class Task:
                 raise KeyError('flags[...].data')
             if flag_checker['type'] not in {'string', 'regex', 'program'}:
                 raise ValueError('flags[...].type', flag_checker['type'])
-
-             
 
     def to_dict(self, complete=True):
         return {
@@ -108,8 +110,8 @@ def api_add_or_update_task(api, sess, args):
         task_id = int(task_id)
     except (ValueError, TypeError) as e:
         raise Exception(
-            api.lc.get('api_invalid_data_type').format(
-                expected=api.lc.get('int'),
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
                 param='task_id',
             )
         )
@@ -118,8 +120,8 @@ def api_add_or_update_task(api, sess, args):
         value = int(value)
     except (ValueError, TypeError) as e:
         raise Exception(
-            api.lc.get('api_invalid_data_type').format(
-                expected=api.lc.get('int'),
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
                 param='value',
             )
         )
@@ -131,13 +133,14 @@ def api_add_or_update_task(api, sess, args):
         task.title = title
         task.value = value
         task.labels = labels
+        task.flags = flags
         write_task(task)
     else:
         logger.info('Creating task {}', task_id)
         try:
-            task = Task(task_id, {'title': title, 'text': text, 'value': value, 'labels': labels})
+            task = Task(task_id, {'title': title, 'text': text, 'value': value, 'labels': labels, 'flags': flags})
         except KeyError as e:
-            raise ApiArgumentError(api.lc.get('api_argument_error').format(argument=str(e)))
+            raise ApiArgumentError(lc.get('api_argument_error').format(argument=str(e)))
         write_task(task)
     http.write(json.dumps({'success': True}))
 
@@ -151,15 +154,15 @@ def api_get_task(api, sess, args):
         task_id = int(task_id)
     except (ValueError, TypeError) as e:
         raise Exception(
-            api.lc.get('api_invalid_data_type').format(
-                expected=api.lc.get('int'),
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
                 param='task_id',
             )
         )
     try:
         task = read_task(task_id)
     except TaskNotFoundError:
-        raise Exception(api.lc.get('task_does_not_exist').format(task_id=task_id))
+        raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
     
     http.write(json.dumps({'success': True, 'task': task.to_dict()}))
 
@@ -173,15 +176,15 @@ def api_delete_task(api, sess, args):
         task_id = int(task_id)
     except (ValueError, TypeError) as e:
         raise Exception(
-            api.lc.get('api_invalid_data_type').format(
-                expected=api.lc.get('int'),
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
                 param='task_id',
             )
         )
     try:
         delete_task(task_id)
     except TaskNotFoundError:
-        raise Exception(api.lc.get('task_does_not_exist').format(task_id=task_id))
+        raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
     
     http.write(json.dumps({'success': True}))
 
