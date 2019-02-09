@@ -1,5 +1,7 @@
 from loguru import logger
 
+from localization import lc
+
 
 GUEST = 0
 USER = 100
@@ -16,12 +18,14 @@ class ApiKeyError(Exception):
         super().__init__(*a)
 
 
+class ApiArgumentError(Exception):
+    def __init__(self, arg):
+        super().__init__(arg)
+
+
 class Api:
     def __init__(self):
         self.handlers = {}
-
-    def set_locale(self, lc):
-        self.lc = lc
     
     def add(self, name, func, access_level):
         if self.has(name):

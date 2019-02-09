@@ -45,3 +45,5 @@ class Localization:
                     if k not in result:
                         result[k] = v
         return result
+
+lc = Localization()

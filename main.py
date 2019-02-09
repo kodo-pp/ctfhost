@@ -12,14 +12,12 @@ import tornado.ioloop
 import tornado.web
 from loguru import logger
 
-from localization import Localization
+from localization import Localization, lc
 from configuration import configuration
 from template import render_template
 from api import api, ApiKeyError
 import auth
 import tasks
-
-lc = None
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -41,8 +39,8 @@ class ApiHandler(tornado.web.RequestHandler):
             self.write(json.dumps({'success': False, 'error_message': lc.get('no_such_api_function')}))
             return
         except BaseException as e:
-            self.write(json.dumps({'success': False, 'error_message': lc.get(str(e))}))
-            logger.error('Exception occured while serving an API call: {}', str(e))
+            self.write(json.dumps({'success': False, 'error_message': lc.get(repr(e))}))
+            logger.error('Exception occured while serving an API call: {}', repr(e))
             print_exc()
             return
 
@@ -53,9 +51,9 @@ class AdminHandler(tornado.web.RequestHandler):
     def get(self):
         session = auth.load_session(self.get_cookie('session_id'))
         if session is None or not session.is_admin:
-            self.write(render_template('admin_error.html', lc, error=lc.get('not_admin')))
+            self.write(render_template('admin_error.html', error=lc.get('not_admin')))
             return
-        self.write(render_template('admin.html', lc, session=session, tasks=tasks))
+        self.write(render_template('admin.html', session=session, tasks=tasks))
 
 class LoginHandler(tornado.web.RequestHandler):
     def get(self):
@@ -63,7 +61,7 @@ class LoginHandler(tornado.web.RequestHandler):
         if auth.load_session(session_id) is not None:
             self.redirect('/', permanent=True)
             return
-        self.write(render_template('login.html', lc))
+        self.write(render_template('login.html'))
 
 class RegisterHandler(tornado.web.RequestHandler):
     def get(self):
@@ -71,13 +69,13 @@ class RegisterHandler(tornado.web.RequestHandler):
         if auth.load_session(session_id) is not None:
             self.redirect('/', permanent=True)
             return
-        self.write(render_template('register.html', lc))
+        self.write(render_template('register.html'))
 
 class LogoutHandler(tornado.web.RequestHandler):
     def get(self):
         session_id = self.get_cookie('session_id')
         if auth.load_session(session_id) is None:
-            self.write(render_template('auth_error.html', lc, error=lc.get('logout_no_session')))
+            self.write(render_template('auth_error.html', error=lc.get('logout_no_session')))
             return
         auth.logout(session_id)
         self.clear_cookie('session_id')
@@ -88,16 +86,16 @@ class AuthHandler(tornado.web.RequestHandler):
         username = self.get_argument('username', None)
         password = self.get_argument('password', None)
         if username is None:
-            self.write(render_template('auth_error.html', lc, error=lc.get('no_username')))
+            self.write(render_template('auth_error.html', error=lc.get('no_username')))
             return
         if password is None:
-            self.write(render_template('auth_error.html', lc, error=lc.get('no_passord')))
+            self.write(render_template('auth_error.html', error=lc.get('no_passord')))
             return
 
         try:
             session = auth.authenticate_user(username, password)
         except auth.BaseAuthenticationError as e:
-            self.write(render_template('auth_error.html', lc, error=lc.get(e.text)))
+            self.write(render_template('auth_error.html', error=lc.get(e.text)))
             return
         self.set_cookie('session_id', session.id, expires=session.expires_at)
         self.redirect('/', permanent=True)
@@ -111,16 +109,16 @@ class RegHandler(tornado.web.RequestHandler):
         email = self.get_argument('email', None)
         
         if username is None or username == '':
-            self.write(render_template('reg_error.html', lc, error=lc.get('no_username')))
+            self.write(render_template('reg_error.html', error=lc.get('no_username')))
             return
         if password is None or password == '':
-            self.write(render_template('reg_error.html', lc, error=lc.get('no_password')))
+            self.write(render_template('reg_error.html', error=lc.get('no_password')))
             return
         if password != password_c:
-            self.write(render_template('reg_error.html', lc, error=lc.get('password_c_failed')))
+            self.write(render_template('reg_error.html', error=lc.get('password_c_failed')))
             return
         if username in auth.get_user_list():
-            self.write(render_template('reg_error.html', lc, error=lc.get('user_already_exists')))
+            self.write(render_template('reg_error.html', error=lc.get('user_already_exists')))
             return
 
         auth.register_user(username=username, password=password, disp_name=disp_name, email=email)
@@ -134,7 +132,7 @@ class TasksHandler(tornado.web.RequestHandler):
             self.redirect('/login')
             return
         task_list = tasks.get_task_list()
-        self.write(render_template('tasks.html', lc, session=session, tasks=task_list))
+        self.write(render_template('tasks.html', session=session, tasks=task_list))
 
 class FaviconHandler(tornado.web.RequestHandler):
     def get(self):
@@ -157,10 +155,7 @@ def make_app():
 
 
 def main():
-    global lc
-    lc = Localization()
     lc.select_languages(configuration['lang_list'])
-    api.set_locale(lc)
 
     app = make_app()
     app.listen(8888)

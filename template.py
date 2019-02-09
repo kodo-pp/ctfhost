@@ -4,13 +4,13 @@ import os
 import re
 
 import configuration as conf
-import localization as lc
+from localization import lc
 
 from tornado.template import Template, Loader
 
 template_loader = None
 
-def render_template(template_name, lc, **kwargs):
+def render_template(template_name, **kwargs):
     global template_loader
     if template_loader is None or True:
         template_loader = Loader('templates')
