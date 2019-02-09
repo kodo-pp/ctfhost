@@ -125,6 +125,8 @@ def api_add_or_update_task(api, sess, args):
                 param='value',
             )
         )
+
+    
     
     if task_exists(task_id):
         logger.info('Modifying task {}', task_id)
@@ -134,6 +136,7 @@ def api_add_or_update_task(api, sess, args):
         task.value = value
         task.labels = labels
         task.flags = flags
+        task.validate_flags()
         write_task(task)
     else:
         logger.info('Creating task {}', task_id)

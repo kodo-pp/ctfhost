@@ -57,14 +57,16 @@
                         let title = null;
                         let value = null;
                         let labels = [];
+                        let loaded_flags = [];
                         if (task_id !== null) {
                             let loaded_task = load_task(task_id);
                             text = loaded_task.task.text;
                             title = loaded_task.task.title;
                             value = loaded_task.task.value;
                             labels = loaded_task.task.labels;
+                            loaded_flags = loaded_task.task.flags;
                         }
-                        open_task_editor(task_id, text, title, value, labels);
+                        open_task_editor(task_id, text, title, value, labels, loaded_flags);
                     } catch (e) {
                         error_message(e.message);
                     }
@@ -95,6 +97,13 @@
             {
                 let error_message = '{{ lc_error }}: ' + msg;
                 alert(error_message);
+            }
+
+            lc_messages = {
+                'lc_flagtype_string':  '{{ lc_flagtype_string }}',
+                'lc_flagtype_regex':   '{{ lc_flagtype_regex }}',
+                'lc_flagtype_program': '{{ lc_flagtype_program }}',
+                'lc_delete_flag':      '{{ lc_delete_flag }}',
             }
 
             window.addEventListener('load', setup_tabs);
@@ -142,23 +151,7 @@
                     </textarea>
                 </p>
                 <p>{{ lc_flags }}</p>
-                <div id="task-editor-flags">
-                    <div class="w3-row-padding" id="flag0">
-                        <div class="w3-col s4 m4 l4">
-                            <select id="flag_type0" onchange="update_flagtype_internal(0)" class="w3-input w3-border">
-                                <option value="string" selected>{{ lc_flagtype_string }}</option>
-                                <option value="regex">{{ lc_flagtype_regex }}</option>
-                                <option value="program">{{ lc_flagtype_program }}</option>
-                            </select>
-                        </div>
-                        <div class="w3-col s6 m6 l6">
-                            <input id="flag_data0" type="text" class="w3-input w3-border">
-                        </div>
-                        <div class="w3-col s2 m2 l2">
-                            <a class="w3-button w3-red" href="javascript:delete_flag(0)">{{ lc_delete_flag }}</a>
-                        </div>
-                    </div>
-                </div>
+                <div id="task-editor-flags"></div> <!-- Filled by task-editor.js -->
                 <p>
                     <a href="javascript:add_flag()" class="w3-button w3-green">{{ lc_add_flag }}</a>
                 </p>
