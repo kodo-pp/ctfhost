@@ -125,8 +125,6 @@ def api_add_or_update_task(api, sess, args):
                 param='value',
             )
         )
-
-    
     
     if task_exists(task_id):
         logger.info('Modifying task {}', task_id)
@@ -168,6 +166,32 @@ def api_get_task(api, sess, args):
         raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
     
     http.write(json.dumps({'success': True, 'task': task.to_dict()}))
+
+
+def api_submit_flag(api, sess, args):
+    http = args['http_handler']
+    request = json.loads(http.request.body)
+    task_id = request['task_id']
+    flag_data = request['flag']
+
+    try:
+        task_id = int(task_id)
+    except (ValueError, TypeError) as e:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
+                param='task_id',
+            )
+        )
+    try:
+        task = read_task(task_id)
+    except TaskNotFoundError:
+        raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
+    
+    
+    correct = bool(task.check_flag(flag_data))
+    # TODO: add to team stats
+    http.write(json.dumps({'success': True, 'flag_correct': correct}))
 
 
 def api_delete_task(api, sess, args):
@@ -249,3 +273,4 @@ def write_task(task):
 api.add('add_or_update_task', api_add_or_update_task, access_level=ADMIN)
 api.add('delete_task',        api_delete_task,        access_level=ADMIN)
 api.add('get_task',           api_get_task,           access_level=USER)
+api.add('submit_flag',        api_submit_flag,        access_level=USER)

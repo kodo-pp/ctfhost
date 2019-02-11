@@ -167,7 +167,8 @@ function add_flag()
             <input id="flag_data##no##"
                    type="text"
                    class="w3-input w3-border"
-                   onchange="update_flagdata_internal(##no##)">
+                   onchange="update_flagdata_internal(##no##)"
+                   style="font-family: monospace;">
         </div>
         <div class="w3-col s2 m2 l2">
             <a class="w3-button w3-red" href="javascript:delete_flag(##no##)">${lc_messages['lc_delete_flag']}</a>
