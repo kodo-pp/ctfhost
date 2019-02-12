@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="/static/ctfhost-common.css">
         <meta charset="utf-8">
         <title>{{ conf_ctfname }} - {{ lc_tasks }}</title>
+        <script src="/static/http-request.js"></script>
         <script>
             function toggle_task(task_id)
             {
@@ -29,6 +30,26 @@
                 }
 
                 inner.classList.toggle('hidden');
+            }
+
+            function submit_flag(task_id)
+            {
+                let flag = document.getElementById(`flag-input-id${task_id}`).value;
+                let result;
+                try {
+                    result = make_http_request('/api/submit_flag', JSON.stringify({
+                        'task_id': task_id,
+                        'flag': flag
+                    }));
+                } catch (e) {
+                    alert('{{ lc_error }}: ' + e.message);
+                    return;
+                }
+                if (result.flag_correct) {
+                    location.reload();
+                } else {
+                    alert('{{ lc_incorrect_flag }}');
+                }
             }
         </script>
     </head>
@@ -63,11 +84,14 @@
                                 <input
                                     type="text"
                                     class="w3-input w3-border ctfhost-combo-input-text"
+                                    id="flag-input-id{{ task.task_id }}"
                                     placeholder="{{ lc_input_flag }}"
+                                    style="font-family: monospace"
                                 >
                                 <input
-                                    type="submit"
-                                    class="w3-input w3-border w3-green w3-button ctfhost-combo-input-submit"
+                                    type="button"
+                                    class="w3-input w3-green w3-button ctfhost-combo-input-submit"
+                                    onclick="submit_flag({{ task.task_id }});"
                                     value="{{ lc_submit_flag }}"
                                 >
                             </form>

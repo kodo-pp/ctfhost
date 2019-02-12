@@ -62,3 +62,4 @@ flagtype_string                     = Literal match
 flagtype_regex                      = Regular expression match
 flagtype_program                    = Path to checker program
 delete_flag                         = Delete flag
+incorrect_flag                      = Flag is incorrect

@@ -188,8 +188,12 @@ def api_submit_flag(api, sess, args):
     except TaskNotFoundError:
         raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
     
-    
     correct = bool(task.check_flag(flag_data))
+    logger.info('Flag submission from team {} for task with ID {} - {}'.format(
+        sess.username,
+        task_id,
+        'correct' if correct else 'wrong'
+    ))
     # TODO: add to team stats
     http.write(json.dumps({'success': True, 'flag_correct': correct}))
 
