@@ -103,6 +103,54 @@
                 let error_message = '{{ lc['error'] }}: ' + msg;
                 alert(error_message);
             }
+    
+            function change_password(team_name)
+            {
+                if (!confirm('{{ lc['change_password_confirm_msg'] }}')) {
+                    return;
+                }
+                let new_password = document.getElementById(`new-password-${team_name}`).value;
+                try {
+                    make_http_request('/api/change_password', JSON.stringify({
+                        'team_name': team_name,
+                        'new_password': new_password,
+                        'old_password': "doesn't matter"
+                    }));
+                    alert('{{ lc['password_changed_successfully'] }}');
+                } catch (e) {
+                    error_message(e.message);
+                }
+            }
+
+            function logout_team(team_name)
+            {
+                if (!confirm('{{ lc['logout_team_confirm_msg'] }}')) {
+                    return;
+                }
+                try {
+                    make_http_request('/api/logout_team', JSON.stringify({
+                        'team_name': team_name
+                    }));
+                    alert('{{ lc['team_logged_out_successfully'] }}');
+                } catch (e) {
+                    error_message(e.message);
+                }
+            }
+
+            function delete_team(team_name)
+            {
+                if (!confirm('{{ lc['delete_team_confirm_msg'] }}')) {
+                    return;
+                }
+                try {
+                    make_http_request('/api/delete_team', JSON.stringify({
+                        'team_name': team_name
+                    }));
+                    location.reload();
+                } catch (e) {
+                    error_message(e.message);
+                }
+            }
 
             window.addEventListener('load', setup_tabs);
         </script>
@@ -222,6 +270,7 @@
                                     type="password"
                                     placeholder="{{ lc['new_password'] }}"
                                     class="w3-input w3-border"
+                                    id="new-password-{{ team.team_name }}"
                                 >
                             </div>
                             <div class="w3-col s2 m2 w2">

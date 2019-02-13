@@ -50,7 +50,7 @@ class Api:
         except KeyError:
             raise ApiKeyError(name)
         if access_level < required_access_level:
-            raise ApiPermissionError(self.lc.get('api_call_not_allowed').format(api_func=name))
+            raise ApiPermissionError(lc.get('api_call_not_allowed').format(api_func=name))
         func(self, session, args)
 
 api = Api()

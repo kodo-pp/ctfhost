@@ -4,11 +4,14 @@ import sqlite3
 import hashlib
 import time
 import os
+import json
 from contextlib import closing
+from api import api, GUEST, USER, ADMIN, ApiArgumentError
 
 from loguru import logger
 
 from configuration import configuration
+from localization import lc
 
 class Session:
     def __init__(self, id, username, expires_at, is_admin):
@@ -36,6 +39,14 @@ class SessionCache:
 
     def add(self, session):
         self.cache[session.id] = session
+
+    def remove(self, session_id):
+        del self.cache[session_id]
+
+    def remove_for(self, username):
+        for k, v in self.cache.items():
+            if v.username == username:
+                del self.cache[k]
 
     def get(self, session_id):
         if session_id not in self.cache:
@@ -79,6 +90,7 @@ def logout(session_id):
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute('DELETE FROM sessions WHERE session_id = ?', (session_id,))
+    session_cache.remove(session_id)
 
 
 def get_user_info(username):
@@ -160,5 +172,109 @@ def register_user(username, password, disp_name=None, email=None):
             (username, password_hash, disp_name, email)
         )
         db.commit()
+
+
+def verify_password(user, passwd):
+    password_hash = hashlib.sha512(passwd.encode()).hexdigest()
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute('SELECT rowid FROM users WHERE username = ? AND password_hash = ?', (user, password_hash))
+        return len(cur.fetchall()) > 0
+
+
+def update_password(user, passwd):
+    logger.info(
+        'Updating password for user {}: {}',
+        user,
+        '<hidden>' if configuration['hide_password_in_logs'] else passwd
+    )
+    password_hash = hashlib.sha512(passwd.encode()).hexdigest()
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute('UPDATE users SET password_hash = ? WHERE username = ?', (password_hash, user))
+        db.commit()
+
+
+def logout_team(team_name):
+    logger.info(
+        'Terminating all session of team {}',
+        team_name,
+    )
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute('DELETE FROM sessions WHERE username = ?', (team_name,))
+        db.commit()
+    session_cache.remove_for(team_name)
+
+
+def delete_team(team_name):
+    logger.warning(
+        'DELETING team {}',
+        team_name,
+    )
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute('DELETE FROM sessions WHERE username = ?', (team_name,))
+        cur.execute('DELETE FROM users WHERE username = ?', (team_name,))
+        cur.execute('DELETE FROM submissions WHERE team_name = ?', (team_name,))
+        db.commit()
+    session_cache.remove_for(team_name)
+
+
+def api_change_password(api, sess, args):
+    http = args['http_handler']
+    request = json.loads(http.request.body)
+    team_name = request['team_name']
+    old_password = request['old_password']
+    new_password = request['new_password']
+
+    if type(old_password) is not str:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('str'),
+                param='old_password',
+            )
+        )
+    if type(new_password) is not str:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('str'),
+                param='new_password',
+            )
+        )
+
+    if sess.is_admin:
+        update_password(team_name, new_password)
+        http.write(json.dumps({'success': True}))
+        return
+    elif team_name == sess.username and verify_password(team_name, old_password):
+        update_password(team_name, new_password)
+        http.write(json.dumps({'success': True}))
+        return
+    else:
+        raise Exception(lc.get('api_call_permission_denied'))
+
+
+def api_logout_team(api, sess, args):
+    http = args['http_handler']
+    request = json.loads(http.request.body)
+    team_name = request['team_name']
+
+    logout_team(team_name)
+    http.write(json.dumps({'success': True}))
+
+
+def api_delete_team(api, sess, args):
+    http = args['http_handler']
+    request = json.loads(http.request.body)
+    team_name = request['team_name']
+
+    delete_team(team_name)
+    http.write(json.dumps({'success': True}))
+
+
+api.add('change_password', api_change_password, access_level=USER)
+api.add('logout_team',     api_logout_team,     access_level=ADMIN)
+api.add('delete_team',     api_delete_team,     access_level=ADMIN)
 
 session_cache = SessionCache()
