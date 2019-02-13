@@ -51,10 +51,11 @@ class ApiHandler(tornado.web.RequestHandler):
 class AdminHandler(tornado.web.RequestHandler):
     def get(self):
         session = auth.load_session(self.get_cookie('session_id'))
+        submissions = team.get_all_submissions()
         if session is None or not session.is_admin:
             self.write(render_template('admin_error.html', error=lc.get('not_admin')))
             return
-        self.write(render_template('admin.html', session=session, tasks=tasks))
+        self.write(render_template('admin.html', session=session, tasks=tasks, submissions=submissions))
 
 class LoginHandler(tornado.web.RequestHandler):
     def get(self):

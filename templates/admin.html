@@ -176,12 +176,15 @@
             <div class="w3-bar w3-dark-grey" id="tabset">
                 <span class="w3-bar-item w3-button" id="tab-tasks">{{ lc['admintab_tasks'] }}</span>
                 <span class="w3-bar-item w3-button" id="tab-teams">{{ lc['admintab_teams'] }}</span>
+                <span class="w3-bar-item w3-button" id="tab-submissions">{{ lc['admintab_submissions'] }}</span>
             </div>
             <div id="tabcontents">
                 <div class="w3-container hidden" id="tabcontent-tasks">
                     <h2>{{ lc['admintab_tasks'] }}</h2>
                     <p>
-                        <a class="w3-button w3-green" href="javascript:edit_task(null)">{{ lc['admin_task_add'] }}</a>
+                        <a class="w3-button w3-green" href="javascript:edit_task(null)">
+                            {{ lc['admin_task_add'] }}
+                        </a>
                     </p>
                     {% for task in tasks.get_task_list() %}
                         <p>
@@ -203,6 +206,33 @@
                 </div>
                 <div class="w3-container hidden" id="tabcontent-teams">
                     <h2>{{ lc['admintab_teams'] }}</h2>
+                </div>
+                <div class="w3-container hidden" id="tabcontent-submissions">
+                    <h2>{{ lc['admintab_submissions'] }}</h2>
+                    <table class="w3-table w3-border w3-striped">
+                        <tr>
+                            <th>{{ lc['team_name'] }}</th>
+                            <th>{{ lc['task_name'] }}</th>
+                            <th>{{ lc['submitted_flag'] }}</th>
+                            <th>{{ lc['is_correct'] }}</th>
+                            <th>{{ lc['points'] }}</th>
+                            <th>{{ lc['submission_time'] }}</th>
+                        </tr>
+                        {% for sub in reversed(sorted(submissions, key = lambda x: x['time'])) %}
+                            <tr>
+                                <td>{{ sub['team_name'] }}</td>
+                                <td>{{ tasks.read_task(sub['task_id']).title }}</td>
+                                <td style="font-family: monospace">{{ sub['flag'] }}</td>
+                                {% if sub['is_correct'] %}
+                                    <td class="w3-text-green">{{ lc['yes'] }}</td>
+                                {% else %}
+                                    <td class="w3-text-red">{{ lc['no'] }}</td>
+                                {% end %}
+                                <td>{{ sub['points'] }}</td>
+                                <td>{{ conf['date_fmt_func'](sub['time']) }}</td>
+                            </tr>
+                        {% end %}
+                    </table>
                 </div>
             </div>
         </div>
