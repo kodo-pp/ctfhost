@@ -12,12 +12,13 @@ import tornado.ioloop
 import tornado.web
 from loguru import logger
 
+import auth
+import tasks
+import team
 from localization import Localization, lc
 from configuration import configuration
 from template import render_template
 from api import api, ApiKeyError
-import auth
-import tasks
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -132,7 +133,8 @@ class TasksHandler(tornado.web.RequestHandler):
             self.redirect('/login')
             return
         task_list = tasks.get_task_list()
-        self.write(render_template('tasks.html', session=session, tasks=task_list))
+        current_team = team.read_team(session.username)
+        self.write(render_template('tasks.html', session=session, tasks=task_list, team=current_team))
 
 class FaviconHandler(tornado.web.RequestHandler):
     def get(self):

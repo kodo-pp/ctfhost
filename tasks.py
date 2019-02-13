@@ -7,6 +7,7 @@ from contextlib import closing
 
 from loguru import logger
 
+import team
 from configuration import configuration
 from api import api, GUEST, USER, ADMIN, ApiArgumentError
 from localization import lc
@@ -18,7 +19,7 @@ class TaskNotFoundError(Exception):
 
 
 def check_flag_with_program(prog, flag):
-    raise NotImplemented('Checker program is not yet implemented')
+    raise NotImplementedError('Checker program is not yet implemented')
 
 
 class Task:
@@ -189,12 +190,26 @@ def api_submit_flag(api, sess, args):
         raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
     
     correct = bool(task.check_flag(flag_data))
+
+    try:
+        team.add_submission(
+            team_name = sess.username,
+            task_id = task_id,
+            flag = flag_data,
+            is_correct = correct,
+            points = task.value if correct else 0,
+        )
+    except team.TaskAlreadySolved:
+        logger.warning('Team {} submitted a flag for already solved task with ID {}', sess.username, task_id)
+        http.write(json.dumps({'success': False, 'error_message': lc.get('task_already_solved')}))
+        return
+        
+
     logger.info('Flag submission from team {} for task with ID {} - {}'.format(
         sess.username,
         task_id,
         'correct' if correct else 'wrong'
     ))
-    # TODO: add to team stats
     http.write(json.dumps({'success': True, 'flag_correct': correct}))
 
 

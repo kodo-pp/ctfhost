@@ -65,10 +65,19 @@
         </div>
         <div class="w3-container">
             <h1>{{ lc['tasks'] }}</h1>
+            <h2>{{ lc['points_message'].format(points=team.points) }}</h2>
             {% for task in tasks %}
                 <p>
-                <div class="w3-container w3-light-grey">
-                    <h3>{{ task.title }} [{{ task.value }}]</h3>
+                {% if task.task_id in team.solves %}
+                    <div class="w3-container w3-light-grey w3-leftbar w3-border-green">
+                {% else %}
+                    <div class="w3-container w3-light-grey w3-leftbar w3-border-light-grey">
+                {% end %}
+                    {% if task.task_id in team.solves %}
+                        <h3>{{ task.title }} [{{ task.value }}] ({{ lc['solved'] }})</h3>
+                    {% else %}
+                        <h3>{{ task.title }} [{{ task.value }}]</h3>
+                    {% end %}
                     {% for label in task.labels %}
                         <span class="ctfhost-task-view-label">{{ label }}</span>
                     {% end %}

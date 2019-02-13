@@ -63,3 +63,7 @@ flagtype_regex                      = Regular expression match
 flagtype_program                    = Path to checker program
 delete_flag                         = Delete flag
 incorrect_flag                      = Flag is incorrect
+task_already_solved                 = Task is already solved
+task_submission_too_frequent        = You can't submit more than one flag in {time} seconds
+solved                              = Solved
+points_message                      = {points} points
