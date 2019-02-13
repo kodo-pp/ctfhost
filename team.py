@@ -43,6 +43,15 @@ def get_all_submissions():
         ]
 
 
+def get_all_teams():
+    with closing(sqlite3.connect(configuration['db_path'], detect_types=sqlite3.PARSE_DECLTYPES)) as db:
+        cur = db.cursor()
+        cur.execute('SELECT username FROM users')
+        team_names = [i[0] for i in cur.fetchall()]
+    for i in team_names:
+        yield read_team(i)
+
+
 def get_solves(team_name):
     with closing(sqlite3.connect(configuration['db_path'], detect_types=sqlite3.PARSE_DECLTYPES)) as db:
         cur = db.cursor()
