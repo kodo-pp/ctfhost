@@ -34,11 +34,14 @@ def get_submissions(team_name):
 
 
 def get_solves(team_name):
-    with closing(sqlite3.connect(configuration['db_path'])) as db:
+    with closing(sqlite3.connect(configuration['db_path'], detect_types=sqlite3.PARSE_DECLTYPES)) as db:
         cur = db.cursor()
-        cur.execute('SELECT task_id FROM submissions WHERE team_name = ? AND correct = 1', (team_name,))
+        cur.execute(
+            'SELECT task_id, time, points FROM submissions WHERE team_name = ? AND correct = 1',
+            (team_name,)
+        )
         solves = cur.fetchall()
-    return [i[0] for i in solves]
+    return {i[0]: (i[1], i[2]) for i in solves}
 
 
 def get_team_basic_info(team_name):

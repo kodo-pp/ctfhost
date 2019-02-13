@@ -136,6 +136,29 @@ class TasksHandler(tornado.web.RequestHandler):
         current_team = team.read_team(session.username)
         self.write(render_template('tasks.html', session=session, tasks=task_list, team=current_team))
 
+class TeamProfileHandler(tornado.web.RequestHandler):
+    def get(self):
+        session_id = self.get_cookie('session_id')
+        session = auth.load_session(session_id)
+        if session is None:
+            self.redirect('/login')
+            return
+        target_team_name = self.get_argument('team', None)
+        if target_team_name is None:
+            self.clear()
+            self.set_status(404)
+            self.finish(render_template('team_profile_404.html', session=session))
+            return
+        try:
+            target_team = team.read_team(target_team_name)
+        except BaseException:
+            self.clear()
+            self.set_status(404)
+            self.finish(render_template('team_profile_404.html', session=session))
+            return
+
+        self.write(render_template('team_profile.html', session=session, team=target_team, tasks_module=tasks))
+
 class FaviconHandler(tornado.web.RequestHandler):
     def get(self):
         self.redirect('/static/favicon.png', permanent=True)
@@ -151,6 +174,7 @@ def make_app():
         (r'/auth', AuthHandler),
         (r'/reg', RegHandler),
         (r'/tasks', TasksHandler),
+        (r'/team_profile', TeamProfileHandler),
         (r'/favicon.ico', FaviconHandler),
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': './static'})
     ], debug=True)
