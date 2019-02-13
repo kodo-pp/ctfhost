@@ -3,7 +3,9 @@ import json
 import os
 import re
 import shutil
+import time
 from contextlib import closing
+from threading import Lock
 
 from loguru import logger
 
@@ -13,9 +15,15 @@ from api import api, GUEST, USER, ADMIN, ApiArgumentError
 from localization import lc
 
 
+last_solves = {}
+last_solves_lock = Lock()
+
+
 class TaskNotFoundError(Exception):
-    def __init__(self, *a):
-        super().__init__(*a)
+    pass
+
+class TooFrequentSubmissions(Exception):
+    pass
 
 
 def check_flag_with_program(prog, flag):
@@ -58,7 +66,14 @@ class Task:
             'flags':   self.flags,
         }
 
-    def check_flag(self, flag):
+    def check_flag(self, flag, team_name):
+        now = time.time()
+        global last_solves, last_solves_lock
+        with last_solves_lock:
+            if team_name in last_solves:
+                if last_solves[team_name] + configuration['min_submission_interval'] > now:
+                    raise TooFrequentSubmissions()
+            last_solves[team_name] = now
         for flag_checker in self.flags:
             fc_type = flag_checker['type']
             fc_data = flag_checker['data']
@@ -188,8 +203,18 @@ def api_submit_flag(api, sess, args):
         task = read_task(task_id)
     except TaskNotFoundError:
         raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
-    
-    correct = bool(task.check_flag(flag_data))
+
+    try:
+        correct = bool(task.check_flag(flag_data, team_name=sess.username))
+    except TooFrequentSubmissions:
+        logger.warning('Too frequent submissions from team {} for task with ID {}', sess.username, task_id)
+        http.write(json.dumps({
+            'success': False,
+            'error_message': lc.get('task_submission_too_frequent').format(
+                time=configuration['min_submission_interval']
+            )
+        }))
+        return
 
     try:
         team.add_submission(
