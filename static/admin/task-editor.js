@@ -14,6 +14,11 @@ function open_task_editor(task_id, text, title, value, labels, loaded_flags)
     if (overlay.classList.contains('task-editor-active')) {
         throw new Error('Another task editor is already active');
     }
+
+    let container = document.getElementById('task-editor-flags');
+    container.innerHTML = '';
+    flags = {};
+    flagno = 0;
     
     overlay.classList.add('task-editor-active');
 
@@ -139,9 +144,9 @@ function add_flag()
     <div class="w3-row-padding" id="flag##no##">
         <div class="w3-col s4 m4 l4">
             <select id="flag_type##no##" onchange="update_flagtype_internal(##no##)" class="w3-input w3-border">
-                <option value="string">${lc_messages['lc_flagtype_string']}</option>
-                <option value="regex">${lc_messages['lc_flagtype_regex']}</option>
-                <option value="program">${lc_messages['lc_flagtype_program']}</option>
+                <option value="string">${locale_messages['flagtype_string']}</option>
+                <option value="regex">${locale_messages['flagtype_regex']}</option>
+                <option value="program">${locale_messages['flagtype_program']}</option>
             </select>
         </div>
         <div class="w3-col s6 m6 l6">
@@ -152,7 +157,7 @@ function add_flag()
                    style="font-family: monospace;">
         </div>
         <div class="w3-col s2 m2 l2">
-            <a class="w3-button w3-red" href="javascript:delete_flag(##no##)">${lc_messages['lc_delete_flag']}</a>
+            <a class="w3-button w3-red" href="javascript:delete_flag(##no##)">${locale_messages['delete_flag']}</a>
         </div>
     </div>
     `

@@ -1,14 +1,17 @@
 <!doctype html>
-<html lang="{{ lc_lang_code }}" dir="ltr">
+<html lang="{{ lc['lang_code'] }}" dir="ltr">
     <head>
         <link rel="shortcut icon" href="/static/favicon.png">
         <link rel="stylesheet" href="/static/w3css/w3.css">
         <link rel="stylesheet" href="/static/ctfhost-common.css">
         <link rel="stylesheet" href="/static/task-editor.css">
+        <script>
+            locale_messages = {% raw str(lc) %}; /* should work */
+        </script>
         <script src="/static/admin/task-editor.js"></script>
         <script src="/static/http-request.js"></script>
         <meta charset="utf-8">
-        <title>{{ conf_ctfname }} - {{ lc_admin_page }}</title>
+        <title>{{ conf['ctfname'] }} - {{ lc['admin_page'] }}</title>
         <script>
             function select_tab(tab_name)
             {
@@ -70,13 +73,14 @@
                         open_task_editor(task_id, text, title, value, labels, loaded_flags);
                     } catch (e) {
                         error_message(e.message);
+                        throw e;
                     }
                 }, 0);
             }
 
             function delete_task(task_id)
             {
-                if (!confirm('{{ lc_confirm_task_deletion }}')) {
+                if (!confirm('{{ lc['confirm_task_deletion'] }}')) {
                     return false;
                 }
 
@@ -96,15 +100,8 @@
 
             function error_message(msg)
             {
-                let error_message = '{{ lc_error }}: ' + msg;
+                let error_message = '{{ lc['error'] }}: ' + msg;
                 alert(error_message);
-            }
-
-            lc_messages = {
-                'lc_flagtype_string':  '{{ lc_flagtype_string }}',
-                'lc_flagtype_regex':   '{{ lc_flagtype_regex }}',
-                'lc_flagtype_program': '{{ lc_flagtype_program }}',
-                'lc_delete_flag':      '{{ lc_delete_flag }}',
             }
 
             window.addEventListener('load', setup_tabs);
@@ -113,73 +110,73 @@
     <body>
         <div id="task-editor-overlay">
             <div id="task-editor-box">
-                <h3>{{ lc_task_editor }}</h3>
+                <h3>{{ lc['task_editor'] }}</h3>
                 <input type="hidden" id="task-editor-taskid-input">
                 <p>
-                    <label for="task-editor-title-input">{{ lc_taskeditor_title }}</label>
+                    <label for="task-editor-title-input">{{ lc['taskeditor_title'] }}</label>
                     <input
                         type="text"
                         id="task-editor-title-input"
-                        placeholder="{{ lc_taskeditor_title }}"
+                        placeholder="{{ lc['taskeditor_title'] }}"
                         class="w3-input w3-border"
                         required
                     >
                 </p>
                 <p>
-                    <label for="task-editor-value-input">{{ lc_taskeditor_value }}</label>
+                    <label for="task-editor-value-input">{{ lc['taskeditor_value'] }}</label>
                     <input
                         type="number"
                         step=1
                         id="task-editor-value-input"
-                        placeholder="{{ lc_taskeditor_value }}"
+                        placeholder="{{ lc['taskeditor_value'] }}"
                         class="w3-input w3-border"
                         pattern="[1-9][0-9]*"
                         required
                     >
                 </p>
                 <p>
-                    <label for="task-editor-labels-input">{{ lc_taskeditor_labels }}</label>
+                    <label for="task-editor-labels-input">{{ lc['taskeditor_labels'] }}</label>
                     <input
                         type="text"
                         id="task-editor-labels-input"
-                        placeholder="{{ lc_taskeditor_labels }}"
+                        placeholder="{{ lc['taskeditor_labels'] }}"
                         class="w3-input w3-border"
                     >
                 </p>
                 <p>
-                    <label for="task-editor-text-input">{{ lc_taskeditor_text }}</label>
+                    <label for="task-editor-text-input">{{ lc['taskeditor_text'] }}</label>
                     <textarea id="task-editor-text-input" class="w3-input w3-border">
                     </textarea>
                 </p>
-                <p>{{ lc_flags }}</p>
+                <p>{{ lc['flags'] }}</p>
                 <div id="task-editor-flags"></div> <!-- Filled by task-editor.js -->
                 <p>
-                    <a href="javascript:add_flag()" class="w3-button w3-green">{{ lc_add_flag }}</a>
+                    <a href="javascript:add_flag()" class="w3-button w3-green">{{ lc['add_flag'] }}</a>
                 </p>
                 <p>
-                    <a id="task-editor-cancel-button" class="w3-button w3-red">{{ lc_taskeditor_cancel }}</a>
-                    <a id="task-editor-submit-button" class="w3-button w3-green">{{ lc_taskeditor_submit }}</a>
+                    <a id="task-editor-cancel-button" class="w3-button w3-red">{{ lc['taskeditor_cancel'] }}</a>
+                    <a id="task-editor-submit-button" class="w3-button w3-green">{{ lc['taskeditor_submit'] }}</a>
                 </p>
             </div>
         </div>
         <div class="w3-bar w3-dark-grey">
-            <a class="w3-bar-item w3-button" href="/">{{ lc_home_page }}</a>
-            <a class="w3-bar-item w3-button" href="/tasks">{{ lc_tasks }}</a>
-            <span class="w3-bar-item w3-green">{{ lc_admin_page }}</span>
-            <a class="w3-bar-item w3-button w3-right" href="/lout">{{ lc_logout }}</a>
-            <span class="w3-bar-item w3-light-grey w3-right">{{ lc_signed_in_as.format(session.username) }}</span>
+            <a class="w3-bar-item w3-button" href="/">{{ lc['home_page'] }}</a>
+            <a class="w3-bar-item w3-button" href="/tasks">{{ lc['tasks'] }}</a>
+            <span class="w3-bar-item w3-green">{{ lc['admin_page'] }}</span>
+            <a class="w3-bar-item w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
+            <span class="w3-bar-item w3-light-grey w3-right">{{ lc['signed_in_as'].format(session.username) }}</span>
         </div>
         <div class="w3-container">
-            <h1>{{ lc_admin_page }}</h1>
+            <h1>{{ lc['admin_page'] }}</h1>
             <div class="w3-bar w3-dark-grey" id="tabset">
-                <span class="w3-bar-item w3-button" id="tab-tasks">{{ lc_admintab_tasks }}</span>
-                <span class="w3-bar-item w3-button" id="tab-teams">{{ lc_admintab_teams }}</span>
+                <span class="w3-bar-item w3-button" id="tab-tasks">{{ lc['admintab_tasks'] }}</span>
+                <span class="w3-bar-item w3-button" id="tab-teams">{{ lc['admintab_teams'] }}</span>
             </div>
             <div id="tabcontents">
                 <div class="w3-container hidden" id="tabcontent-tasks">
-                    <h2>{{ lc_admintab_tasks }}</h2>
+                    <h2>{{ lc['admintab_tasks'] }}</h2>
                     <p>
-                        <a class="w3-button w3-green" href="javascript:edit_task(null)">{{ lc_admin_task_add }}</a>
+                        <a class="w3-button w3-green" href="javascript:edit_task(null)">{{ lc['admin_task_add'] }}</a>
                     </p>
                     {% for task in tasks.get_task_list() %}
                         <p>
@@ -189,18 +186,18 @@
                                     <a
                                         class="w3-button w3-blue"
                                         onclick="edit_task({{ task.task_id }})"
-                                    >{{ lc_admin_task_edit }}</a>
+                                    >{{ lc['admin_task_edit'] }}</a>
                                     <a
                                         class="w3-button w3-red"
                                         onclick="delete_task({{ task.task_id }})"
-                                    >{{ lc_admin_task_delete }}</a>
+                                    >{{ lc['admin_task_delete'] }}</a>
                                 </p>
                             </div>
                         </p>
                     {% end %}
                 </div>
                 <div class="w3-container hidden" id="tabcontent-teams">
-                    <h2>{{ lc_admintab_teams }}</h2>
+                    <h2>{{ lc['admintab_teams'] }}</h2>
                 </div>
             </div>
         </div>

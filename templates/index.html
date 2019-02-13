@@ -1,29 +1,29 @@
 <!doctype html>
-<html lang="{{ lc_lang_code }}" dir="ltr">
+<html lang="{{ lc['lang_code'] }}" dir="ltr">
     <head>
         <link rel="shortcut icon" href="/static/favicon.png">
         <link rel="stylesheet" href="/static/w3css/w3.css">
         <link rel="stylesheet" href="/static/ctfhost-common.css">
         <meta charset="utf-8">
-        <title>{{ conf_ctfname }} - {{ lc_home_page }}</title>
+        <title>{{ conf['ctfname'] }} - {{ lc['home_page'] }}</title>
     </head>
     <body>
         <div class="w3-bar w3-dark-grey">
-            <span class="w3-bar-item w3-green">{{ lc_home_page }}</span>
+            <span class="w3-bar-item w3-green">{{ lc['home_page'] }}</span>
             {% if session is not None %}
-                <a class="w3-bar-item w3-button" href="/tasks">{{ lc_tasks }}</a>
+                <a class="w3-bar-item w3-button" href="/tasks">{{ lc['tasks'] }}</a>
                 {% if session.is_admin %}
-                    <a class="w3-bar-item w3-button" href="/admin">{{ lc_admin_page }}</a>
+                    <a class="w3-bar-item w3-button" href="/admin">{{ lc['admin_page'] }}</a>
                 {% end %}
-                <a class="w3-bar-item w3-button w3-right" href="/lout">{{ lc_logout }}</a>
-                <span class="w3-bar-item w3-light-grey w3-right">{{ lc_signed_in_as.format(session.username) }}</span>
+                <a class="w3-bar-item w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
+                <span class="w3-bar-item w3-light-grey w3-right">{{ lc['signed_in_as'].format(session.username) }}</span>
             {% else %}
-                <a class="w3-bar-item w3-button" href="/login">{{ lc_signin }}</a>
-                <a class="w3-bar-item w3-button" href="/signup">{{ lc_signup }}</a>
+                <a class="w3-bar-item w3-button" href="/login">{{ lc['signin'] }}</a>
+                <a class="w3-bar-item w3-button" href="/signup">{{ lc['signup'] }}</a>
             {% end %}
         </div>
         <div class="w3-container">
-            <h1>{% raw conf_welcome_message.format(ctf_name=conf_ctfname) %}</h1>
+            <h1>{% raw conf['welcome_message'].format(ctf_name=conf['ctfname']) %}</h1>
         </div>
     </body>
 </html>

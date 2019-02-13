@@ -13,7 +13,6 @@ template_loader = None
 def render_template(template_name, **kwargs):
     global template_loader
     if template_loader is None or True:
+        # XXX: enable template caching
         template_loader = Loader('templates')
-    prefixed_lc = dict([('lc_' + k, v) for k, v in lc.get_dict().items()])
-    prefixed_conf = dict([('conf_' + k, v) for k, v in conf.configuration.items()])
-    return template_loader.load(template_name).generate(**kwargs, **prefixed_lc, **prefixed_conf)
+    return template_loader.load(template_name).generate(**kwargs, lc=lc.get_dict(), conf=conf.configuration)

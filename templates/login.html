@@ -1,38 +1,38 @@
 <!doctype html>
-<html lang="{{ lc_lang_code }}">
+<html lang="{{ lc['lang_code'] }}">
     <head>
         <link rel="shortcut icon" href="/static/favicon.png">
         <link rel="stylesheet" href="/static/w3css/w3.css">
         <link rel="stylesheet" href="/static/ctfhost-common.css">
         <meta charset="utf-8">
-        <title>{{ conf_ctfname }} - {{ lc_signin }}</title>
+        <title>{{ conf['ctfname'] }} - {{ lc['signin'] }}</title>
     </head>
 
     <body>
         <div class="w3-bar w3-dark-grey">
-            <a class="w3-bar-item w3-button" href="/">{{ lc_home_page }}</a>
-            <span class="w3-bar-item w3-green">{{ lc_signin }}</span>
-            <a class="w3-bar-item w3-button" href="/signup">{{ lc_signup }}</a>
+            <a class="w3-bar-item w3-button" href="/">{{ lc['home_page'] }}</a>
+            <span class="w3-bar-item w3-green">{{ lc['signin'] }}</span>
+            <a class="w3-bar-item w3-button" href="/signup">{{ lc['signup'] }}</a>
         </div>
         <div class="w3-container">
             <h1>
-                {{ conf_ctfname }} - {{ lc_signin }}
+                {{ conf['ctfname'] }} - {{ lc['signin'] }}
             </h1>
         </div>
         <form action="/auth" method="POST" class="w3-container">
             <p>
-                <label for="input-username">{{ lc_username }}</label>
-                <input type="text" class="w3-input w3-border" id="input-username" name="username" placeholder="{{ lc_username }}">
+                <label for="input-username">{{ lc['username'] }}</label>
+                <input type="text" class="w3-input w3-border" id="input-username" name="username" placeholder="{{ lc['username'] }}">
             </p>
             <p>
-                <label for="input-password">{{ lc_password }}</label>
-                <input type="password" class="w3-input w3-border" id="input-password" name="password" placeholder="{{ lc_password }}">
+                <label for="input-password">{{ lc['password'] }}</label>
+                <input type="password" class="w3-input w3-border" id="input-password" name="password" placeholder="{{ lc['password'] }}">
             </p>
             <p>
-                <input type="submit" class="w3-btn w3-green" value="{{ lc_signin }}">
+                <input type="submit" class="w3-btn w3-green" value="{{ lc['signin'] }}">
             </p>
             <p>
-                <a href="/signup">{{ lc_maybe_signup }}</a>
+                <a href="/signup">{{ lc['maybe_signup'] }}</a>
             </p>
         </form>
     </body>

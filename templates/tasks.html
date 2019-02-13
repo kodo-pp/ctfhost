@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="{{ lc_lang_code }}" dir="ltr">
+<html lang="{{ lc['lang_code'] }}" dir="ltr">
     <head>
         <link rel="shortcut icon" href="/static/favicon.png">
         <link rel="stylesheet" href="/static/w3css/w3.css">
         <link rel="stylesheet" href="/static/ctfhost-common.css">
         <meta charset="utf-8">
-        <title>{{ conf_ctfname }} - {{ lc_tasks }}</title>
+        <title>{{ conf['ctfname'] }} - {{ lc['tasks'] }}</title>
         <script src="/static/http-request.js"></script>
         <script>
             function toggle_task(task_id)
@@ -22,11 +22,11 @@
                 if (inner.classList.contains('hidden')) {
                     toggle_btn.classList.remove('w3-green');
                     toggle_btn.classList.add('w3-grey');
-                    toggle_btn.innerHTML = '{{ lc_task_hide }}';
+                    toggle_btn.innerHTML = '{{ lc['task_hide'] }}';
                 } else {
                     toggle_btn.classList.remove('w3-grey');
                     toggle_btn.classList.add('w3-green');
-                    toggle_btn.innerHTML = '{{ lc_task_show }}';
+                    toggle_btn.innerHTML = '{{ lc['task_show'] }}';
                 }
 
                 inner.classList.toggle('hidden');
@@ -42,29 +42,29 @@
                         'flag': flag
                     }));
                 } catch (e) {
-                    alert('{{ lc_error }}: ' + e.message);
+                    alert('{{ lc['error'] }}: ' + e.message);
                     return;
                 }
                 if (result.flag_correct) {
                     location.reload();
                 } else {
-                    alert('{{ lc_incorrect_flag }}');
+                    alert('{{ lc['incorrect_flag'] }}');
                 }
             }
         </script>
     </head>
     <body>
         <div class="w3-bar w3-dark-grey">
-            <a class="w3-bar-item w3-button" href="/">{{ lc_home_page }}</a>
-            <span class="w3-bar-item w3-green">{{ lc_tasks }}</span>
+            <a class="w3-bar-item w3-button" href="/">{{ lc['home_page'] }}</a>
+            <span class="w3-bar-item w3-green">{{ lc['tasks'] }}</span>
             {% if session.is_admin %}
-                <a class="w3-bar-item w3-button" href="/admin">{{ lc_admin_page }}</a>
+                <a class="w3-bar-item w3-button" href="/admin">{{ lc['admin_page'] }}</a>
             {% end %}
-            <a class="w3-bar-item w3-button w3-right" href="/lout">{{ lc_logout }}</a>
-            <span class="w3-bar-item w3-light-grey w3-right">{{ lc_signed_in_as.format(session.username) }}</span>
+            <a class="w3-bar-item w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
+            <span class="w3-bar-item w3-light-grey w3-right">{{ lc['signed_in_as'].format(session.username) }}</span>
         </div>
         <div class="w3-container">
-            <h1>{{ lc_tasks }}</h1>
+            <h1>{{ lc['tasks'] }}</h1>
             {% for task in tasks %}
                 <p>
                 <div class="w3-container w3-light-grey">
@@ -76,7 +76,7 @@
                         href="javascript:toggle_task({{ task.task_id }});"
                         class="w3-button w3-green"
                         id="task-id{{ task.task_id }}-toggle-btn"
-                    >{{ lc_task_show }}</a></p>
+                    >{{ lc['task_show'] }}</a></p>
                     <div id="task-id{{ task.task_id }}-inner" class="hidden">
                         <p>{{ task.text }}</p>
                         <p>
@@ -85,14 +85,14 @@
                                     type="text"
                                     class="w3-input w3-border ctfhost-combo-input-text"
                                     id="flag-input-id{{ task.task_id }}"
-                                    placeholder="{{ lc_input_flag }}"
+                                    placeholder="{{ lc['input_flag'] }}"
                                     style="font-family: monospace"
                                 >
                                 <input
                                     type="button"
                                     class="w3-input w3-green w3-button ctfhost-combo-input-submit"
                                     onclick="submit_flag({{ task.task_id }});"
-                                    value="{{ lc_submit_flag }}"
+                                    value="{{ lc['submit_flag'] }}"
                                 >
                             </form>
                         </p>
