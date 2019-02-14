@@ -169,6 +169,21 @@
                 }
             }
 
+            function rename_group(group_id)
+            {
+                let new_name = document.getElementById(`rename-group-name${parent_id}`).value;
+                let data = {
+                    'group_id': group_id,
+                    'new_name': new_name
+                };
+                try {
+                    make_http_request('/api/rename_group', JSON.stringify(data));
+                    location.reload();
+                } catch (e) {
+                    error_message(e.message);
+                }
+            }
+
             function setup_group_parents()
             {
                 {% for group in tasks.get_group_list() %}

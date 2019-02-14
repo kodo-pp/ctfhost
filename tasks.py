@@ -211,7 +211,7 @@ def api_add_or_update_task(api, sess, args):
 
 
 def api_add_group(api, sess, args):
-    http = args['http_handler']
+    http    = args['http_handler']
     request = json.loads(http.request.body)
     name    = request['name']
     parent  = request['parent']
@@ -219,6 +219,18 @@ def api_add_group(api, sess, args):
     group_id = allocate_group_id()
 
     logger.info('Creating group {} ({})', name, group_id)
+    write_group(group_id, {'name': name, 'parent': parent})
+    http.write(json.dumps({'success': True}))
+
+
+def api_rename_group(api, sess, args):
+    http     = args['http_handler']
+    request  = json.loads(http.request.body)
+    group_id = request['group_id']
+    new_name = request['new_name']
+
+    logger.info('Renaming group ({}) to {}', group_id, new_name)
+    # XXX: STOPPED HERE
     write_group(group_id, {'name': name, 'parent': parent})
     http.write(json.dumps({'success': True}))
 
@@ -419,3 +431,4 @@ api.add('delete_task',        api_delete_task,        access_level=ADMIN)
 api.add('get_task',           api_get_task,           access_level=USER)
 api.add('submit_flag',        api_submit_flag,        access_level=USER)
 api.add('add_group',          api_add_group,          access_level=ADMIN)
+api.add('rename_group',       api_rename_group,       access_level=ADMIN)
