@@ -258,45 +258,46 @@
                         {{ lc['register_new_team'] }}
                     </a>
                     {% for team in teams %}
-                        <h3>{{ team.full_name }}</h3>
-                        <p><strong>{{ lc['nickname'] }}</strong>: {{ team.team_name }}</p>
-                        <p><a
-                            class="w3-button w3-blue"
-                            href="/team_profile?team={{ team.team_name }}"
-                        >{{ lc['view_profile'] }}</a></p>
-                        <div class="w3-row">
-                            <div class="w3-col s10 m10 w10">
-                                <input
-                                    type="password"
-                                    placeholder="{{ lc['new_password'] }}"
-                                    class="w3-input w3-border"
-                                    id="new-password-{{ team.team_name }}"
-                                >
+                        <div class="w3-light-grey w3-container" style="margin: 10px 0px 10px 0px">
+                            <h3>{{ team.full_name }}</h3>
+                            <p><strong>{{ lc['nickname'] }}</strong>: {{ team.team_name }}</p>
+                            <p><a
+                                class="w3-button w3-blue"
+                                href="/team_profile?team={{ team.team_name }}"
+                            >{{ lc['view_profile'] }}</a></p>
+                            <div class="w3-row">
+                                <div class="w3-col s10 m10 w10">
+                                    <input
+                                        type="password"
+                                        placeholder="{{ lc['new_password'] }}"
+                                        class="w3-input w3-border"
+                                        id="new-password-{{ team.team_name }}"
+                                    >
+                                </div>
+                                <div class="w3-col s2 m2 w2">
+                                    <a
+                                        class="w3-button w3-green"
+                                        href="javascript:change_password('{{ team.team_name }}')"
+                                    >
+                                        {{ lc['change_password'] }}
+                                    </a>
+                                </div>
                             </div>
-                            <div class="w3-col s2 m2 w2">
+                            <p>
                                 <a
-                                    class="w3-button w3-green"
-                                    href="javascript:change_password('{{ team.team_name }}')"
+                                    class="w3-button w3-red"
+                                    href="javascript:delete_team('{{ team.team_name }}')"
                                 >
-                                    {{ lc['change_password'] }}
+                                    {{ lc['delete_team'] }}
                                 </a>
-                            </div>
+                                <a
+                                    class="w3-button w3-deep-orange"
+                                    href="javascript:logout_team('{{ team.team_name }}')"
+                                >
+                                    {{ lc['logout_team'] }}
+                                </a>
+                            </p>
                         </div>
-                        <p>
-                            <a
-                                class="w3-button w3-red"
-                                href="javascript:delete_team('{{ team.team_name }}')"
-                            >
-                                {{ lc['delete_team'] }}
-                            </a>
-                            <a
-                                class="w3-button w3-deep-orange"
-                                href="javascript:logout_team('{{ team.team_name }}')"
-                            >
-                                {{ lc['logout_team'] }}
-                            </a>
-                        </p>
-                        <hr>
                     {% end %}
                 </div>
                 <div class="w3-container hidden" id="tabcontent-submissions">
