@@ -153,8 +153,31 @@
                     error_message(e.message);
                 }
             }
+            
+            function add_group(parent_id)
+            {
+                let name = document.getElementById(`add-group-name${parent_id}`).value;
+                let data = {
+                    'parent': parent_id,
+                    'name': name
+                };
+                try {
+                    make_http_request('/api/add_group', JSON.stringify(data));
+                    location.reload();
+                } catch (e) {
+                    error_message(e.message);
+                }
+            }
+
+            function setup_group_parents()
+            {
+                {% for group in tasks.get_group_list() %}
+                    document.getElementById('group-parent{{ group['group_id'] }}').value = {{ group['parent'] }};
+                {% end %}
+            }
 
             window.addEventListener('load', setup_tabs);
+            window.addEventListener('load', setup_group_parents);
         </script>
     </head>
     <body>
@@ -196,14 +219,11 @@
                 <p>
                     <label for="task-editor-groupname-input">{{ lc['taskeditor_group'] }}</label>
                     <select id="task-editor-groupname-input" class="w3-input w3-border">
-                        <option id="task-editor-group-opt-0" value="0">
+                        <option value="0">
                             {{ lc['root_group'] }}
                         </option>
                         {% for group in tasks.get_group_list() %}
-                            <option
-                                id="task-editor-group-opt-{{ group['group_id'] }}"
-                                value="{{ group['group_id'] }}"
-                            >
+                            <option value="{{ group['group_id'] }}">
                                 {{ group['name'] }}
                             </option>
                         {% end %}
@@ -247,6 +267,100 @@
             </div>
             <div id="tabcontents">
                 <div class="w3-container hidden" id="tabcontent-tasks">
+                    <h2>{{ lc['admintab_groups'] }}</h2>
+                    <p>
+                    <div class="w3-row-padding">
+                        <div class="w3-col s9 m9 l9">
+                            <input
+                                type="text"
+                                id="add-group-name0"
+                                class="w3-input w3-border"
+                                placeholder="{{ lc['group_name'] }}">
+                        </div>
+                        <div class="w3-col s3 m3 l3">
+                            <a
+                                class="w3-button w3-green block"
+                                href="javascript:add_group(0)"
+                            >
+                                {{ lc['add_group'] }}
+                            </a>
+                        </div>
+                    </div>
+                    </p>
+                    {% for group in tasks.get_group_list() %}
+                        <p>
+                        <div class="w3-container w3-light-grey" style="padding-bottom: 10px;">
+                            <h3>{{ group['name'] }}</h3>
+                            <p>
+                            <div class="w3-row-padding">
+                                <div class="w3-col s8 m8 l8">
+                                    <input
+                                        type="text"
+                                        id="add-group-name{{ group['group_id'] }}"
+                                        class="w3-input w3-border"
+                                        placeholder="{{ lc['group_name'] }}">
+                                    </div>
+                                <div class="w3-col s4 m4 l4">
+                                    <a
+                                        class="w3-button w3-green block"
+                                        href="javascript:add_group({{ group['group_id'] }})"
+                                    >
+                                        {{ lc['add_subgroup'] }}
+                                    </a>
+                                </div>
+                            </div>
+                            </p>
+                            <p>
+                            <div class="w3-row-padding">
+                                <div class="w3-col s8 m8 l8">
+                                    <input
+                                        type="text"
+                                        id="rename-group-name{{ group['group_id'] }}"
+                                        class="w3-input w3-border"
+                                        placeholder="{{ lc['group_new_name'] }}">
+                                </div>
+                                <div class="w3-col s4 m4 l4">
+                                    <a
+                                        class="w3-button w3-green block"
+                                        href="javascript:rename_group({{ group['group_id'] }})"
+                                    >
+                                        {{ lc['rename_group'] }}
+                                    </a>
+                                </div>
+                            </div>
+                            </p>
+                            <p>{{ lc['parent_group'] }}</p>
+                            <div class="w3-row-padding">
+                                <div class="w3-col s8 m8 l8">
+                                    <select
+                                        class="w3-input w3-border"
+                                        id="group-parent{{ group['group_id'] }}"
+                                    >
+                                        <option value="0">
+                                            {{ lc['root_group'] }}
+                                        </option>
+                                        {% for parent in tasks.get_group_list() %}
+                                            {% if group['group_id'] != parent['group_id'] %}
+                                                <option value="{{ parent['group_id'] }}">
+                                                    {{ parent['name'] }}
+                                                </option>
+                                            {% end %}
+                                        {% end %}
+                                    </select>
+                                </div>
+                                <div class="w3-col s4 m4 l4">
+                                    <a
+                                        href="javascript:update_group_parent({{ group['group_id'] }})"
+                                        class="w3-button w3-green block"
+                                    >
+                                        {{ lc['update_group_parent'] }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        </p>
+                    {% end %}
+                    <hr>
                     <h2>{{ lc['admintab_tasks'] }}</h2>
                     <p>
                         <a class="w3-button w3-green" href="javascript:edit_task(null)">
@@ -254,21 +368,19 @@
                         </a>
                     </p>
                     {% for task in tasks.get_task_list() %}
-                        <p>
-                            <div class="w3-container w3-light-grey">
-                                <p>{{ task.title }} [{{ task.value }}]</p>
-                                <p>
-                                    <a
-                                        class="w3-button w3-blue"
-                                        onclick="edit_task({{ task.task_id }})"
-                                    >{{ lc['admin_task_edit'] }}</a>
-                                    <a
-                                        class="w3-button w3-red"
-                                        onclick="delete_task({{ task.task_id }})"
-                                    >{{ lc['admin_task_delete'] }}</a>
-                                </p>
-                            </div>
-                        </p>
+                        <div class="w3-container w3-light-grey" style="margin: 10px 0 10px 0;">
+                            <p>{{ task.title }} [{{ task.value }}]</p>
+                            <p>
+                                <a
+                                    class="w3-button w3-blue"
+                                    onclick="edit_task({{ task.task_id }})"
+                                >{{ lc['admin_task_edit'] }}</a>
+                                <a
+                                    class="w3-button w3-red"
+                                    onclick="delete_task({{ task.task_id }})"
+                                >{{ lc['admin_task_delete'] }}</a>
+                            </p>
+                        </div>
                     {% end %}
                 </div>
                 <div class="w3-container hidden" id="tabcontent-teams">

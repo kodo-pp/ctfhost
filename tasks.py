@@ -22,6 +22,9 @@ last_solves_lock = Lock()
 class TaskNotFoundError(Exception):
     pass
 
+class GroupNotFoundError(Exception):
+    pass
+
 class TooFrequentSubmissions(Exception):
     pass
 
@@ -207,6 +210,19 @@ def api_add_or_update_task(api, sess, args):
     http.write(json.dumps({'success': True}))
 
 
+def api_add_group(api, sess, args):
+    http = args['http_handler']
+    request = json.loads(http.request.body)
+    name    = request['name']
+    parent  = request['parent']
+
+    group_id = allocate_group_id()
+
+    logger.info('Creating group {} ({})', name, group_id)
+    write_group(group_id, {'name': name, 'parent': parent})
+    http.write(json.dumps({'success': True}))
+
+
 def api_get_task(api, sess, args):
     http = args['http_handler']
     request = json.loads(http.request.body)
@@ -375,7 +391,31 @@ def write_task(task):
         f.write(json.dumps(obj))
 
 
+def read_group(group_id):
+    assert type(group_id) is int
+    group_dir = os.path.join(configuration['groups_path'], str(group_id))
+    group_file = os.path.join(group_dir, 'group.json')
+    try:
+        with open(group_file) as f:
+            group_str = f.read()
+        group = json.loads(group_str)
+        group['group_id'] = group_id
+        return group
+    except FileNotFoundError:
+        raise GroupNotFoundError(group_id)
+
+
+def write_group(group_id, group_dict):
+    assert type(group_id) is int
+    group_dir = os.path.join(configuration['groups_path'], str(group_id))
+    os.makedirs(group_dir, exist_ok=True)
+    group_file = os.path.join(group_dir, 'group.json')
+    with open(group_file, 'w') as f:
+        f.write(json.dumps(group_dict))
+
+
 api.add('add_or_update_task', api_add_or_update_task, access_level=ADMIN)
 api.add('delete_task',        api_delete_task,        access_level=ADMIN)
 api.add('get_task',           api_get_task,           access_level=USER)
 api.add('submit_flag',        api_submit_flag,        access_level=USER)
+api.add('add_group',          api_add_group,          access_level=ADMIN)
