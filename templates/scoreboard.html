@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="{{ lc['lang_code'] }}" dir="ltr">
+    <head>
+        <link rel="shortcut icon" href="/static/favicon.png">
+        <link rel="stylesheet" href="/static/w3css/w3.css">
+        <link rel="stylesheet" href="/static/ctfhost-common.css">
+        <meta charset="utf-8">
+        <title>{{ conf['ctfname'] }} - {{ lc['scoreboard'] }}</title>
+    </head>
+    <body>
+        <div class="w3-bar w3-dark-grey">
+            <a class="w3-bar-item w3-button" href="/">{{ lc['home_page'] }}</a>
+            <a class="w3-bar-item w3-button" href="/tasks">{{ lc['tasks'] }}</a>
+            <a class="w3-bar-item w3-button" href="/team_profile?team={{ session.username }}">
+                {{ lc['team_profile'] }}
+            </a>
+            <span class="w3-bar-item w3-green">{{ lc['scoreboard'] }}</span>
+            {% if session.is_admin %}
+                <a class="w3-bar-item w3-button" href="/admin">{{ lc['admin_page'] }}</a>
+            {% end %}
+            <a class="w3-bar-item w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
+            <span class="w3-bar-item w3-light-grey w3-right">
+                {{ lc['signed_in_as'].format(session.username) }}
+            </span>
+        </div>
+        <div class="w3-container" style="overflow: auto;">
+            <h1>{{ lc['scoreboard'] }}</h1>
+            <table class="w3-table w3-border w3-bordered">
+                <tr>
+                    <th>{{ lc['scoreboard_position'] }}</th>
+                    <th>{{ lc['team_name'] }}</th>
+                    <th>{{ lc['points'] }}</th>
+                    {% for task in task_list %}
+                        <th class="w3-center">{{ task.title }}</th>
+                    {% end %}
+                </tr>
+                {% for i, team in enumerate(sorted(team_list, key = lambda t: -t.points)) %}
+                    <tr>
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ team.full_name }}</td>
+                        <td>{{ team.points }}</td>
+                        {% for task in task_list %}
+                            {% if task.task_id in team.solves %}
+                                <td class="w3-pale-green w3-text-green w3-center">+</td>
+                            {% else %}
+                                <td class="w3-pale-red w3-text-red w3-center">-</td>
+                            {% end %}
+                        {% end %}
+                    </tr>
+                {% end %}
+            </ul>
+        </div>
+    </body>
+</html>

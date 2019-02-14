@@ -98,3 +98,5 @@ password_changed_successfully       = Password changed successfully
 team_logged_out_successfully        = All sessions for this teams terminated successfully
 logout_team_confirm_msg             = Do you really want to terminate all sessions for this team?
 delete_team_confirm_msg             = Do you REALLY want to DELETE this team? This will also delete its submissions
+scoreboard                          = Scoreboard
+scoreboard_position                 = #

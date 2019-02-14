@@ -205,6 +205,18 @@ class TeamProfileHandler(tornado.web.RequestHandler):
 
         self.write(render_template('team_profile.html', session=session, team=target_team, tasks_module=tasks))
 
+
+class ScoreboardHandler(tornado.web.RequestHandler):
+    def get(self):
+        session_id = self.get_cookie('session_id')
+        session = auth.load_session(session_id)
+        if session is None:
+            self.redirect('/login')
+            return
+        team_list = list(team.get_all_teams())
+        task_list = list(tasks.get_task_list())
+        self.write(render_template('scoreboard.html', session=session, team_list=team_list, task_list=task_list))
+
 class FaviconHandler(tornado.web.RequestHandler):
     def get(self):
         self.redirect('/static/favicon.png')
@@ -223,6 +235,7 @@ def make_app():
         (r'/admin_reg', AdminRegHandler),
         (r'/tasks', TasksHandler),
         (r'/team_profile', TeamProfileHandler),
+        (r'/scoreboard', ScoreboardHandler),
         (r'/favicon.ico', FaviconHandler),
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': './static'})
     ], debug=True)
