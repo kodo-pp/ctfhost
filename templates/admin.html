@@ -62,15 +62,17 @@
                         let value = null;
                         let labels = [];
                         let loaded_flags = [];
+                        let group = [];
                         if (task_id !== null) {
                             let loaded_task = load_task(task_id);
                             text = loaded_task.task.text;
                             title = loaded_task.task.title;
                             value = loaded_task.task.value;
                             labels = loaded_task.task.labels;
+                            group = loaded_task.task.group;
                             loaded_flags = loaded_task.task.flags;
                         }
-                        open_task_editor(task_id, text, title, value, labels, loaded_flags);
+                        open_task_editor(task_id, text, title, value, labels, loaded_flags, group);
                     } catch (e) {
                         error_message(e.message);
                         throw e;
@@ -190,6 +192,22 @@
                         placeholder="{{ lc['taskeditor_labels'] }}"
                         class="w3-input w3-border"
                     >
+                </p>
+                <p>
+                    <label for="task-editor-groupname-input">{{ lc['taskeditor_group'] }}</label>
+                    <select id="task-editor-groupname-input" class="w3-input w3-border">
+                        <option id="task-editor-group-opt-0" value="0">
+                            {{ lc['root_group'] }}
+                        </option>
+                        {% for group in tasks.get_group_list() %}
+                            <option
+                                id="task-editor-group-opt-{{ group['group_id'] }}"
+                                value="{{ group['group_id'] }}"
+                            >
+                                {{ group['name'] }}
+                            </option>
+                        {% end %}
+                    </select>
                 </p>
                 <p>
                     <label for="task-editor-text-input">{{ lc['taskeditor_text'] }}</label>
@@ -313,18 +331,22 @@
                             <th>{{ lc['submission_time'] }}</th>
                         </tr>
                         {% for sub in reversed(sorted(submissions, key = lambda x: x['time'])) %}
-                            <tr>
-                                <td>{{ sub['team_name'] }}</td>
-                                <td>{{ tasks.read_task(sub['task_id']).title }}</td>
-                                <td style="font-family: monospace">{{ sub['flag'] }}</td>
-                                {% if sub['is_correct'] %}
-                                    <td class="w3-text-green">{{ lc['yes'] }}</td>
-                                {% else %}
-                                    <td class="w3-text-red">{{ lc['no'] }}</td>
-                                {% end %}
-                                <td>{{ sub['points'] }}</td>
-                                <td>{{ conf['date_fmt_func'](sub['time']) }}</td>
-                            </tr>
+                            {% try %}
+                                {% set task = tasks.read_task(sub['task_id']) %}
+                                <tr>
+                                    <td>{{ sub['team_name'] }}</td>
+                                    <td>{{ task.title }}</td>
+                                    <td style="font-family: monospace">{{ sub['flag'] }}</td>
+                                    {% if sub['is_correct'] %}
+                                        <td class="w3-text-green">{{ lc['yes'] }}</td>
+                                    {% else %}
+                                        <td class="w3-text-red">{{ lc['no'] }}</td>
+                                    {% end %}
+                                    <td>{{ sub['points'] }}</td>
+                                    <td>{{ conf['date_fmt_func'](sub['time']) }}</td>
+                                </tr>
+                            {% except KeyError %}
+                            {% end %}
                         {% end %}
                     </table>
                 </div>

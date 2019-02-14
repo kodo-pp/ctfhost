@@ -10,6 +10,8 @@ DEFAULTS = {
     'value': 0,
     'labels': [],
     'flags': [],
+    'group': 0,
+    'order': 0,
 }
 
 

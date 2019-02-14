@@ -4,7 +4,7 @@ function ActionError(text)
 }
 
 
-function open_task_editor(task_id, text, title, value, labels, loaded_flags)
+function open_task_editor(task_id, text, title, value, labels, loaded_flags, group)
 {
     let overlay = document.querySelector('#task-editor-overlay');
     if (overlay === null) {
@@ -27,12 +27,14 @@ function open_task_editor(task_id, text, title, value, labels, loaded_flags)
     let in_value    = document.querySelector('#task-editor-overlay #task-editor-value-input');
     let in_text     = document.querySelector('#task-editor-overlay #task-editor-text-input');
     let in_labels   = document.querySelector('#task-editor-overlay #task-editor-labels-input');
+    let in_group    = document.querySelector('#task-editor-overlay #task-editor-groupname-input');
 
-    in_taskid.value   = task_id;
-    in_title.value    = title;
-    in_value.value    = value;
-    in_text.value     = text;
-    in_labels.value   = labels.join(' ');
+    in_taskid.value = task_id;
+    in_title.value  = title;
+    in_value.value  = value;
+    in_text.value   = text;
+    in_labels.value = labels.join(' ');
+    in_group.value  = group;
     
     let submit_button = document.querySelector('#task-editor-overlay #task-editor-submit-button');
     let cancel_button = document.querySelector('#task-editor-overlay #task-editor-cancel-button');
@@ -97,6 +99,7 @@ function task_editor_submit()
     let labels_s  = document.querySelector('#task-editor-overlay #task-editor-labels-input').value;
     let labels    = labels_s.split(' ').filter(Boolean);
     let value     = parseInt(document.querySelector('#task-editor-overlay #task-editor-value-input').value);
+    let group     = parseInt(document.querySelector('#task-editor-overlay #task-editor-groupname-input').value);
     /* global flags */
 
     let flaglist = [];
@@ -110,7 +113,8 @@ function task_editor_submit()
         'title': title,
         'value': value,
         'labels': labels,
-        'flags': flaglist
+        'flags': flaglist,
+        'group': group
     });
 
     let response;

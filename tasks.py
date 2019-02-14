@@ -38,6 +38,8 @@ class Task:
         self.value   = info['value']
         self.labels  = info['labels']
         self.flags   = info['flags']
+        self.group   = info['group']
+        self.order   = info['order']
         self.validate_flags()
 
     def validate_flags(self):
@@ -64,6 +66,8 @@ class Task:
             'value':   self.value,
             'labels':  self.labels,
             'flags':   self.flags,
+            'group':   self.group,
+            'order':   self.order,
         }
 
     def check_flag(self, flag, team_name):
@@ -107,6 +111,47 @@ def get_task_list():
             yield read_task(task_id)
         except Exception as e:
             logger.warning('Error loading task info: {}', repr(e))
+
+
+def read_group(group_id):
+    assert type(group_id) is int
+    group_dir = os.path.join(configuration['groups_path'], str(group_id))
+    group_file = os.path.join(group_dir, 'group.json')
+    try:
+        with open(group_file) as f:
+            group_str = f.read()
+        group = json.loads(group_str)
+        return {'group_id': group_id, 'name': group['name'], 'parent': group['parent']}
+    except FileNotFoundError:
+        raise GroupNotFoundError(group_id)
+
+
+def write_group(group):
+    group_id = group.group_id
+    assert type(group_id) is int
+    group_dir = os.path.join(configuration['groups_path'], str(group_id))
+    os.makedirs(group_dir, exist_ok=True)
+    group_file = os.path.join(group_dir, 'group.json')
+    obj = group.to_dict(False)
+    with open(group_file, 'w') as f:
+        f.write(json.dumps(obj))
+
+
+def get_group_list():
+    groups_path = configuration['groups_path']
+    os.makedirs(groups_path, exist_ok=True)
+    for group_dir in os.listdir(groups_path):
+        try:
+            if not os.path.isdir(os.path.join(groups_path, group_dir)):
+                continue
+            if re.match(r'^[1-9][0-9]*$', group_dir) is None:
+                continue
+            if not os.access(os.path.join(groups_path, group_dir, 'group.json'), os.R_OK):
+                continue
+            group_id = int(group_dir)
+            yield read_group(group_id)
+        except Exception as e:
+            logger.warning('Error loading group info: {}', repr(e))
 
 
 def api_add_or_update_task(api, sess, args):
@@ -284,6 +329,22 @@ def allocate_task_id():
         with open(path, 'w') as f:
             f.write(str(last_task_id + 1))
         return last_task_id + 1
+    except FileNotFoundError:
+        with open(path, 'w') as f:
+            f.write('1')
+        return 1
+
+
+def allocate_group_id():
+    path = configuration['group_maxid_path']
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    try:
+        with open(path) as f:
+            s = f.read()
+            last_group_id = int(s) if s != '' else 0
+        with open(path, 'w') as f:
+            f.write(str(last_group_id + 1))
+        return last_group_id + 1
     except FileNotFoundError:
         with open(path, 'w') as f:
             f.write('1')
