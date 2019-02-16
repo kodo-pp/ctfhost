@@ -25,6 +25,9 @@ class TaskNotFoundError(Exception):
 class GroupNotFoundError(Exception):
     pass
 
+class GroupReparentError(Exception):
+    pass
+
 class TooFrequentSubmissions(Exception):
     pass
 
@@ -215,6 +218,19 @@ def api_add_group(api, sess, args):
     request = json.loads(http.request.body)
     name    = request['name']
     parent  = request['parent']
+    try:
+        parent = int(parent)
+    except (ValueError, TypeError) as e:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
+                param='parent',
+            )
+        )
+    if name == '':
+        raise ApiArgumentError(lc.get('api_argument_error').format(argument='name'))
+    if parent != 0:
+        read_group(parent)
 
     group_id = allocate_group_id()
 
@@ -228,11 +244,73 @@ def api_rename_group(api, sess, args):
     request  = json.loads(http.request.body)
     group_id = request['group_id']
     new_name = request['new_name']
+    try:
+        group_id = int(group_id)
+    except (ValueError, TypeError) as e:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
+                param='group_id',
+            )
+        )
+
+    if new_name == '':
+        raise ApiArgumentError(lc.get('api_argument_error').format(argument='name'))
 
     logger.info('Renaming group ({}) to {}', group_id, new_name)
-    # XXX: STOPPED HERE
-    write_group(group_id, {'name': name, 'parent': parent})
+    group = read_group(group_id)
+    group['name'] = new_name
+
+    write_group(group_id, group)
     http.write(json.dumps({'success': True}))
+
+
+def api_reparent_group(api, sess, args):
+    http     = args['http_handler']
+    request  = json.loads(http.request.body)
+    group_id = request['group_id']
+    new_parent = request['new_parent']
+    try:
+        new_parent = int(new_parent)
+    except (ValueError, TypeError) as e:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
+                param='new_parent',
+            )
+        )
+
+    if may_reparent_group(group_id, new_parent):
+        logger.info('Reparenting group ({}): new parent: ({})', group_id, new_parent)
+        reparent_group(group_id, new_parent)
+    else:
+        logger.warning('Cannot reparent group ({}): new parent: ({})', group_id, new_parent)
+        raise GroupReparentError(lc.get('parent_loop_detected'))
+
+
+    http.write(json.dumps({'success': True}))
+
+
+def may_reparent_group(group_id, new_parent):
+    group_ids = set([group_id])
+    group = read_group(group_id)
+    group['parent'] = new_parent
+    while True:
+        parent_id = group['parent']
+        if parent_id == 0:
+            # OK, alternative path to root group
+            return True
+        elif parent_id in group_ids:
+            # Not OK: loop
+            return False
+        group_ids.add(parent_id)
+        group = read_group(parent_id)
+
+
+def reparent_group(group_id, new_parent):
+    group = read_group(group_id)
+    group['parent'] = new_parent
+    write_group(group_id, group)
 
 
 def api_get_task(api, sess, args):
@@ -326,9 +404,33 @@ def api_delete_task(api, sess, args):
             )
         )
     try:
+        logger.info("Deleting task with id {}", task_id)
         delete_task(task_id)
     except TaskNotFoundError:
         raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
+    
+    http.write(json.dumps({'success': True}))
+
+
+def api_delete_group(api, sess, args):
+    http = args['http_handler']
+    request = json.loads(http.request.body)
+    group_id = request['group_id']
+
+    try:
+        group_id = int(group_id)
+    except (ValueError, TypeError) as e:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
+                param='group_id',
+            )
+        )
+    try:
+        logger.info("Deleting group ({})", group_id)
+        delete_group(group_id)
+    except GroupNotFoundError:
+        raise Exception(lc.get('group_does_not_exist').format(group_id=group_id))
     
     http.write(json.dumps({'success': True}))
 
@@ -342,9 +444,26 @@ def delete_task(task_id):
     shutil.rmtree(os.path.join(configuration['tasks_path'], str(task_id)))
 
 
+def delete_group(group_id):
+    if type(group_id) is not int:
+        # Security measure, because this function can potentially do something
+        raise GroupNotFoundError()
+    if not group_exists(group_id):
+        raise GroupNotFoundError()
+    shutil.rmtree(os.path.join(configuration['groups_path'], str(group_id)))
+    # TODO: deal properly with orphans
+
+
 def task_exists(task_id):
-    assert type(task_id) is int
+    if type(task_id) is not int:
+        return False
     return os.access(os.path.join(configuration['tasks_path'], str(task_id), 'task.json'), os.R_OK)
+
+
+def group_exists(group_id):
+    if type(group_id) is not int:
+        return False
+    return os.access(os.path.join(configuration['groups_path'], str(group_id), 'group.json'), os.R_OK)
 
 
 def allocate_task_id():
@@ -380,7 +499,8 @@ def allocate_group_id():
 
 
 def read_task(task_id):
-    assert type(task_id) is int
+    if type(task_id) is not int:
+        raise TaskNotFoundError(task_id)
     task_dir = os.path.join(configuration['tasks_path'], str(task_id))
     task_file = os.path.join(task_dir, 'task.json')
     try:
@@ -394,7 +514,8 @@ def read_task(task_id):
 
 def write_task(task):
     task_id = task.task_id
-    assert type(task_id) is int
+    if type(task_id) is not int:
+        raise TaskNotFoundError(task_id)
     task_dir = os.path.join(configuration['tasks_path'], str(task_id))
     os.makedirs(task_dir, exist_ok=True)
     task_file = os.path.join(task_dir, 'task.json')
@@ -404,7 +525,8 @@ def write_task(task):
 
 
 def read_group(group_id):
-    assert type(group_id) is int
+    if type(group_id) is not int:
+        raise GroupNotFoundError(group_id)
     group_dir = os.path.join(configuration['groups_path'], str(group_id))
     group_file = os.path.join(group_dir, 'group.json')
     try:
@@ -418,7 +540,8 @@ def read_group(group_id):
 
 
 def write_group(group_id, group_dict):
-    assert type(group_id) is int
+    if type(group_id) is not int:
+        raise GroupNotFoundError(group_id)
     group_dir = os.path.join(configuration['groups_path'], str(group_id))
     os.makedirs(group_dir, exist_ok=True)
     group_file = os.path.join(group_dir, 'group.json')
@@ -432,3 +555,5 @@ api.add('get_task',           api_get_task,           access_level=USER)
 api.add('submit_flag',        api_submit_flag,        access_level=USER)
 api.add('add_group',          api_add_group,          access_level=ADMIN)
 api.add('rename_group',       api_rename_group,       access_level=ADMIN)
+api.add('reparent_group',     api_reparent_group,     access_level=ADMIN)
+api.add('delete_group',       api_delete_group,       access_level=ADMIN)

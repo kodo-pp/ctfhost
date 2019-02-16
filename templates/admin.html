@@ -171,13 +171,44 @@
 
             function rename_group(group_id)
             {
-                let new_name = document.getElementById(`rename-group-name${parent_id}`).value;
+                let new_name = document.getElementById(`rename-group-name${group_id}`).value;
                 let data = {
                     'group_id': group_id,
                     'new_name': new_name
                 };
                 try {
                     make_http_request('/api/rename_group', JSON.stringify(data));
+                    location.reload();
+                } catch (e) {
+                    error_message(e.message);
+                }
+            }
+
+            function update_group_parent(group_id)
+            {
+                let new_parent = document.getElementById(`group-parent${group_id}`).value;
+                let data = {
+                    'group_id': group_id,
+                    'new_parent': new_parent
+                };
+                try {
+                    make_http_request('/api/reparent_group', JSON.stringify(data));
+                    location.reload();
+                } catch (e) {
+                    error_message(e.message);
+                }
+            }
+
+            function delete_group(group_id)
+            {
+                if (!confirm("{{ lc['confirm_group_deletion'] }}")) {
+                    return;
+                }
+                let data = {
+                    'group_id': group_id
+                };
+                try {
+                    make_http_request('/api/delete_group', JSON.stringify(data));
                     location.reload();
                 } catch (e) {
                     error_message(e.message);
@@ -277,11 +308,12 @@
             <h1>{{ lc['admin_page'] }}</h1>
             <div class="w3-bar w3-dark-grey" id="tabset">
                 <span class="w3-bar-item w3-button" id="tab-tasks">{{ lc['admintab_tasks'] }}</span>
+                <span class="w3-bar-item w3-button" id="tab-groups">{{ lc['admintab_groups'] }}</span>
                 <span class="w3-bar-item w3-button" id="tab-teams">{{ lc['admintab_teams'] }}</span>
                 <span class="w3-bar-item w3-button" id="tab-submissions">{{ lc['admintab_submissions'] }}</span>
             </div>
             <div id="tabcontents">
-                <div class="w3-container hidden" id="tabcontent-tasks">
+                <div class="w3-container hidden" id="tabcontent-groups">
                     <h2>{{ lc['admintab_groups'] }}</h2>
                     <p>
                     <div class="w3-row-padding">
@@ -372,10 +404,19 @@
                                     </a>
                                 </div>
                             </div>
+                            <p>
+                                <a
+                                    href="javascript:delete_group({{ group['group_id'] }})"
+                                    class="w3-button w3-red"
+                                >
+                                    {{ lc['delete_group'] }}
+                                </a>
+                            </p>
                         </div>
                         </p>
                     {% end %}
-                    <hr>
+                </div>
+                <div class="w3-container hidden" id="tabcontent-tasks">
                     <h2>{{ lc['admintab_tasks'] }}</h2>
                     <p>
                         <a class="w3-button w3-green" href="javascript:edit_task(null)">

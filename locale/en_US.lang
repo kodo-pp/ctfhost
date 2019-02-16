@@ -110,3 +110,6 @@ group_new_name                      = New name
 parent_group                        = Parent group
 update_group_parent                 = Update task group parent
 add_subgroup                        = Add subgroup
+parent_loop_detected                = Loop detected
+confirm_group_deletion              = Do you really want to delete this task group?
+delete_group                        = Delete task group
