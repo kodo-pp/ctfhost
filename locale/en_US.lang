@@ -113,3 +113,7 @@ add_subgroup                        = Add subgroup
 parent_loop_detected                = Loop detected
 confirm_group_deletion              = Do you really want to delete this task group?
 delete_group                        = Delete task group
+subgroups                           = Subgroups:
+subtasks                            = Tasks belonging to this group:
+empty_list                          = <empty list>
+error_building_group_path           = <Error building group path>

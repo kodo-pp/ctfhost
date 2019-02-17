@@ -159,6 +159,29 @@ def get_group_list():
         except Exception as e:
             logger.warning('Error loading group info: {}', repr(e))
 
+def get_group_dict():
+    group_list = get_group_list()
+    group_dict = {}
+    for i in group_list:
+        group_dict[i['group_id']] = i
+    return group_dict
+
+
+def build_group_path(groups, group_id, max_depth=30):
+    try:
+        path = []
+        for i in range(max_depth):
+            if group_id == 0:
+                return list(reversed(path))
+            group = groups[group_id]
+            path.append(group['name'])
+            group_id = group['parent']
+        path.append('...')
+        return list(reversed(path))
+    except BaseException as e:
+        logger.warning('Error building group path: {}', str(e))
+        return [lc.get('error_building_group_path'), '']
+
 
 def api_add_or_update_task(api, sess, args):
     http = args['http_handler']
@@ -169,6 +192,8 @@ def api_add_or_update_task(api, sess, args):
     value   = request['value']
     labels  = request['labels']
     flags   = request['flags']
+    group   = request['group']
+    order   = request['order'] if 'order' in request else 0 # XXX: do something with this
 
     if task_id is None or task_id == '':
         task_id = allocate_task_id()
@@ -192,6 +217,26 @@ def api_add_or_update_task(api, sess, args):
                 param='value',
             )
         )
+
+    try:
+        group = int(group)
+    except (ValueError, TypeError) as e:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
+                param='group',
+            )
+        )
+
+    try:
+        order = int(order)
+    except (ValueError, TypeError) as e:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
+                param='order',
+            )
+        )
     
     if task_exists(task_id):
         logger.info('Modifying task {}', task_id)
@@ -201,6 +246,8 @@ def api_add_or_update_task(api, sess, args):
         task.value = value
         task.labels = labels
         task.flags = flags
+        task.group = group
+        task.order = order
         task.validate_flags()
         write_task(task)
     else:

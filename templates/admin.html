@@ -217,7 +217,7 @@
 
             function setup_group_parents()
             {
-                {% for group in tasks.get_group_list() %}
+                {% for group in groups.values() %}
                     document.getElementById('group-parent{{ group['group_id'] }}').value = {{ group['parent'] }};
                 {% end %}
             }
@@ -268,7 +268,7 @@
                         <option value="0">
                             {{ lc['root_group'] }}
                         </option>
-                        {% for group in tasks.get_group_list() %}
+                        {% for group in groups.values() %}
                             <option value="{{ group['group_id'] }}">
                                 {{ group['name'] }}
                             </option>
@@ -334,9 +334,12 @@
                         </div>
                     </div>
                     </p>
-                    {% for group in tasks.get_group_list() %}
+                    {% for group in groups.values() %}
                         <p>
                         <div class="w3-container w3-light-grey" style="padding-bottom: 10px;">
+                            <span style="color: grey;">
+                                {{ '/'.join(build_group_path(groups, group['group_id'])[:-1]) + '/' }}
+                            </span>
                             <h3>{{ group['name'] }}</h3>
                             <p>
                             <div class="w3-row-padding">
@@ -376,7 +379,7 @@
                                 </div>
                             </div>
                             </p>
-                            <p>{{ lc['parent_group'] }}</p>
+                            <h5>{{ lc['parent_group'] }}</h5>
                             <div class="w3-row-padding">
                                 <div class="w3-col s8 m8 l8">
                                     <select
@@ -386,7 +389,7 @@
                                         <option value="0">
                                             {{ lc['root_group'] }}
                                         </option>
-                                        {% for parent in tasks.get_group_list() %}
+                                        {% for parent in groups.values() %}
                                             {% if group['group_id'] != parent['group_id'] %}
                                                 <option value="{{ parent['group_id'] }}">
                                                     {{ parent['name'] }}
@@ -404,6 +407,40 @@
                                     </a>
                                 </div>
                             </div>
+                            <p>
+                                <h5>{{ lc['subgroups'] }}</h5>
+                                <ul class="w3-ul">
+                                    {% set any_subgroup = False %}
+                                    {% for subgroup in groups.values() %}
+                                        {% if subgroup['parent'] == group['group_id'] %}
+                                            {% set any_subgroup = True %}
+                                            <li>{{ subgroup['name'] }}</li>
+                                        {% end %}
+                                    {% end %}
+                                    {% if not any_subgroup %}
+                                        <p style="padding-left: 10px">
+                                            <em>{{ lc['empty_list'] }}</em>
+                                        </p>
+                                    {% end %}
+                                </ul>
+                            </p>
+                            <p>
+                                <h5>{{ lc['subtasks'] }}</h5>
+                                <ul class="w3-ul">
+                                    {% set any_task = False %}
+                                    {% for task in tasks %}
+                                        {% if task.group == group['group_id'] %}
+                                            {% set any_task = True %}
+                                            <li>{{ task.title }}</li>
+                                        {% end %}
+                                    {% end %}
+                                    {% if not any_task %}
+                                        <p style="padding-left: 10px">
+                                            <em>{{ lc['empty_list'] }}</em>
+                                        </p>
+                                    {% end %}
+                                </ul>
+                            </p>
                             <p>
                                 <a
                                     href="javascript:delete_group({{ group['group_id'] }})"
@@ -423,9 +460,9 @@
                             {{ lc['admin_task_add'] }}
                         </a>
                     </p>
-                    {% for task in tasks.get_task_list() %}
+                    {% for task in tasks %}
                         <div class="w3-container w3-light-grey" style="margin: 10px 0 10px 0;">
-                            <p>{{ task.title }} [{{ task.value }}]</p>
+                            <h3>{{ task.title }} [{{ task.value }}]</h3>
                             <p>
                                 <a
                                     class="w3-button w3-blue"
@@ -500,7 +537,7 @@
                         </tr>
                         {% for sub in reversed(sorted(submissions, key = lambda x: x['time'])) %}
                             {% try %}
-                                {% set task = tasks.read_task(sub['task_id']) %}
+                                {% set task = read_task(sub['task_id']) %}
                                 <tr>
                                     <td>{{ sub['team_name'] }}</td>
                                     <td>{{ task.title }}</td>

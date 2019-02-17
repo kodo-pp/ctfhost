@@ -57,10 +57,13 @@ class AdminHandler(tornado.web.RequestHandler):
             return
         self.write(render_template(
             'admin.html',
-            session = session,
-            tasks = tasks,
-            submissions = submissions,
-            teams = team.get_all_teams()
+            session          = session,
+            tasks            = list(tasks.get_task_list()),
+            submissions      = list(submissions),
+            teams            = list(team.get_all_teams()),
+            groups           = dict(tasks.get_group_dict()),
+            read_task        = tasks.read_task,
+            build_group_path = tasks.build_group_path,
         ))
 
 class AdminNewTeamHandler(tornado.web.RequestHandler):
