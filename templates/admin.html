@@ -338,7 +338,11 @@
                         <p>
                         <div class="w3-container w3-light-grey" style="padding-bottom: 10px;">
                             <span style="color: grey;">
-                                {{ '/'.join(build_group_path(groups, group['group_id'])[:-1]) + '/' }}
+                                {% try %}
+                                    {{ '/'.join(build_group_path(groups, group['group_id'])[:-1]) + '/' }}
+                                {% except BaseException as e %}
+                                    {{ lc['error_building_group_path'] }}
+                                {% end %}
                             </span>
                             <h3>{{ group['name'] }}</h3>
                             <p>
@@ -462,6 +466,13 @@
                     </p>
                     {% for task in tasks %}
                         <div class="w3-container w3-light-grey" style="margin: 10px 0 10px 0;">
+                            <span style="color: grey;">
+                                {% try %}
+                                    {{ '/'.join(build_group_path(groups, task.group)) + '/' }}
+                                {% except BaseException as e %}
+                                    {{ lc['error_building_group_path'] }}
+                                {% end %}
+                            </span>
                             <h3>{{ task.title }} [{{ task.value }}]</h3>
                             <p>
                                 <a

@@ -180,7 +180,7 @@ def build_group_path(groups, group_id, max_depth=30):
         return list(reversed(path))
     except BaseException as e:
         logger.warning('Error building group path: {}', str(e))
-        return [lc.get('error_building_group_path'), '']
+        raise
 
 
 def api_add_or_update_task(api, sess, args):
@@ -253,7 +253,18 @@ def api_add_or_update_task(api, sess, args):
     else:
         logger.info('Creating task {}', task_id)
         try:
-            task = Task(task_id, {'title': title, 'text': text, 'value': value, 'labels': labels, 'flags': flags})
+            task = Task(
+                task_id,
+                {
+                    'title':  title,
+                    'text':   text,
+                    'value':  value,
+                    'labels': labels,
+                    'flags':  flags,
+                    'group':  group,
+                    'order':  order,
+                }
+            )
         except KeyError as e:
             raise ApiArgumentError(lc.get('api_argument_error').format(argument=str(e)))
         write_task(task)
