@@ -117,3 +117,4 @@ subgroups                           = Subgroups:
 subtasks                            = Tasks belonging to this group:
 empty_list                          = <empty list>
 error_building_group_path           = <Error building group path>
+taskeditor_order                    = Sorting priority

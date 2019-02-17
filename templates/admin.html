@@ -62,7 +62,8 @@
                         let value = null;
                         let labels = [];
                         let loaded_flags = [];
-                        let group = [];
+                        let group = 0;
+                        let order = 0;
                         if (task_id !== null) {
                             let loaded_task = load_task(task_id);
                             text = loaded_task.task.text;
@@ -71,8 +72,9 @@
                             labels = loaded_task.task.labels;
                             group = loaded_task.task.group;
                             loaded_flags = loaded_task.task.flags;
+                            order = loaded_task.task.order;
                         }
-                        open_task_editor(task_id, text, title, value, labels, loaded_flags, group);
+                        open_task_editor(task_id, text, title, value, labels, loaded_flags, group, order);
                     } catch (e) {
                         error_message(e.message);
                         throw e;
@@ -284,6 +286,19 @@
                 <div id="task-editor-flags"></div> <!-- Filled by task-editor.js -->
                 <p>
                     <a href="javascript:add_flag()" class="w3-button w3-green">{{ lc['add_flag'] }}</a>
+                </p>
+                <p>
+                    <label for="task-editor-order-input">{{ lc['taskeditor_order'] }}</label>
+                    <input
+                        type="number"
+                        step="1"
+                        id="task-editor-order-input"
+                        placeholder="{{ lc['taskeditor_order'] }}"
+                        class="w3-input w3-border"
+                        pattern="[1-9][0-9]*"
+                        value="0"
+                        required
+                    >
                 </p>
                 <p>
                     <a id="task-editor-cancel-button" class="w3-button w3-red">{{ lc['taskeditor_cancel'] }}</a>

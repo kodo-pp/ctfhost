@@ -193,7 +193,7 @@ def api_add_or_update_task(api, sess, args):
     labels  = request['labels']
     flags   = request['flags']
     group   = request['group']
-    order   = request['order'] if 'order' in request else 0 # XXX: do something with this
+    order   = request['order']
 
     if task_id is None or task_id == '':
         task_id = allocate_task_id()
