@@ -10,6 +10,7 @@
         </script>
         <script src="/static/admin/task-editor.js"></script>
         <script src="/static/http-request.js"></script>
+        <script src="/static/ace/src-min/ace.js"></script>
         <meta charset="utf-8">
         <title>{{ conf['ctfname'] }} - {{ lc['admin_page'] }}</title>
         <script>
@@ -245,8 +246,16 @@
                 in_seed.value = mkseed();
             }
 
+            function toggle_task_gen_visible(task_id)
+            {
+                let container = document.getElementById(`gen-config-wrapper${task_id}`);
+                container.classList.toggle('hidden');
+            }
+
             window.addEventListener('load', setup_tabs);
             window.addEventListener('load', setup_group_parents);
+
+            gen_config_editors = {};
         </script>
     </head>
     <body>
@@ -638,6 +647,40 @@
                             <p>
                                 <strong>{{ lc['task_token_seed'] }}:</strong>
                                 <code style="font-family: monospace">{{ task.seed }}</code>
+                            </p>
+                            <div id="gen-config-wrapper{{ task.task_id }}" class="w3-container hidden">
+                                <div id="gen-config-editor{{ task.task_id }}">{{
+                                    task_gen.read_task_generation_config(task.task_id) 
+                                }}</div>
+                                <style>
+                                    #gen-config-editor{{ task.task_id }} {
+                                        width: 100%;
+                                        height: 400px;
+                                    }
+                                </style>
+                                <script>
+                                    (function() {
+                                        let editor = ace.edit('gen-config-editor{{ task.task_id }}');
+                                        gen_config_editors[{{ task.task_id }}] = editor;
+                                        editor.session.setMode('ace/mode/python');
+                                    })()
+                                </script>
+                                <p>
+                                    <a
+                                        class="w3-button w3-green"
+                                        href="javascript:update_gen_config({{ task.task_id }})"
+                                    >
+                                        {{ lc['update_gen_config'] }}
+                                    </a>
+                                </p>
+                            </div>
+                            <p>
+                                <a
+                                    class="w3-button w3-green"
+                                    href="javascript:toggle_task_gen_visible({{ task.task_id }})"
+                                >
+                                    {{ lc['show_or_hide'] }}
+                                </a>
                             </p>
                         </div>
                     {% end %}

@@ -122,3 +122,5 @@ taskeditor_seed                     = Token seed
 taskeditor_randomize_seed           = Randomize
 task_token_seed                     = Task token seed
 admintab_task_gen                   = Task generation
+update_gen_config                   = Update configuration
+show_or_hide                        = Show/Hide

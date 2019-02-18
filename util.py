@@ -1,5 +1,6 @@
 import os
 import secrets
+import importlib
 
 from configuration import configuration
 
@@ -12,3 +13,11 @@ def get_ctfhost_seed():
         return seed
     with open(path) as f:
         return f.read().strip()
+
+
+def import_file(filename, module_name='imported_file'):
+    spec = importlib.util.spec_from_file_location(module_name, filename)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod 
+
