@@ -24,13 +24,14 @@ def migrate_task(task_path):
     obj = json.loads(raw_read)
     for k, v in DEFAULTS.items():
         if k not in obj:
+            new_value = v if type(v) is not type(lambda:0) else v()
             print(
                 '  -> Setting attribute {key} to {value}'.format(
                     key = repr(k),
-                    value = repr(v) if type(v) is not type(lambda:0) else repr(v())
+                    value = repr(new_value)
                 )
             )
-            obj[k] = v if type(v) is not type(lambda:0) else v()
+            obj[k] = new_value
     written = json.dumps(obj)
     with open(task_path, 'w') as f:
         f.write(written)

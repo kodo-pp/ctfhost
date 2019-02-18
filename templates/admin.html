@@ -365,6 +365,7 @@
             <div class="w3-bar w3-dark-grey" id="tabset">
                 <span class="w3-bar-item w3-button" id="tab-tasks">{{ lc['admintab_tasks'] }}</span>
                 <span class="w3-bar-item w3-button" id="tab-groups">{{ lc['admintab_groups'] }}</span>
+                <span class="w3-bar-item w3-button" id="tab-task-gen">{{ lc['admintab_task_gen'] }}</span>
                 <span class="w3-bar-item w3-button" id="tab-teams">{{ lc['admintab_teams'] }}</span>
                 <span class="w3-bar-item w3-button" id="tab-submissions">{{ lc['admintab_submissions'] }}</span>
             </div>
@@ -621,6 +622,25 @@
                             {% end %}
                         {% end %}
                     </table>
+                </div>
+                <div class="w3-container hidden" id="tabcontent-task-gen">
+                    <h2>{{ lc['admintab_task_gen'] }}</h2>
+                    {% for task in tasks %}
+                        <div class="w3-container w3-light-grey" style="margin: 10px 0 10px 0;">
+                            <span style="color: grey;">
+                                {% try %}
+                                    {{ '/'.join(build_group_path(groups, task.group)) + '/' }}
+                                {% except BaseException as e %}
+                                    {{ lc['error_building_group_path'] }}
+                                {% end %}
+                            </span>
+                            <h3>{{ task.title }}</h3>
+                            <p>
+                                <strong>{{ lc['task_token_seed'] }}:</strong>
+                                <code style="font-family: monospace">{{ task.seed }}</code>
+                            </p>
+                        </div>
+                    {% end %}
                 </div>
             </div>
         </div>

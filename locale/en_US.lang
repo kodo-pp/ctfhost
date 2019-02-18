@@ -120,3 +120,5 @@ error_building_group_path           = <Error building group path>
 taskeditor_order                    = Sorting priority
 taskeditor_seed                     = Token seed
 taskeditor_randomize_seed           = Randomize
+task_token_seed                     = Task token seed
+admintab_task_gen                   = Task generation
