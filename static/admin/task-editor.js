@@ -4,7 +4,7 @@ function ActionError(text)
 }
 
 
-function open_task_editor(task_id, text, title, value, labels, loaded_flags, group, order)
+function open_task_editor(task_id, text, title, value, labels, loaded_flags, group, order, seed)
 {
     let overlay = document.querySelector('#task-editor-overlay');
     if (overlay === null) {
@@ -29,6 +29,7 @@ function open_task_editor(task_id, text, title, value, labels, loaded_flags, gro
     let in_labels   = document.querySelector('#task-editor-overlay #task-editor-labels-input');
     let in_group    = document.querySelector('#task-editor-overlay #task-editor-groupname-input');
     let in_order    = document.querySelector('#task-editor-overlay #task-editor-order-input');
+    let in_seed     = document.querySelector('#task-editor-overlay #task-editor-seed-input');
 
     in_taskid.value = task_id;
     in_title.value  = title;
@@ -37,6 +38,7 @@ function open_task_editor(task_id, text, title, value, labels, loaded_flags, gro
     in_labels.value = labels.join(' ');
     in_group.value  = group;
     in_order.value  = order;
+    in_seed.value   = seed;
     
     let submit_button = document.querySelector('#task-editor-overlay #task-editor-submit-button');
     let cancel_button = document.querySelector('#task-editor-overlay #task-editor-cancel-button');
@@ -103,6 +105,7 @@ function task_editor_submit()
     let value     = parseInt(document.querySelector('#task-editor-overlay #task-editor-value-input').value);
     let group     = parseInt(document.querySelector('#task-editor-overlay #task-editor-groupname-input').value);
     let order     = parseInt(document.querySelector('#task-editor-overlay #task-editor-order-input').value);
+    let seed      = document.querySelector('#task-editor-overlay #task-editor-seed-input').value;
     /* global flags */
 
     let flaglist = [];
@@ -112,13 +115,14 @@ function task_editor_submit()
 
     let data = JSON.stringify({
         'task_id': task_id,
-        'text': text,
-        'title': title,
-        'value': value,
+        'text':   text,
+        'title':  title,
+        'value':  value,
         'labels': labels,
-        'flags': flaglist,
-        'group': group,
-        'order': order
+        'flags':  flaglist,
+        'group':  group,
+        'order':  order,
+        'seed':   seed
     });
 
     let response;

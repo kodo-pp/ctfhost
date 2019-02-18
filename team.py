@@ -6,6 +6,8 @@ from datetime import datetime
 
 from loguru import logger
 
+import tasks
+import util
 from configuration import configuration
 
 
@@ -99,3 +101,18 @@ def add_submission(team_name, task_id, flag, is_correct, points):
             (team_name, task_id, flag, is_correct, points, datetime.now())
         )
         db.commit()
+
+def get_token(team_name, task_id):
+    task = tasks.read_task(task_id)
+    
+    team_seed = get_team_seed(team_name)
+    task_seed = task.seed
+    ctfhost_seed = util.get_ctfhost_seed()
+
+    return hashlib.sha256(
+        'team:{},task:{},glob:{};'.format(
+            team_seed,
+            task_seed,
+            ctfhost_seed
+        ).encode()
+    ).hexdigest()

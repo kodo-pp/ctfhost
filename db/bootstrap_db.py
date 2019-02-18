@@ -6,6 +6,7 @@ from sys import argv
 from hashlib import sha512
 from os import urandom, access, R_OK, _exit as exit, rename
 from base64 import b64encode
+from secrets import token_hex
 
 
 db_path = 'ctfhost.db'
@@ -45,7 +46,9 @@ def main():
     password = b64encode(password_raw).decode()
     print('Your CTFHost root password is "{}". Keep it private!'.format(password))
     password_hash = sha512(password.encode()).hexdigest()
-    sql = sql.replace('@@_PASSWORD_HASH_@@', password_hash)
+
+    token_seed = token_hex(16)
+    sql = sql.replace('@@_PASSWORD_HASH_@@', password_hash).replace('@@_TOKEN_SEED_@@', token_seed)
 
     print('Creating database')
     db = sqlite3.connect(db_path)

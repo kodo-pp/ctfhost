@@ -46,6 +46,7 @@ class Task:
         self.flags   = info['flags']
         self.group   = info['group']
         self.order   = info['order']
+        self.seed    = info['seed']
         self.validate_flags()
 
     def validate_flags(self):
@@ -74,6 +75,7 @@ class Task:
             'flags':   self.flags,
             'group':   self.group,
             'order':   self.order,
+            'seed':    self.seed,
         }
 
     def check_flag(self, flag, team_name):
@@ -194,6 +196,7 @@ def api_add_or_update_task(api, sess, args):
     flags   = request['flags']
     group   = request['group']
     order   = request['order']
+    seed    = request['seed']
 
     if task_id is None or task_id == '':
         task_id = allocate_task_id()
@@ -237,6 +240,13 @@ def api_add_or_update_task(api, sess, args):
                 param='order',
             )
         )
+
+    if type(seed) is not str or len(seed) != 16:
+        raise Exception(
+            lc.get('api_argument_error').format(
+                argument='seed',
+            )
+        )
     
     if task_exists(task_id):
         logger.info('Modifying task {}', task_id)
@@ -248,6 +258,7 @@ def api_add_or_update_task(api, sess, args):
         task.flags = flags
         task.group = group
         task.order = order
+        task.seed = seed
         task.validate_flags()
         write_task(task)
     else:
@@ -263,6 +274,7 @@ def api_add_or_update_task(api, sess, args):
                     'flags':  flags,
                     'group':  group,
                     'order':  order,
+                    'seed':   seed,
                 }
             )
         except KeyError as e:

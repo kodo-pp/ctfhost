@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+import secrets
 
 DEFAULTS = {
     'text': '',
@@ -12,6 +13,7 @@ DEFAULTS = {
     'flags': [],
     'group': 0,
     'order': 0,
+    'seed': lambda: secrets.token_hex(8),
 }
 
 
@@ -22,8 +24,13 @@ def migrate_task(task_path):
     obj = json.loads(raw_read)
     for k, v in DEFAULTS.items():
         if k not in obj:
-            print('  -> Setting attribute {key} to {value}'.format(key=repr(k), value=repr(v)))
-            obj[k] = v
+            print(
+                '  -> Setting attribute {key} to {value}'.format(
+                    key = repr(k),
+                    value = repr(v) if type(v) is not type(lambda:0) else repr(v())
+                )
+            )
+            obj[k] = v if type(v) is not type(lambda:0) else v()
     written = json.dumps(obj)
     with open(task_path, 'w') as f:
         f.write(written)

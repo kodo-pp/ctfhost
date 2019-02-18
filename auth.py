@@ -5,13 +5,14 @@ import hashlib
 import time
 import os
 import json
+import secrets
 from contextlib import closing
-from api import api, GUEST, USER, ADMIN, ApiArgumentError
 
 from loguru import logger
 
 from configuration import configuration
 from localization import lc
+from api import api, GUEST, USER, ADMIN, ApiArgumentError
 
 class Session:
     def __init__(self, id, username, expires_at, is_admin):
@@ -157,6 +158,7 @@ def register_user(username, password, disp_name=None, email=None):
     if email == '':
         email = None
     password_hash = hashlib.sha512(password.encode()).hexdigest()
+    token_seed = secrets.token_hex(16)
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute(
@@ -168,8 +170,8 @@ def register_user(username, password, disp_name=None, email=None):
             raise BaseRegistrationError()
         logger.info('Registering user "{}"'.format(username))
         cur.execute(
-            'INSERT INTO users VALUES (?, ?, ?, ?, 0)',
-            (username, password_hash, disp_name, email)
+            'INSERT INTO users VALUES (?, ?, ?, ?, 0, ?)',
+            (username, password_hash, disp_name, email, token_seed)
         )
         db.commit()
 
