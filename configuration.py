@@ -15,5 +15,6 @@ configuration = {
     'group_maxid_path':        'db/tasks-etc/maxgroupid.txt',
     'min_submission_interval': 30,
     'date_fmt_func':           date_fmt.default_date_fmt,
-    'gen_config_presets_path': 'presets/gen'
+    'gen_config_presets_path': 'presets/gen',
+    'ctfhost_seed_path':       'db/ctfhost-seed.txt',
 }

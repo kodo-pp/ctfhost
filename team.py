@@ -23,9 +23,11 @@ class Team:
         self.solves      = info['solves']
         self.points      = info['points']
         self.submissions = info['submissions']
+        self.seed        = info['seed']
 
     def strip_private_data(self):
         self.submissions = []
+        self.seed = '0' * 28
 
 
 def get_submissions(team_name):
@@ -68,9 +70,9 @@ def get_solves(team_name):
 def get_team_basic_info(team_name):
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
-        cur.execute('SELECT full_name, email FROM users WHERE username = ?', (team_name,))
+        cur.execute('SELECT full_name, email, token_seed FROM users WHERE username = ?', (team_name,))
         result = cur.fetchone()
-    return {'full_name': result[0], 'email': result[1]}
+    return {'full_name': result[0], 'email': result[1], 'seed': result[2]}
 
 
 def read_team(team_name):
@@ -102,17 +104,3 @@ def add_submission(team_name, task_id, flag, is_correct, points):
         )
         db.commit()
 
-def get_token(team_name, task_id):
-    task = tasks.read_task(task_id)
-    
-    team_seed = get_team_seed(team_name)
-    task_seed = task.seed
-    ctfhost_seed = util.get_ctfhost_seed()
-
-    return hashlib.sha256(
-        'team:{},task:{},glob:{};'.format(
-            team_seed,
-            task_seed,
-            ctfhost_seed
-        ).encode()
-    ).hexdigest()

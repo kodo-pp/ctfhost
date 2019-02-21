@@ -183,7 +183,7 @@ class TasksHandler(tornado.web.RequestHandler):
         if session is None:
             self.redirect('/login')
             return
-        task_list = tasks.get_task_list()
+        task_list = list(task_gen.get_generated_task_list(team_name=session.username))
         current_team = team.read_team(session.username)
         self.write(render_template('tasks.html', session=session, tasks=task_list, team=current_team))
 
