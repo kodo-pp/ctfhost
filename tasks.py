@@ -129,7 +129,7 @@ def read_group(group_id):
         with open(group_file) as f:
             group_str = f.read()
         group = json.loads(group_str)
-        return {'group_id': group_id, 'name': group['name'], 'parent': group['parent']}
+        return {'group_id': group_id, 'name': group['name'], 'parent': group['parent'], 'seed': group['seed']}
     except FileNotFoundError:
         raise GroupNotFoundError(group_id)
 
@@ -288,6 +288,7 @@ def api_add_group(api, sess, args):
     request = json.loads(http.request.body)
     name    = request['name']
     parent  = request['parent']
+    seed    = request['seed']
     try:
         parent = int(parent)
     except (ValueError, TypeError) as e:
@@ -305,7 +306,7 @@ def api_add_group(api, sess, args):
     group_id = allocate_group_id()
 
     logger.info('Creating group {} ({})', name, group_id)
-    write_group(group_id, {'name': name, 'parent': parent})
+    write_group(group_id, {'name': name, 'parent': parent, 'seed': seed})
     http.write(json.dumps({'success': True}))
 
 

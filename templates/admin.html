@@ -246,9 +246,9 @@
                 in_seed.value = mkseed();
             }
 
-            function toggle_task_gen_visible(task_id)
+            function toggle_task_gen_visible(uid)
             {
-                let container = document.getElementById(`gen-config-wrapper${task_id}`);
+                let container = document.getElementById(`gen-config-wrapper${uid}`);
                 container.classList.toggle('hidden');
             }
 
@@ -449,6 +449,25 @@
                                 </div>
                             </div>
                             </p>
+                            <h5>{{ lc['group_token_seed'] }}</h5>
+                            <div class="w3-row-padding">
+                                <div class="w3-col s9 m9 l9">
+                                    <input
+                                        type="text"
+                                        id="task-editor-seed-input"
+                                        placeholder="{{ lc['group_token_seed'] }}"
+                                        class="w3-input w3-border"
+                                        regex="[0-9a-f]{16}"
+                                        required
+                                    >
+                                </div>
+                                <div class="w3-col s3 m3 l3">
+                                    <!-- TODO -->
+                                    <a class="w3-button w3-green block" href="javascript:group_randomize_seed({{)">
+                                        {{ lc['taskeditor_randomize_seed'] }}
+                                    </a>
+                                </div>
+                            </div>
                             <h5>{{ lc['parent_group'] }}</h5>
                             <div class="w3-row-padding">
                                 <div class="w3-col s8 m8 l8">
@@ -643,24 +662,24 @@
                                     {{ lc['error_building_group_path'] }}
                                 {% end %}
                             </span>
-                            <h3>{{ task.title }}</h3>
+                            <h3>{{ task.title }} ({{ lc['task'] }})</h3>
                             <p>
                                 <strong>{{ lc['task_token_seed'] }}:</strong>
                                 <code style="font-family: monospace">{{ task.seed }}</code>
                             </p>
-                            <div id="gen-config-wrapper{{ task.task_id }}" class="w3-container hidden">
-                                <div id="gen-config-editor{{ task.task_id }}">{{
+                            <div id="gen-config-wrapper{{ 'task' + str(task.task_id) }}" class="w3-container hidden">
+                                <div id="gen-config-editor{{ 'task' + str(task.task_id) }}">{{
                                     task_gen.read_task_generation_config(task.task_id) 
                                 }}</div>
                                 <style>
-                                    #gen-config-editor{{ task.task_id }} {
+                                    #gen-config-editor{{ 'task' + str(task.task_id) }} {
                                         width: 100%;
                                         height: 400px;
                                     }
                                 </style>
                                 <script>
                                     (function() {
-                                        let editor = ace.edit('gen-config-editor{{ task.task_id }}');
+                                        let editor = ace.edit('gen-config-editor{{ 'task' + str(task.task_id) }}');
                                         gen_config_editors[{{ task.task_id }}] = editor;
                                         editor.session.setMode('ace/mode/python');
                                     })()
@@ -668,7 +687,7 @@
                                 <p>
                                     <a
                                         class="w3-button w3-green"
-                                        href="javascript:update_gen_config({{ task.task_id }})"
+                                        href="javascript:update_gen_config({{ 'task' + str(task.task_id) }})"
                                     >
                                         {{ lc['update_gen_config'] }}
                                     </a>
@@ -677,7 +696,60 @@
                             <p>
                                 <a
                                     class="w3-button w3-green"
-                                    href="javascript:toggle_task_gen_visible({{ task.task_id }})"
+                                    href="javascript:toggle_task_gen_visible({{ 'task' + str(task.task_id) }})"
+                                >
+                                    {{ lc['show_or_hide'] }}
+                                </a>
+                            </p>
+                        </div>
+                    {% end %}
+                    {% for group in groups.values() %}
+                        <div class="w3-container w3-light-grey" style="margin: 10px 0 10px 0;">
+                            <span style="color: grey;">
+                                {% try %}
+                                    {{ '/'.join(build_group_path(groups, group['group'])) + '/' }}
+                                {% except BaseException as e %}
+                                    {{ lc['error_building_group_path'] }}
+                                {% end %}
+                            </span>
+                            <h3>{{ group['name'] }} ({{ lc['group'] }})</h3>
+                            <p>
+                                <strong>{{ lc['group_token_seed'] }}:</strong>
+                                <code style="font-family: monospace">{{ group['seed'] }}</code>
+                            </p>
+                            <div
+                                id="gen-config-wrapper{{ 'group' + str(group['group_id']) }}"
+                                class="w3-container hidden"
+                            >
+                                <div id="gen-config-editor{{ 'group' + str(group['group_id']) }}">{{
+                                    task_gen.read_group_generation_config(group['group_id'])
+                                }}</div>
+                                <style>
+                                    #gen-config-editor{{ 'group' + str(group['group_id']) }} {
+                                        width: 100%;
+                                        height: 400px;
+                                    }
+                                </style>
+                                <script>
+                                    (function() {
+                                        let editor = ace.edit('gen-config-editor{{ 'group'+group['group_id'] }}');
+                                        gen_config_editors[{{ group['group_id'] }}] = editor;
+                                        editor.session.setMode('ace/mode/python');
+                                    })()
+                                </script>
+                                <p>
+                                    <a
+                                        class="w3-button w3-green"
+                                        href="javascript:update_gen_config({{ 'group' + str(group['group_id']) }})"
+                                    >
+                                        {{ lc['update_gen_config'] }}
+                                    </a>
+                                </p>
+                            </div>
+                            <p>
+                                <a
+                                    class="w3-button w3-green"
+                                    href="javascript:toggle_group_gen_visible({{ 'group' + str(group['group_id']) }})"
                                 >
                                     {{ lc['show_or_hide'] }}
                                 </a>
