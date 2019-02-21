@@ -10,6 +10,7 @@ from threading import Lock
 from loguru import logger
 
 import team
+import task_gen
 from configuration import configuration
 from api import api, GUEST, USER, ADMIN, ApiArgumentError
 from localization import lc
@@ -382,6 +383,28 @@ def reparent_group(group_id, new_parent):
     group = read_group(group_id)
     group['parent'] = new_parent
     write_group(group_id, group)
+
+
+def api_get_generated_task(api, sess, args):
+    http = args['http_handler']
+    request = json.loads(http.request.body)
+    task_id = request['task_id']
+
+    try:
+        task_id = int(task_id)
+    except (ValueError, TypeError) as e:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
+                param='task_id',
+            )
+        )
+    try:
+        task = task_gen.get_generated_task(task_id)
+    except TaskNotFoundError:
+        raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
+    
+    http.write(json.dumps({'success': True, 'task': task.to_dict()}))
 
 
 def api_get_task(api, sess, args):

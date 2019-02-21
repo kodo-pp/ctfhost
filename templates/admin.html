@@ -233,6 +233,23 @@
                 }
             }
 
+            function update_gen_config(task_id)
+            {
+                ace = gen_config_editors[task_id];
+                new_config = ace.getValue();
+                let data = {
+                    'task_id': task_id,
+                    'new_config': new_config
+                }
+                try {
+                    make_http_request('/api/update_gen_config', JSON.stringify(data));
+                    alert("{{ lc['gen_config_update_success'] }}");
+                    //location.reload();
+                } catch (e) {
+                    error_message(e.message);
+                }
+            }
+
             function setup_group_parents()
             {
                 {% for group in groups.values() %}

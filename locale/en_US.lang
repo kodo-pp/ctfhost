@@ -125,5 +125,6 @@ admintab_task_gen                   = Task generation
 update_gen_config                   = Update configuration
 show_or_hide                        = Show/Hide
 group_token_seed                    = Group token seed
+gen_config_update_success           = Task generation config updated successfully
 task                                = task
 group                               = task group
