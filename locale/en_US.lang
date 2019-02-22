@@ -129,3 +129,6 @@ gen_config_update_success           = Generation config updated successfully
 task                                = task
 group                               = task group
 groups                              = Groups
+hints                               = Hints
+add_hint                            = Add hint
+delete_hint                         = Delete hint

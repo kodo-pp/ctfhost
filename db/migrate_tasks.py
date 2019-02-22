@@ -14,6 +14,7 @@ DEFAULTS = {
     'group': 0,
     'order': 0,
     'seed': lambda: secrets.token_hex(8),
+    'hints': [],
 }
 
 

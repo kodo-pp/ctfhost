@@ -4,7 +4,7 @@ function ActionError(text)
 }
 
 
-function open_task_editor(task_id, text, title, value, labels, loaded_flags, group, order, seed)
+function open_task_editor(task_id, text, title, value, labels, loaded_flags, group, order, seed, loaded_hints)
 {
     let overlay = document.querySelector('#task-editor-overlay');
     if (overlay === null) {
@@ -15,10 +15,12 @@ function open_task_editor(task_id, text, title, value, labels, loaded_flags, gro
         throw new Error('Another task editor is already active');
     }
 
-    let container = document.getElementById('task-editor-flags');
-    container.innerHTML = '';
+    document.getElementById('task-editor-flags').innerHTML = '';
+    document.getElementById('task-editor-hints').innerHTML = '';
     flags = {};
+    hints = {};
     flagno = 0;
+    hintno = 0;
     
     overlay.classList.add('task-editor-active');
 
@@ -51,7 +53,13 @@ function open_task_editor(task_id, text, title, value, labels, loaded_flags, gro
         add_flag();
         flags[no] = flag;
     }
-    update_flags_ui();
+
+    for (let hint of loaded_hints) {
+        let no = hintno;
+        add_hint();
+        hints[no] = hint;
+    }
+    update_ui();
 }
 
 
@@ -113,6 +121,11 @@ function task_editor_submit()
         flaglist.push(flags[no]);
     }
 
+    let hintlist = [];
+    for (let no in hints) {
+        hintlist.push(hints[no]);
+    }
+
     let data = JSON.stringify({
         'task_id': task_id,
         'text':   text,
@@ -122,7 +135,8 @@ function task_editor_submit()
         'flags':  flaglist,
         'group':  group,
         'order':  order,
-        'seed':   seed
+        'seed':   seed,
+        'hints':  hintlist
     });
 
     let response;
@@ -148,6 +162,48 @@ function task_editor_submit()
 
 var flags = {};
 var flagno = 0;
+var hints = {};
+var hintno = 0;
+
+
+function add_hint()
+{
+    const hint_input_template = `
+    <div class="w3-row-padding" id="hint##no##">
+        <div class="w3-col s4 m4 l4">
+            <input
+                id="hint_cost##no##"
+                onchange="update_hintcost_internal(##no##)"
+                class="w3-input w3-border"
+                type="number"
+                step=1
+                required
+            >
+        </div>
+        <div class="w3-col s6 m6 l6">
+            <input
+                id="hint_text##no##"
+                type="text"
+                class="w3-input w3-border"
+                onchange="update_hinttext_internal(##no##)"
+            >
+        </div>
+        <div class="w3-col s2 m2 l2">
+            <a class="w3-button w3-red" href="javascript:delete_hint(##no##)">${locale_messages['delete_hint']}</a>
+        </div>
+    </div>
+    `
+    let container = document.getElementById('task-editor-hints');
+    
+    // Ugly, I know...
+    container.innerHTML += hint_input_template.split('##no##').join(hintno.toString());
+
+    hints[hintno] = {'cost': 10, 'text': 'Hint text...'};
+    ++hintno;
+
+    // Костыль № 9247
+    update_hints_ui();
+}
 
 
 function add_flag()
@@ -188,10 +244,25 @@ function add_flag()
 }
 
 
+function update_ui()
+{
+    update_flags_ui();
+    update_hints_ui();
+}
+
+
 function update_flags_ui()
 {
     for (let no in flags) {
         update_flag_ui(no);
+    }
+}
+
+
+function update_hints_ui()
+{
+    for (let no in hints) {
+        update_hint_ui(no);
     }
 }
 
@@ -202,6 +273,15 @@ function update_flag_ui(no)
     let in_data = document.getElementById(`flag_data${no}`);
     in_type.value = flags[no].type;
     in_data.value = flags[no].data;
+}
+
+
+function update_hint_ui(no)
+{
+    let in_cost = document.getElementById(`hint_cost${no}`);
+    let in_text = document.getElementById(`hint_text${no}`);
+    in_cost.value = hints[no].cost;
+    in_text.value = hints[no].text;
 }
 
 
@@ -226,6 +306,30 @@ function delete_flag(no)
     let flag_container = document.getElementById(`flag${no}`);
     flag_container.remove();
     delete flags[no];
+}
+
+
+function update_hintcost_internal(no)
+{
+    let elem = document.getElementById(`hint_cost${no}`);
+    let cost = elem.value;
+    hints[no].cost = parseInt(cost);
+}
+
+
+function update_hinttext_internal(no)
+{
+    let elem = document.getElementById(`hint_text${no}`);
+    let text = elem.value;
+    hints[no].text = text;
+}
+
+
+function delete_hint(no)
+{
+    let hint_container = document.getElementById(`hint${no}`);
+    hint_container.remove();
+    delete hints[no];
 }
 
 

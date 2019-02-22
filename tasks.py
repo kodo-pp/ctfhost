@@ -48,7 +48,24 @@ class Task:
         self.group   = info['group']
         self.order   = info['order']
         self.seed    = info['seed']
+        self.hints   = info['hints']
+        self.validate()
+
+    def validate(self):
         self.validate_flags()
+        self.validate_hints()
+
+    def validate_hints(self):
+        if type(self.hints) is not list:
+            raise TypeError('hints', type(self.hints))
+        for hint in self.hints:
+            if type(hint) is not dict:
+                raise TypeError('hints[...]', type(hint))
+            if type(hint['cost']) is not int:
+                raise TypeError('hints[...].cost', type(hint['cost']))
+            if type(hint['text']) is not str:
+                raise TypeError('hints[...].text', type(hint['text']))
+        
 
     def validate_flags(self):
         # TODO: maybe generate user-friendly error messages
@@ -77,6 +94,7 @@ class Task:
             'group':   self.group,
             'order':   self.order,
             'seed':    self.seed,
+            'hints':   self.hints,
         }
 
     def check_flag(self, flag, team_name):
@@ -198,6 +216,7 @@ def api_add_or_update_task(api, sess, args):
     group   = request['group']
     order   = request['order']
     seed    = request['seed']
+    hints   = request['hints']
 
     if task_id is None or task_id == '':
         task_id = allocate_task_id()
@@ -260,7 +279,8 @@ def api_add_or_update_task(api, sess, args):
         task.group = group
         task.order = order
         task.seed = seed
-        task.validate_flags()
+        task.hints = hints
+        task.validate()
         write_task(task)
     else:
         logger.info('Creating task {}', task_id)
@@ -276,8 +296,10 @@ def api_add_or_update_task(api, sess, args):
                     'group':  group,
                     'order':  order,
                     'seed':   seed,
+                    'hints':  hints,
                 }
             )
+            task.validate()
         except KeyError as e:
             raise ApiArgumentError(lc.get('api_argument_error').format(argument=str(e)))
         write_task(task)
