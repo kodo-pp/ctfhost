@@ -11,7 +11,7 @@ import tasks
 import util
 import team
 from configuration import configuration
-from api import api, ADMIN, USER, GUEST
+from api import api, ADMIN, USER, GUEST, ApiArgumentError
 
 
 class PresetNotFoundError(Exception):
@@ -67,9 +67,57 @@ def read_task_generation_config(task_id):
         raise tasks.TaskNotFoundError()
     task_gen_file = os.path.join(task_dir, 'generate.py')
     if not os.access(task_gen_file, os.R_OK):
-        make_task_generation_config_from_preset(task_id, 'noop')
+        make_default_task_generation_config(task_id)
     with open(task_gen_file) as f:
         return f.read()
+
+
+def make_default_task_generation_config(task_id):
+    task = tasks.read_task(task_id)
+    if task.group == 0:
+        make_task_generation_config_from_preset(task_id, 'noop')
+    else:
+        # Guarantees that config will be available at the moment of exit
+        write_task_generation_config(task_id, read_group_generation_config(task.group))
+        logger.info('Inheriting task ({}) generation config from group ({})', task_id, task.group)
+    
+
+def make_group_generation_config_from_preset(group_id, preset_name):
+    if type(group_id) is not int:
+        raise groups.GroupNotFoundError()
+    group_dir = os.path.join(configuration['groups_path'], str(group_id))
+    if not os.access(group_dir, os.R_OK | os.X_OK):
+        raise groups.GroupNotFoundError()
+
+    preset = read_preset(preset_name)
+    logger.info('Making group ({}) generation config from preset "{}"', group_id, preset_name)
+    group_gen_file = os.path.join(group_dir, 'generate.py')
+
+    with open(group_gen_file, 'w') as f:
+        f.write(preset)
+
+
+def read_group_generation_config(group_id):
+    if type(group_id) is not int:
+        raise groups.GroupNotFoundError()
+    group_dir = os.path.join(configuration['groups_path'], str(group_id))
+    if not os.access(group_dir, os.R_OK | os.X_OK):
+        raise groups.GroupNotFoundError()
+    group_gen_file = os.path.join(group_dir, 'generate.py')
+    if not os.access(group_gen_file, os.R_OK):
+        make_default_group_generation_config(group_id)
+    with open(group_gen_file) as f:
+        return f.read()
+
+
+def make_default_group_generation_config(group_id):
+    group = tasks.read_group(group_id)
+    if group['parent'] == 0:
+        make_group_generation_config_from_preset(group_id, 'noop')
+    else:
+        # Guarantees that config will be available at the moment of exit
+        write_group_generation_config(group_id, read_group_generation_config(group['parent']))
+        logger.info('Inheriting group ({}) generation config from group ({})', group_id, group['parent'])
 
 
 def write_task_generation_config(task_id, config):
@@ -80,6 +128,17 @@ def write_task_generation_config(task_id, config):
         raise tasks.TaskNotFoundError()
     task_gen_file = os.path.join(task_dir, 'generate.py')
     with open(task_gen_file, 'w') as f:
+        f.write(config)
+
+
+def write_group_generation_config(group_id, config):
+    if type(group_id) is not int:
+        raise groups.TaskNotFoundError()
+    group_dir = os.path.join(configuration['groups_path'], str(group_id))
+    if not os.access(group_dir, os.R_OK | os.X_OK):
+        raise groups.TaskNotFoundError()
+    group_gen_file = os.path.join(group_dir, 'generate.py')
+    with open(group_gen_file, 'w') as f:
         f.write(config)
 
 
@@ -117,6 +176,7 @@ def write_generated_task(task, token):
 
 
 def maybe_generate(task_id, token):
+    read_task_generation_config(task_id)    # Make sure that the config is available
     if should_generate(task_id, token):
         generate(task_id, token)
 
@@ -146,6 +206,7 @@ def get_config_modification_timestamp(task_id):
 
 
 def generate(task_id, token):
+    read_task_generation_config(task_id)    # Make sure that the config is available
     logger.info('Generating task {} with token {}', task_id, token)
     task_dir = os.path.join(configuration['tasks_path'], str(task_id))
     os.makedirs(task_dir, exist_ok=True)
@@ -167,20 +228,38 @@ def get_generated_task_list(team_name):
 def api_update_gen_config(api, sess, args):
     http = args['http_handler']
     request = json.loads(http.request.body)
-    task_id    = request['task_id']
+    what       = request['what']
     new_config = request['new_config']
 
-    try:
-        task_id = int(task_id)
-    except (ValueError, TypeError) as e:
-        raise Exception(
-            lc.get('api_invalid_data_type').format(
-                expected=lc.get('int'),
-                param='task_id',
+    if what == 'task':
+        task_id = request['task_id']
+        try:
+            task_id = int(task_id)
+        except (ValueError, TypeError) as e:
+            raise Exception(
+                lc.get('api_invalid_data_type').format(
+                    expected=lc.get('int'),
+                    param='task_id',
+                )
             )
-        )
-    
-    write_task_generation_config(task_id, new_config)
-    http.write(json.dumps({'success': True}))
+        
+        write_task_generation_config(task_id, new_config)
+        http.write(json.dumps({'success': True}))
+    elif what == 'group':
+        group_id = request['group_id']
+        try:
+            group_id = int(group_id)
+        except (ValueError, TypeError) as e:
+            raise Exception(
+                lc.get('api_invalid_data_type').format(
+                    expected=lc.get('int'),
+                    param='group_id',
+                )
+            )
+        
+        write_group_generation_config(group_id, new_config)
+        http.write(json.dumps({'success': True}))
+    else:
+        raise ApiArgumentError('what')
 
 api.add('update_gen_config', api_update_gen_config, access_level=ADMIN)

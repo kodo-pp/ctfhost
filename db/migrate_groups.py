@@ -6,20 +6,15 @@ import sys
 import secrets
 
 DEFAULTS = {
-    'text': '',
-    'title': 'Unnamed task',
-    'value': 0,
-    'labels': [],
-    'flags': [],
-    'group': 0,
-    'order': 0,
+    'name':   'Unnamed group',
+    'parent': 0,
     'seed': lambda: secrets.token_hex(8),
 }
 
 
-def migrate_task(task_path):
-    print('==> Migrating task "{task}"'.format(task=task_path))
-    with open(task_path, 'r') as f:
+def migrate_group(group_path):
+    print('==> Migrating group "{group}"'.format(group=group_path))
+    with open(group_path, 'r') as f:
         raw_read = f.read()
     obj = json.loads(raw_read)
     for k, v in DEFAULTS.items():
@@ -33,20 +28,20 @@ def migrate_task(task_path):
             )
             obj[k] = new_value
     written = json.dumps(obj)
-    with open(task_path, 'w') as f:
+    with open(group_path, 'w') as f:
         f.write(written)
 
 
 def main():
     if '--help' in sys.argv or '-h' in sys.argv:
-        print('Usage: {prog} [path/to/task.json] ...'.format(prog=sys.argv[0]))
-        print('Add missing attributes to tasks')
+        print('Usage: {prog} [path/to/group.json] ...'.format(prog=sys.argv[0]))
+        print('Add missing attributes to groups')
         sys.exit(0)
-    for task_path in sys.argv[1:]:
+    for group_path in sys.argv[1:]:
         try:
-            migrate_task(task_path)
+            migrate_group(group_path)
         except BaseException as e:
-            print('Error while processing task "{task}": {err}'.format(task=task_path, err=repr(e)))
+            print('Error while processing group "{group}": {err}'.format(group=group_path, err=repr(e)))
             sys.exit(1)
 
 
