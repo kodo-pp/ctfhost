@@ -195,7 +195,8 @@
                 let name = document.getElementById(`add-group-name${parent_id}`).value;
                 let data = {
                     'parent': parent_id,
-                    'name': name
+                    'name': name,
+                    'seed': mkseed()
                 };
                 try {
                     make_http_request('/api/add_group', JSON.stringify(data));
