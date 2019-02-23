@@ -198,7 +198,7 @@ function add_hint()
     // Ugly, I know...
     container.innerHTML += hint_input_template.split('##no##').join(hintno.toString());
 
-    hints[hintno] = {'cost': 10, 'text': 'Hint text...'};
+    hints[hintno] = {'cost': 10, 'text': 'Hint text...', 'hexid': mkhexid(16), 'purchases': []};
     ++hintno;
 
     // Костыль № 9247

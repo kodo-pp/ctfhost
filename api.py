@@ -13,6 +13,11 @@ class ApiPermissionError(Exception):
         super().__init__(*a)
 
 
+class ApiUserError(Exception):
+    def __init__(self, *a):
+        super().__init__(*a)
+
+
 class ApiKeyError(Exception):
     def __init__(self, *a):
         super().__init__(*a)

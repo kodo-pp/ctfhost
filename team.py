@@ -34,17 +34,29 @@ def get_submissions(team_name):
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute('SELECT task_id, flag, correct, points FROM submissions WHERE team_name = ?', (team_name,))
-        return cur.fetchall()
+        data = cur.fetchall()
+    result = []
+    for row in data:
+        if not tasks.task_exists(row[0]):
+            logger.warning('Unable to load submission: task {} not found', row[0])
+            continue
+        result.append(row)
+    return result
 
 
 def get_all_submissions():
     with closing(sqlite3.connect(configuration['db_path'], detect_types=sqlite3.PARSE_DECLTYPES)) as db:
         cur = db.cursor()
         cur.execute('SELECT team_name, task_id, flag, correct, points, time FROM submissions')
-        return [
-            {'team_name': i[0], 'task_id': i[1], 'flag': i[2], 'is_correct': i[3], 'points': i[4], 'time': i[5]}
-            for i in cur.fetchall()
-        ]
+        data = cur.fetchall()
+    result = []
+    for i in data:
+        row = {'team_name': i[0], 'task_id': i[1], 'flag': i[2], 'is_correct': i[3], 'points': i[4], 'time': i[5]}
+        if not tasks.task_exists(row['task_id']):
+            logger.warning('Unable to load submission: task {} not found', row['task_id'])
+            continue
+        result.append(row)
+    return result
 
 
 def get_all_teams():
@@ -64,7 +76,13 @@ def get_solves(team_name):
             (team_name,)
         )
         solves = cur.fetchall()
-    return {i[0]: (i[1], i[2]) for i in solves}
+    result = {}
+    for i in solves:
+        if not tasks.task_exists(i[0]):
+            logger.warning('Unable to load solve information: task {} not found', i[0])
+            continue
+        result[i[0]] = (i[1], i[2])
+    return result
 
 
 def get_team_basic_info(team_name):

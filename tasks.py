@@ -65,7 +65,13 @@ class Task:
                 raise TypeError('hints[...].cost', type(hint['cost']))
             if type(hint['text']) is not str:
                 raise TypeError('hints[...].text', type(hint['text']))
-        
+            if type(hint['purchases']) is not list:
+                raise TypeError('hints[...].purchases', type(hint['purchases']))
+            if type(hint['hexid']) is not str:
+                raise TypeError('hints[...].hexid', type(hint['hexid']))
+            hint['hexid'] = hint['hexid'].lower()
+            if re.match(r'^[0-9a-f]{32}$', hint['hexid']) is None:
+                raise ValueError('hints[...].hexid', hint['hexid'])
 
     def validate_flags(self):
         # TODO: maybe generate user-friendly error messages
@@ -121,6 +127,7 @@ class Task:
 
     def strip_private_data(self):
         self.flags = []
+        self.hints = []
 
 
 def get_task_list():
@@ -558,6 +565,10 @@ def delete_task(task_id):
     if not task_exists(task_id):
         raise TaskNotFoundError()
     shutil.rmtree(os.path.join(configuration['tasks_path'], str(task_id)))
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute('DELETE FROM submissions WHERE task_id = ?', (task_id,))
+        db.commit()
 
 
 def delete_group(group_id):
@@ -663,6 +674,18 @@ def write_group(group_id, group_dict):
     group_file = os.path.join(group_dir, 'group.json')
     with open(group_file, 'w') as f:
         f.write(json.dumps(group_dict))
+
+    
+# TODO: XXX: FIXME:
+# give hints random hash, so that their identification is 99.99% unique 
+
+
+def access_hint(task_id, hint_no, current_team):
+    if type(hint_no) is not int:
+        raise TypeError('hint_no', str(type(hint_no)))
+    if not has_hint(task_id, hint_no, current_team):
+        buy_hint(task_id, hint_no, current_team)
+    return get_hint(task_id, hint_no)
 
 
 api.add('add_or_update_task', api_add_or_update_task, access_level=ADMIN)
