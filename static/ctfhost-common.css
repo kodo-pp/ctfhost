@@ -1,13 +1,3 @@
-.ctfhost-combo-input-text {
-    grid-column-start: 1;
-    grid-column-end: 7;
-}
-
-.ctfhost-combo-input-submit {
-    grid-column-start: 7;
-    grid-column-end: 8;
-}
-
 .ctfhost-task-view-label {
     cursor: default;
     display: inline-block;

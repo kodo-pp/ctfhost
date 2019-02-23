@@ -190,7 +190,8 @@ def should_generate(task_id, token):
     except BaseException:
         return True
     conf_ts = get_config_modification_timestamp(task_id)
-    return gen_ts < conf_ts
+    task_ts = get_task_modification_timestamp(task_id)
+    return gen_ts < conf_ts or gen_ts < task_ts
 
 
 def get_generation_timestamp(task_id, token):
@@ -203,6 +204,12 @@ def get_config_modification_timestamp(task_id):
     task_dir = os.path.join(configuration['tasks_path'], str(task_id))
     task_gen_file = os.path.join(task_dir, 'generate.py')
     return os.stat(task_gen_file).st_mtime
+
+
+def get_task_modification_timestamp(task_id):
+    task_dir = os.path.join(configuration['tasks_path'], str(task_id))
+    task_json_file = os.path.join(task_dir, 'task.json')
+    return os.stat(task_json_file).st_mtime
 
 
 def generate(task_id, token):

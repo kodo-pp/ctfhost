@@ -37,7 +37,9 @@
                 {% for i, team in enumerate(sorted(team_list, key = lambda t: -t.points)) %}
                     <tr>
                         <td>{{ i + 1 }}</td>
-                        <td>{{ team.full_name }}</td>
+                        <td>
+                            <a href="/team_profile?team={{ team.team_name }}">{{ team.full_name }}</a>
+                        </td>
                         <td>{{ team.points }}</td>
                         {% for task in task_list %}
                             {% if task.task_id in team.solves %}

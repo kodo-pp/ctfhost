@@ -26,11 +26,18 @@ class TaskNotFoundError(Exception):
 class GroupNotFoundError(Exception):
     pass
 
+class HintNotFoundError(Exception):
+    pass
+
+class NotEnoughPointsError(Exception):
+    pass
+
 class GroupReparentError(Exception):
     pass
 
 class TooFrequentSubmissions(Exception):
     pass
+
 
 
 def check_flag_with_program(prog, flag):
@@ -65,8 +72,6 @@ class Task:
                 raise TypeError('hints[...].cost', type(hint['cost']))
             if type(hint['text']) is not str:
                 raise TypeError('hints[...].text', type(hint['text']))
-            if type(hint['purchases']) is not list:
-                raise TypeError('hints[...].purchases', type(hint['purchases']))
             if type(hint['hexid']) is not str:
                 raise TypeError('hints[...].hexid', type(hint['hexid']))
             hint['hexid'] = hint['hexid'].lower()
@@ -127,7 +132,6 @@ class Task:
 
     def strip_private_data(self):
         self.flags = []
-        self.hints = []
 
 
 def get_task_list():
@@ -675,17 +679,96 @@ def write_group(group_id, group_dict):
     with open(group_file, 'w') as f:
         f.write(json.dumps(group_dict))
 
+
+def has_hint(task_id, hint_hexid, team_name):
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute(
+            'SELECT rowid FROM hint_purchases WHERE task_id = ? AND hint_hexid = ? AND team_name = ? LIMIT 1',
+            (task_id, hint_hexid, team_name),
+        )
+        return len(cur.fetchall()) > 0
+
+
+def get_hint_puchases_for_team(team_name):
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute(
+            'SELECT task_id, hint_hexid, cost FROM hint_purchases WHERE team_name = ?',
+            (team_name,),
+        )
+        return cur.fetchall()
+
+
+def find_hint(task, hint_hexid):
+    for hint in task.hints:
+        if hint['hexid'] == hint_hexid:
+            return hint
+    raise HintNotFoundError()
+
+
+def purchase_hint(task_id, hint_hexid, team_name):
+    task = read_task(task_id)
+    hint = find_hint(task, hint_hexid)
+    current_team = team.read_team(team_name)
+    if current_team.points < hint['cost']:
+        logger.info(
+            'Team {} tried to purchase hint {} for task {} ({}), but does not have enough points',
+            team_name,
+            hint_hexid,
+            task.title,
+            task_id,
+        )
+        raise NotEnoughPointsError()
+
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute(
+            'INSERT INTO hint_purchases VALUES (?, ?, ?, ?)',
+            (task_id, hint_hexid, team_name, hint['cost']),
+        )
+        db.commit()
+    logger.info(
+        'Team {} purchased hint {} for task {} ({})',
+        team_name,
+        hint_hexid,
+        task.title,
+        task_id,
+    )
+
+
+def get_hint(task_id, hint_hexid):
+    task = read_task(task_id)
+    return find_hint(task, hint_hexid)
+
     
-# TODO: XXX: FIXME:
-# give hints random hash, so that their identification is 99.99% unique 
+def access_hint(task_id, hint_hexid, team_name):
+    if type(task_id) is not int:
+        raise TypeError('task_id', str(type(task_id)))
+    if not has_hint(task_id, hint_hexid, team_name):
+        purchase_hint(task_id, hint_hexid, team_name)
+    return get_hint(task_id, hint_hexid)
 
 
-def access_hint(task_id, hint_no, current_team):
-    if type(hint_no) is not int:
-        raise TypeError('hint_no', str(type(hint_no)))
-    if not has_hint(task_id, hint_no, current_team):
-        buy_hint(task_id, hint_no, current_team)
-    return get_hint(task_id, hint_no)
+def api_access_hint(api, sess, args):
+    http = args['http_handler']
+    request = json.loads(http.request.body)
+    task_id    = request['task_id']
+    hint_hexid = request['hint_hexid']
+    team_name  = sess.username
+
+    try:
+        task_id = int(task_id)
+    except (ValueError, TypeError) as e:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
+                param='task_id',
+            )
+        )
+
+    hint = access_hint(task_id=task_id, hint_hexid=hint_hexid, team_name=team_name)
+    http.write(json.dumps({'success': True, 'hint': hint}))
 
 
 api.add('add_or_update_task', api_add_or_update_task, access_level=ADMIN)
@@ -696,3 +779,4 @@ api.add('add_group',          api_add_group,          access_level=ADMIN)
 api.add('rename_group',       api_rename_group,       access_level=ADMIN)
 api.add('reparent_group',     api_reparent_group,     access_level=ADMIN)
 api.add('delete_group',       api_delete_group,       access_level=ADMIN)
+api.add('access_hint',        api_access_hint,        access_level=USER)

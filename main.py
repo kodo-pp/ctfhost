@@ -176,6 +176,7 @@ class RegHandler(tornado.web.RequestHandler):
         auth.register_user(username=username, password=password, disp_name=disp_name, email=email)
         self.redirect('/')
 
+
 class TasksHandler(tornado.web.RequestHandler):
     def get(self):
         session_id = self.get_cookie('session_id')
@@ -185,7 +186,16 @@ class TasksHandler(tornado.web.RequestHandler):
             return
         task_list = list(task_gen.get_generated_task_list(team_name=session.username))
         current_team = team.read_team(session.username)
-        self.write(render_template('tasks.html', session=session, tasks=task_list, team=current_team))
+        hint_purchases = tasks.get_hint_puchases_for_team(session.username)
+        self.write(
+            render_template(
+                'tasks.html',
+                session        = session,
+                tasks          = task_list,
+                team           = current_team,
+                hint_purchases = hint_purchases,
+            )
+        )
 
 class TeamProfileHandler(tornado.web.RequestHandler):
     def get(self):

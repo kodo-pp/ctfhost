@@ -23,7 +23,6 @@ HINT_DEFAULTS = {
     'value': 10,
     'text': 'Hint text',
     'hexid': lambda: secrets.token_hex(16),
-    'purchases': []
 }
 
 

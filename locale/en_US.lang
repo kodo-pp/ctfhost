@@ -132,3 +132,6 @@ groups                              = Groups
 hints                               = Hints
 add_hint                            = Add hint
 delete_hint                         = Delete hint
+view_hint                           = View hint
+buy_hint                            = Buy hint
+hint                                = Hint

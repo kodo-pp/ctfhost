@@ -97,7 +97,8 @@ def read_team(team_name):
     basic_info = get_team_basic_info(team_name)
     solves = get_solves(team_name)
     submissions = get_submissions(team_name)
-    points = sum([i[3] for i in submissions])   # 3 ==> points
+    hint_purchases = tasks.get_hint_puchases_for_team(team_name)
+    points = sum([i[3] for i in submissions]) - sum([i[2] for i in hint_purchases])
     info = {
         **basic_info,
         'solves': solves,
