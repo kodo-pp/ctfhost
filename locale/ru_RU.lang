@@ -135,5 +135,5 @@ delete_hint                         = Удалить подсказку
 view_hint                           = Просмотреть подсказку
 buy_hint                            = Купить подсказку
 hint                                = Подсказка
-taskeditor_update_seed              = Сохранить параметр генерации токена
+taskeditor_update_seed              = Сохранить
 group_seed_update_success           = Параметр генерации токена сохранён
