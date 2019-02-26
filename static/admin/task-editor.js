@@ -27,7 +27,6 @@ function open_task_editor(task_id, text, title, value, labels, loaded_flags, gro
     let in_taskid   = document.querySelector('#task-editor-overlay #task-editor-taskid-input');
     let in_title    = document.querySelector('#task-editor-overlay #task-editor-title-input');
     let in_value    = document.querySelector('#task-editor-overlay #task-editor-value-input');
-    let in_text     = document.querySelector('#task-editor-overlay #task-editor-text-input');
     let in_labels   = document.querySelector('#task-editor-overlay #task-editor-labels-input');
     let in_group    = document.querySelector('#task-editor-overlay #task-editor-groupname-input');
     let in_order    = document.querySelector('#task-editor-overlay #task-editor-order-input');
@@ -36,7 +35,8 @@ function open_task_editor(task_id, text, title, value, labels, loaded_flags, gro
     in_taskid.value = task_id;
     in_title.value  = title;
     in_value.value  = value;
-    in_text.value   = text;
+    let vim = ace.edit('task-editor-text-input');
+    vim.session.setValue(text);
     in_labels.value = labels.join(' ');
     in_group.value  = group;
     in_order.value  = order;
@@ -106,7 +106,8 @@ function run_task_editor_cancel()
 function task_editor_submit()
 {
     let task_id   = document.querySelector('#task-editor-overlay #task-editor-taskid-input').value;
-    let text      = document.querySelector('#task-editor-overlay #task-editor-text-input').value;
+    let vim = ace.edit('task-editor-text-input');
+    let text = vim.session.getValue();
     let title     = document.querySelector('#task-editor-overlay #task-editor-title-input').value;
     let labels_s  = document.querySelector('#task-editor-overlay #task-editor-labels-input').value;
     let labels    = labels_s.split(' ').filter(Boolean);
