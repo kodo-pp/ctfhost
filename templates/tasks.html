@@ -107,7 +107,7 @@
                         id="task-id{{ task.task_id }}-toggle-btn"
                     >{{ lc['task_show'] }}</a></p>
                     <div id="task-id{{ task.task_id }}-inner" class="hidden">
-                        <p>{{ task.text }}</p>
+                        {% raw task.get_pretty_text() %}
                         {% if len(task.hints) > 0 %}
                             <h4>{{ lc['hints'] }}</h4>
                         {% end %}

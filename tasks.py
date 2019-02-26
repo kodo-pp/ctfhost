@@ -7,6 +7,7 @@ import time
 from contextlib import closing
 from threading import Lock
 
+import markdown as md
 from loguru import logger
 
 import team
@@ -48,17 +49,21 @@ def check_flag_with_program(prog, flag):
 
 class Task:
     def __init__(self, task_id, info):
-        self.task_id = task_id
-        self.title   = info['title']
-        self.text    = info['text']
-        self.value   = info['value']
-        self.labels  = info['labels']
-        self.flags   = info['flags']
-        self.group   = info['group']
-        self.order   = info['order']
-        self.seed    = info['seed']
-        self.hints   = info['hints']
+        self.task_id     = task_id
+        self.title       = info['title']
+        self.text        = info['text']
+        self.value       = info['value']
+        self.labels      = info['labels']
+        self.flags       = info['flags']
+        self.group       = info['group']
+        self.order       = info['order']
+        self.seed        = info['seed']
+        self.hints       = info['hints']
         self.validate()
+
+    def get_pretty_text(self):
+        # TODO: maybe cache the resulting HTML is the performance boost is noticeable
+        return md.markdown(self.text)
 
     def validate(self):
         self.validate_flags()
