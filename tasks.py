@@ -63,7 +63,7 @@ class Task:
 
     def get_pretty_text(self):
         # TODO: maybe cache the resulting HTML is the performance boost is noticeable
-        return md.markdown(self.text)
+        return md.markdown(self.text, extensions=['sane_lists', 'extra', 'codehilite'])
 
     def validate(self):
         self.validate_flags()
