@@ -1,5 +1,7 @@
-# ctfhost
+# CTFhost
 A simple platform to hold task-based CTF competitions. Programming project
+
+Russian version of this document is available in [README.RU.md](README.RU.md)
 
 ## Acknowledgements
 
@@ -8,4 +10,4 @@ A simple platform to hold task-based CTF competitions. Programming project
 - [Loguru](https://github.com/Delgan/loguru) - Logging
 - [Pygments (no HTTPS in the link)](http://pygments.org/) - Source highlighting
 - [Markdown (Python package)](https://python-markdown.github.io/) - Task text formatting
-
+And other libraries (e.g. `sqlite3`)
