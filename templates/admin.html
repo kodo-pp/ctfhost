@@ -301,6 +301,27 @@
                 container.classList.toggle('hidden');
             }
 
+            function group_randomize_seed(group_id)
+            {
+                let in_seed = document.getElementById(`task-editor-seed-input${group_id}`);
+                in_seed.value = mkseed();
+            }
+
+            function group_update_seed(group_id)
+            {
+                let in_seed = document.getElementById(`task-editor-seed-input${group_id}`);
+                data = {
+                    'group_id': group_id,
+                    'new_seed': in_seed.value
+                }
+                try {
+                    make_http_request('/api/update_group_seed', JSON.stringify(data));
+                    alert("{{ lc['group_seed_update_success'] }}");
+                } catch (e) {
+                    error_message(e.message);
+                }
+            }
+
             window.addEventListener('load', setup_tabs);
             window.addEventListener('load', setup_group_parents);
 
@@ -371,6 +392,7 @@
                                 placeholder="{{ lc['taskeditor_seed'] }}"
                                 class="w3-input w3-border"
                                 regex="[0-9a-f]{16}"
+                                autocomplete="off"
                                 required
                             >
                         </div>
@@ -491,7 +513,9 @@
                                         type="text"
                                         id="rename-group-name{{ group['group_id'] }}"
                                         class="w3-input w3-border"
-                                        placeholder="{{ lc['group_new_name'] }}">
+                                        placeholder="{{ lc['group_new_name'] }}"
+                                        autocomplete="off"
+                                    >
                                 </div>
                                 <div class="w3-col s4 m4 l4">
                                     <a
@@ -505,22 +529,32 @@
                             </p>
                             <h5>{{ lc['group_token_seed'] }}</h5>
                             <div class="w3-row-padding">
-                                <div class="w3-col s9 m9 l9">
+                                <div class="w3-col s8 m8 l8">
                                     <input
                                         type="text"
-                                        id="task-editor-seed-input"
+                                        id="task-editor-seed-input{{ group['group_id'] }}"
                                         placeholder="{{ lc['group_token_seed'] }}"
                                         class="w3-input w3-border"
                                         regex="[0-9a-f]{16}"
+                                        value="{{ group['seed'] }}"
+                                        autocomplete="off"
                                         required
                                     >
                                 </div>
-                                <div class="w3-col s3 m3 l3">
+                                <div class="w3-col s2 m2 l2">
                                     <a
-                                        class="w3-button w3-green block"
+                                        class="w3-button w3-blue block"
                                         href="javascript:group_randomize_seed({{ group['group_id'] }})"
                                     >
                                         {{ lc['taskeditor_randomize_seed'] }}
+                                    </a>
+                                </div>
+                                <div class="w3-col s2 m2 l2">
+                                    <a
+                                        class="w3-button w3-green block"
+                                        href="javascript:group_update_seed({{ group['group_id'] }})"
+                                    >
+                                        {{ lc['taskeditor_update_seed'] }}
                                     </a>
                                 </div>
                             </div>
@@ -538,7 +572,7 @@
                                             {% if group['group_id'] != parent['group_id'] %}
                                                 <option value="{{ parent['group_id'] }}">
                                                     {{ parent['name'] }}
-                                                    </option>
+                                                </option>
                                             {% end %}
                                         {% end %}
                                     </select>

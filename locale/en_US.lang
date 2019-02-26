@@ -135,3 +135,5 @@ delete_hint                         = Delete hint
 view_hint                           = View hint
 buy_hint                            = Buy hint
 hint                                = Hint
+taskeditor_update_seed              = Update seed
+group_seed_update_success           = Group seed updated successfully

@@ -1,2 +1,2 @@
-def generate(task, token):
+def generate(task, token, team):
     return task

@@ -22,7 +22,7 @@ def get_token(team_name, task_id):
     task = tasks.read_task(task_id)
     
     team_seed = team.read_team(team_name).seed
-    task_seed = task.seed
+    task_seed = task.get_seed()
     ctfhost_seed = util.get_ctfhost_seed()
 
     return hashlib.sha224(
@@ -142,10 +142,10 @@ def write_group_generation_config(group_id, config):
         f.write(config)
 
 
-def get_generated_task(task_id, token):
+def get_generated_task(task_id, token, team):
     if not tasks.task_exists(task_id):
         raise tasks.TaskNotFoundError(task_id)
-    maybe_generate(task_id, token)
+    maybe_generate(task_id, token, team)
     return read_generated_task(task_id, token)
 
 
@@ -175,10 +175,10 @@ def write_generated_task(task, token):
         f.write(json.dumps(obj))
 
 
-def maybe_generate(task_id, token):
+def maybe_generate(task_id, token, team):
     read_task_generation_config(task_id)    # Make sure that the config is available
     if should_generate(task_id, token):
-        generate(task_id, token)
+        generate(task_id, token, team)
 
 
 def should_generate(task_id, token):
@@ -212,7 +212,7 @@ def get_task_modification_timestamp(task_id):
     return os.stat(task_json_file).st_mtime
 
 
-def generate(task_id, token):
+def generate(task_id, token, team):
     read_task_generation_config(task_id)    # Make sure that the config is available
     logger.info('Generating task {} with token {}', task_id, token)
     task_dir = os.path.join(configuration['tasks_path'], str(task_id))
@@ -220,7 +220,7 @@ def generate(task_id, token):
 
     mod = util.import_file(os.path.join(task_dir, 'generate.py'))
     raw_task = tasks.read_task(task_id)
-    gen_task = mod.generate(raw_task, token)
+    gen_task = mod.generate(task=raw_task, token=token, team=team)
     write_generated_task(gen_task, token)
     with open(os.path.join(task_dir, 'generated', token, 'gen_ts'), 'w') as f:
         f.write(str(time.time()))
@@ -229,7 +229,7 @@ def generate(task_id, token):
 def get_generated_task_list(team_name):
     for task in tasks.get_task_list():
         token = get_token(team_name=team_name, task_id=task.task_id)
-        yield get_generated_task(task_id=task.task_id, token=token)
+        yield get_generated_task(task_id=task.task_id, token=token, team=team.read_team(team_name))
 
 
 def api_update_gen_config(api, sess, args):

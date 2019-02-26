@@ -38,6 +38,8 @@ class GroupReparentError(Exception):
 class TooFrequentSubmissions(Exception):
     pass
 
+class InvalidInheritError(Exception):
+    pass
 
 
 def check_flag_with_program(prog, flag):
@@ -61,6 +63,14 @@ class Task:
     def validate(self):
         self.validate_flags()
         self.validate_hints()
+        self.get_seed()
+
+    def get_seed(self):
+        if self.seed != 'inherit':
+            return self.seed
+        if self.group == 0:
+            raise InvalidInheritError()
+        return get_group_seed(read_group(self.group))
 
     def validate_hints(self):
         if type(self.hints) is not list:
@@ -132,6 +142,14 @@ class Task:
 
     def strip_private_data(self):
         self.flags = []
+
+
+def get_group_seed(group):
+    if group['seed'] != 'inherit':
+        return group['seed']
+    if group['parent'] == 0:
+        raise InvalidInheritError()
+    return get_group_seed(read_group(group['parent']))
 
 
 def get_task_list():
@@ -272,7 +290,7 @@ def api_add_or_update_task(api, sess, args):
             )
         )
 
-    if type(seed) is not str or len(seed) != 16:
+    if (type(seed) is not str or len(seed) != 16) and seed != 'inherit':
         raise Exception(
             lc.get('api_argument_error').format(
                 argument='seed',
@@ -332,6 +350,13 @@ def api_add_group(api, sess, args):
                 param='parent',
             )
         )
+    
+    
+    if (type(seed) is not str or len(seed) != 16) and seed != 'inherit':
+        raise ApiArgumentError(lc.get('api_argument_error').format(argument='seed'))
+    elif parent == 0 and seed == 'inherit':
+        raise InvalidInheritError()
+
     if name == '':
         raise ApiArgumentError(lc.get('api_argument_error').format(argument='name'))
     if parent != 0:
@@ -392,6 +417,29 @@ def api_reparent_group(api, sess, args):
         logger.warning('Cannot reparent group ({}): new parent: ({})', group_id, new_parent)
         raise GroupReparentError(lc.get('parent_loop_detected'))
 
+    http.write(json.dumps({'success': True}))
+
+
+def api_update_group_seed(api, sess, args):
+    http     = args['http_handler']
+    request  = json.loads(http.request.body)
+    group_id = request['group_id']
+    seed     = request['new_seed']
+    try:
+        group_id = int(group_id)
+    except (ValueError, TypeError) as e:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected=lc.get('int'),
+                param='group_id',
+            )
+        )
+    if (type(seed) is not str or len(seed) != 16) and seed != 'inherit':
+        raise ApiArgumentError(lc.get('api_argument_error').format(argument='seed'))
+    group = read_group(group_id)
+    group['seed'] = seed
+    get_group_seed(group)
+    write_group(group_id, group)
 
     http.write(json.dumps({'success': True}))
 
@@ -416,28 +464,6 @@ def reparent_group(group_id, new_parent):
     group = read_group(group_id)
     group['parent'] = new_parent
     write_group(group_id, group)
-
-
-def api_get_generated_task(api, sess, args):
-    http = args['http_handler']
-    request = json.loads(http.request.body)
-    task_id = request['task_id']
-
-    try:
-        task_id = int(task_id)
-    except (ValueError, TypeError) as e:
-        raise Exception(
-            lc.get('api_invalid_data_type').format(
-                expected=lc.get('int'),
-                param='task_id',
-            )
-        )
-    try:
-        task = task_gen.get_generated_task(task_id)
-    except TaskNotFoundError:
-        raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
-    
-    http.write(json.dumps({'success': True, 'task': task.to_dict()}))
 
 
 def api_get_task(api, sess, args):
@@ -777,6 +803,7 @@ api.add('get_task',           api_get_task,           access_level=USER)
 api.add('submit_flag',        api_submit_flag,        access_level=USER)
 api.add('add_group',          api_add_group,          access_level=ADMIN)
 api.add('rename_group',       api_rename_group,       access_level=ADMIN)
+api.add('update_group_seed',  api_update_group_seed,  access_level=ADMIN)
 api.add('reparent_group',     api_reparent_group,     access_level=ADMIN)
 api.add('delete_group',       api_delete_group,       access_level=ADMIN)
 api.add('access_hint',        api_access_hint,        access_level=USER)
