@@ -5,7 +5,7 @@
         <link rel="stylesheet" href="/static/w3css/w3.css">
         <link rel="stylesheet" href="/static/ctfhost-common.css">
         <meta charset="utf-8">
-        <title>{{ conf['ctfname'] }} - {{ lc['change_password'] }}</title>
+        <title>{{ conf['ctfname'] }} - {{ lc['edit_team_info'] }}</title>
     </head>
 
     <body>
@@ -24,42 +24,36 @@
         </div>
         <div class="w3-container">
             <h1>
-                {{ conf['ctfname'] }} - {{ lc['change_password'] }}
+                {{ conf['ctfname'] }} - {{ lc['edit_team_info'] }}
             </h1>
         </div>
-        <form action="/change_password_submit" method="POST" class="w3-container">
+        <form action="/edit_team_info_submit" method="POST" class="w3-container">
             <p>
-                <label for="input-old-password">{{ lc['old_password'] }}</label>
+                <label for="input-disp-name">{{ lc['disp_name'] }}</label>
                 <input
-                    type="password"
+                    type="text"
                     class="w3-input w3-border"
-                    id="input-old-password"
-                    name="old_password"
-                    placeholder="{{ lc['old_password'] }}"
+                    id="input-disp-name"
+                    name="disp_name"
+                    placeholder="{{ lc['disp_name'] }}"
+                    autocomplete="false"
+                    value="{{ team.full_name }}"
                 >
             </p>
             <p>
-                <label for="input-password">{{ lc['new_password'] }}</label>
+                <label for="input-email">{{ lc['email'] }}</label>
                 <input
-                    type="password"
+                    type="email"
                     class="w3-input w3-border"
-                    id="input-password"
-                    name="password"
-                    placeholder="{{ lc['new_password'] }}"
+                    id="input-email"
+                    name="email"
+                    placeholder="{{ lc['email'] }}"
+                    autocomplete="false"
+                    value="{{ team.email if team.email is not None else '' }}"
                 >
             </p>
             <p>
-                <label for="input-password-c">{{ lc['new_password_confirmation'] }}</label>
-                <input
-                    type="password"
-                    class="w3-input w3-border"
-                    id="input-password-c"
-                    name="password_c"
-                    placeholder="{{ lc['new_password_confirmation'] }}"
-                >
-            </p>
-            <p>
-                <input type="submit" class="w3-btn w3-green" value="{{ lc['change_password'] }}">
+                <input type="submit" class="w3-button w3-green" value="{{ lc['edit_team_info'] }}">
             </p>
             <p>
                 <a href="/team_profile?team={{ session.username }}">{{ lc['return_to_profile'] }}</a>

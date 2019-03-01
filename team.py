@@ -108,6 +108,17 @@ def read_team(team_name):
     return Team(team_name, info)
 
 
+def write_team(team):
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute('UPDATE users SET full_name = ?, email = ? WHERE username = ?', (
+            team.full_name,
+            team.email,
+            team.team_name
+        ))
+        db.commit()
+
+
 def add_submission(team_name, task_id, flag, is_correct, points):
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()

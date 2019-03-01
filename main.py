@@ -143,6 +143,44 @@ class ChangePasswordSubmitHandler(tornado.web.RequestHandler):
         self.write(render_template('change_password_ok.html', session=session))
 
 
+class EditTeamInfoHandler(tornado.web.RequestHandler):
+    def get(self):
+        session_id = self.get_cookie('session_id')
+        session = auth.load_session(session_id)
+        current_team = team.read_team(session.username)
+        if session is None:
+            self.redirect('/login')
+            return
+
+        self.write(render_template('edit_team_info.html', session=session, team=current_team))
+
+
+class EditTeamInfoSubmitHandler(tornado.web.RequestHandler):
+    def post(self):
+        session_id = self.get_cookie('session_id')
+        session = auth.load_session(session_id)
+        if session is None:
+            self.redirect('/login')
+            return
+
+        disp_name = self.get_argument('disp_name', None)
+        email = self.get_argument('email', None)
+        if disp_name is None or disp_name == '':
+            self.write(
+                render_template(
+                    'edit_team_info_error.html',
+                    error_message=lc.get('no_disp_name'),
+                    session=session,
+                )
+            )
+            return
+        tm = team.read_team(session.username)
+        tm.full_name = disp_name
+        tm.email = email
+        team.write_team(tm)
+        self.write(render_template('edit_team_info_ok.html', session=session))
+
+
 class AdminRegHandler(tornado.web.RequestHandler):
     def post(self):
         session_id = self.get_cookie('session_id')
@@ -161,6 +199,9 @@ class AdminRegHandler(tornado.web.RequestHandler):
             return
         if password is None or password == '':
             self.write(render_template('reg_error.html', error=lc.get('no_password')))
+            return
+        if disp_name is None or disp_name == '':
+            self.write(render_template('reg_error.html', error=lc.get('no_disp_name')))
             return
         if password != password_c:
             self.write(render_template('reg_error.html', error=lc.get('password_c_failed')))
@@ -233,6 +274,9 @@ class RegHandler(tornado.web.RequestHandler):
             return
         if password != password_c:
             self.write(render_template('reg_error.html', error=lc.get('password_c_failed')))
+            return
+        if disp_name is None or disp_name == '':
+            self.write(render_template('reg_error.html', error=lc.get('no_disp_name')))
             return
         if username in auth.get_user_list():
             self.write(render_template('reg_error.html', error=lc.get('user_already_exists')))
@@ -317,6 +361,8 @@ def make_app():
         (r'/team_profile', TeamProfileHandler),
         (r'/change_password', ChangePasswordHandler),
         (r'/change_password_submit', ChangePasswordSubmitHandler),
+        (r'/edit_team_info', EditTeamInfoHandler),
+        (r'/edit_team_info_submit', EditTeamInfoSubmitHandler),
         (r'/scoreboard', ScoreboardHandler),
         (r'/favicon.ico', FaviconHandler),
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': './static'})
