@@ -68,6 +68,7 @@ class AdminHandler(tornado.web.RequestHandler):
             task_gen         = task_gen,
         ))
 
+
 class AdminNewTeamHandler(tornado.web.RequestHandler):
     def get(self):
         session_id = self.get_cookie('session_id')
@@ -77,6 +78,70 @@ class AdminNewTeamHandler(tornado.web.RequestHandler):
             return
 
         self.write(render_template('admin_new_team.html', session=session))
+
+
+class ChangePasswordHandler(tornado.web.RequestHandler):
+    def get(self):
+        session_id = self.get_cookie('session_id')
+        session = auth.load_session(session_id)
+        if session is None:
+            self.redirect('/login')
+            return
+
+        self.write(render_template('change_password.html', session=session))
+
+
+class ChangePasswordSubmitHandler(tornado.web.RequestHandler):
+    def post(self):
+        session_id = self.get_cookie('session_id')
+        session = auth.load_session(session_id)
+        if session is None:
+            self.redirect('/login')
+            return
+
+        old_password = self.get_argument('old_password', None)
+        password = self.get_argument('password', None)
+        password_c = self.get_argument('password_c', None)
+        if old_password is None or old_password == '':
+            self.write(
+                render_template(
+                    'change_password_error.html',
+                    error_message=lc.get('no_old_password'),
+                    session=session,
+                )
+            )
+            return
+        if not auth.verify_password(session.username, old_password):
+            self.write(
+                render_template(
+                    'change_password_error.html',
+                    error_message=lc.get('invalid_old_password'),
+                    session=session,
+                )
+            )
+            return
+        if password is None or password == '':
+            self.write(
+                render_template(
+                    'change_password_error.html',
+                    error_message=lc.get('no_password'),
+                    session=session,
+                )
+            )
+            return
+        if password != password_c:
+            self.write(
+                render_template(
+                    'change_password_error.html',
+                    error_message=lc.get('password_c_failed'),
+                    session=session,
+                )
+            )
+            return
+        
+        auth.update_password(session.username, password)
+        self.write(render_template('change_password_ok.html', session=session))
+
 
 class AdminRegHandler(tornado.web.RequestHandler):
     def post(self):
@@ -141,7 +206,7 @@ class AuthHandler(tornado.web.RequestHandler):
             self.write(render_template('auth_error.html', error=lc.get('no_username')))
             return
         if password is None:
-            self.write(render_template('auth_error.html', error=lc.get('no_passord')))
+            self.write(render_template('auth_error.html', error=lc.get('no_password')))
             return
 
         try:
@@ -250,6 +315,8 @@ def make_app():
         (r'/admin_reg', AdminRegHandler),
         (r'/tasks', TasksHandler),
         (r'/team_profile', TeamProfileHandler),
+        (r'/change_password', ChangePasswordHandler),
+        (r'/change_password_submit', ChangePasswordSubmitHandler),
         (r'/scoreboard', ScoreboardHandler),
         (r'/favicon.ico', FaviconHandler),
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': './static'})

@@ -40,6 +40,10 @@
                     {{ lc['unknown'] }}
                 {% end %}
             </p>
+            {% if session.username == team.team_name %}
+                <a href="/edit_team_info" class="w3-button w3-green">{{ lc['edit_team_info'] }}</a>
+                <a href="/change_password" class="w3-button w3-green">{{ lc['change_password'] }}</a>
+            {% end %}
             <hr>
             <h2>{{ lc['solves'] }}</h2>
             <table class="w3-table w3-border w3-striped">
