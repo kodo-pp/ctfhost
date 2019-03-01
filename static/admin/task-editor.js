@@ -170,8 +170,8 @@ var hintno = 0;
 function add_hint()
 {
     const hint_input_template = `
-    <div class="w3-row-padding" id="hint##no##">
-        <div class="w3-col s4 m4 l4">
+    <p><div class="w3-row-padding" id="hint##no##">
+        <div class="w3-col s12 m4 l4">
             <input
                 id="hint_cost##no##"
                 onchange="update_hintcost_internal(##no##)"
@@ -181,7 +181,7 @@ function add_hint()
                 required
             >
         </div>
-        <div class="w3-col s6 m6 l6">
+        <div class="w3-col s12 m8 l6">
             <input
                 id="hint_text##no##"
                 type="text"
@@ -189,10 +189,10 @@ function add_hint()
                 onchange="update_hinttext_internal(##no##)"
             >
         </div>
-        <div class="w3-col s2 m2 l2">
-            <a class="w3-button w3-red" href="javascript:delete_hint(##no##)">${locale_messages['delete_hint']}</a>
+        <div class="w3-col s12 m12 l2">
+            <a class="w3-button w3-red block" href="javascript:delete_hint(##no##)">${locale_messages['delete_hint']}</a>
         </div>
-    </div>
+    </div></p>
     `
     let container = document.getElementById('task-editor-hints');
     
@@ -210,25 +210,25 @@ function add_hint()
 function add_flag()
 {
     const flag_input_template = `
-    <div class="w3-row-padding" id="flag##no##">
-        <div class="w3-col s4 m4 l4">
+    <p><div class="w3-row-padding" id="flag##no##">
+        <div class="w3-col s12 m4 l4">
             <select id="flag_type##no##" onchange="update_flagtype_internal(##no##)" class="w3-input w3-border">
                 <option value="string">${locale_messages['flagtype_string']}</option>
                 <option value="regex">${locale_messages['flagtype_regex']}</option>
                 <option value="program">${locale_messages['flagtype_program']}</option>
             </select>
         </div>
-        <div class="w3-col s6 m6 l6">
+        <div class="w3-col s12 m8 l6">
             <input id="flag_data##no##"
                    type="text"
                    class="w3-input w3-border"
                    onchange="update_flagdata_internal(##no##)"
                    style="font-family: monospace;">
         </div>
-        <div class="w3-col s2 m2 l2">
-            <a class="w3-button w3-red" href="javascript:delete_flag(##no##)">${locale_messages['delete_flag']}</a>
+        <div class="w3-col s12 m12 l2">
+            <a class="w3-button w3-red block" href="javascript:delete_flag(##no##)">${locale_messages['delete_flag']}</a>
         </div>
-    </div>
+    </div></p>
     `
     let container = document.getElementById('task-editor-flags');
     

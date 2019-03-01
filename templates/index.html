@@ -9,23 +9,23 @@
     </head>
     <body>
         <div class="w3-bar w3-dark-grey">
-            <span class="w3-bar-item w3-green">{{ lc['home_page'] }}</span>
+            <span class="w3-bar-item w3-mobile w3-green">{{ lc['home_page'] }}</span>
             {% if session is not None %}
-                <a class="w3-bar-item w3-button" href="/tasks">{{ lc['tasks'] }}</a>
-                <a class="w3-bar-item w3-button" href="/team_profile?team={{ session.username }}">
+                <a class="w3-bar-item w3-mobile w3-button" href="/tasks">{{ lc['tasks'] }}</a>
+                <a class="w3-bar-item w3-mobile w3-button" href="/team_profile?team={{ session.username }}">
                     {{ lc['team_profile'] }}
                 </a>
-                <a class="w3-bar-item w3-button" href="/scoreboard">{{ lc['scoreboard'] }}</a>
+                <a class="w3-bar-item w3-mobile w3-button" href="/scoreboard">{{ lc['scoreboard'] }}</a>
                 {% if session.is_admin %}
-                    <a class="w3-bar-item w3-button" href="/admin">{{ lc['admin_page'] }}</a>
+                    <a class="w3-bar-item w3-mobile w3-button" href="/admin">{{ lc['admin_page'] }}</a>
                 {% end %}
-                <a class="w3-bar-item w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
-                <span class="w3-bar-item w3-light-grey w3-right">
+                <a class="w3-bar-item w3-mobile w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
+                <span class="w3-bar-item w3-mobile w3-light-grey w3-right">
                     {{ lc['signed_in_as'].format(session.username) }}
                 </span>
             {% else %}
-                <a class="w3-bar-item w3-button" href="/login">{{ lc['signin'] }}</a>
-                <a class="w3-bar-item w3-button" href="/signup">{{ lc['signup'] }}</a>
+                <a class="w3-bar-item w3-mobile w3-button" href="/login">{{ lc['signin'] }}</a>
+                <a class="w3-bar-item w3-mobile w3-button" href="/signup">{{ lc['signup'] }}</a>
             {% end %}
         </div>
         <div class="w3-container">

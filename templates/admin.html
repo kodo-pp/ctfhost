@@ -254,8 +254,8 @@
 
             function update_gen_config(uid)
             {
-                ace = gen_config_editors[uid];
-                new_config = ace.getValue();
+                let ace = gen_config_editors[uid];
+                let new_config = ace.getValue();
 
                 let data;
                 if (uid[0] == 't') {
@@ -397,7 +397,7 @@
                 <p>
                     <label for="task-editor-seed-input">{{ lc['taskeditor_seed'] }}</label>
                     <div class="w3-row-padding">
-                        <div class="w3-col s9 m9 l9">
+                        <div class="w3-col s12 m8 l9">
                             <input
                                 type="text"
                                 id="task-editor-seed-input"
@@ -408,7 +408,7 @@
                                 required
                             >
                         </div>
-                        <div class="w3-col s3 m3 l3">
+                        <div class="w3-col s12 m4 l3">
                             <a class="w3-button w3-green block" href="javascript:taskeditor_randomize_seed()">
                                 {{ lc['taskeditor_randomize_seed'] }}
                             </a>
@@ -445,40 +445,40 @@
             </div>
         </div>
         <div class="w3-bar w3-dark-grey">
-            <a class="w3-bar-item w3-button" href="/">{{ lc['home_page'] }}</a>
-            <a class="w3-bar-item w3-button" href="/tasks">{{ lc['tasks'] }}</a>
-            <a class="w3-bar-item w3-button" href="/team_profile?team={{ session.username }}">
+            <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-mobile" href="/">{{ lc['home_page'] }}</a>
+            <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-mobile" href="/tasks">{{ lc['tasks'] }}</a>
+            <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-mobile" href="/team_profile?team={{ session.username }}">
                 {{ lc['team_profile'] }}
             </a>
-            <a class="w3-bar-item w3-button" href="/scoreboard">{{ lc['scoreboard'] }}</a>
-            <span class="w3-bar-item w3-green">{{ lc['admin_page'] }}</span>
-            <a class="w3-bar-item w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
-            <span class="w3-bar-item w3-light-grey w3-right">
+            <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-mobile" href="/scoreboard">{{ lc['scoreboard'] }}</a>
+            <span class="w3-bar-item w3-mobile w3-mobile w3-green w3-mobile">{{ lc['admin_page'] }}</span>
+            <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-right w3-mobile" href="/lout">{{ lc['logout'] }}</a>
+            <span class="w3-bar-item w3-mobile w3-mobile w3-light-grey w3-right w3-mobile">
                 {{ lc['signed_in_as'].format(session.username) }}
             </span>
         </div>
         <div class="w3-container">
             <h1>{{ lc['admin_page'] }}</h1>
             <div class="w3-bar w3-dark-grey" id="tabset">
-                <span class="w3-bar-item w3-button" id="tab-tasks">{{ lc['admintab_tasks'] }}</span>
-                <span class="w3-bar-item w3-button" id="tab-groups">{{ lc['admintab_groups'] }}</span>
-                <span class="w3-bar-item w3-button" id="tab-task-gen">{{ lc['admintab_task_gen'] }}</span>
-                <span class="w3-bar-item w3-button" id="tab-teams">{{ lc['admintab_teams'] }}</span>
-                <span class="w3-bar-item w3-button" id="tab-submissions">{{ lc['admintab_submissions'] }}</span>
+                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-tasks">{{ lc['admintab_tasks'] }}</span>
+                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-groups">{{ lc['admintab_groups'] }}</span>
+                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-task-gen">{{ lc['admintab_task_gen'] }}</span>
+                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-teams">{{ lc['admintab_teams'] }}</span>
+                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-submissions">{{ lc['admintab_submissions'] }}</span>
             </div>
             <div id="tabcontents">
                 <div class="w3-container hidden" id="tabcontent-groups">
                     <h2>{{ lc['admintab_groups'] }}</h2>
                     <p>
                     <div class="w3-row-padding">
-                        <div class="w3-col s9 m9 l9">
+                        <div class="w3-col s12 m8 l9">
                             <input
                                 type="text"
                                 id="add-group-name0"
                                 class="w3-input w3-border"
                                 placeholder="{{ lc['group_name'] }}">
                         </div>
-                        <div class="w3-col s3 m3 l3">
+                        <div class="w3-col s12 m4 l3">
                             <a
                                 class="w3-button w3-green block"
                                 href="javascript:add_group(0)"
@@ -501,14 +501,14 @@
                             <h3>{{ group['name'] }}</h3>
                             <p>
                             <div class="w3-row-padding">
-                                <div class="w3-col s8 m8 l8">
+                                <div class="w3-col s12 m7 l8">
                                     <input
                                         type="text"
                                         id="add-group-name{{ group['group_id'] }}"
                                         class="w3-input w3-border"
                                         placeholder="{{ lc['group_name'] }}">
                                     </div>
-                                <div class="w3-col s4 m4 l4">
+                                <div class="w3-col s12 m5 l4">
                                     <a
                                         class="w3-button w3-green block"
                                         href="javascript:add_group({{ group['group_id'] }})"
@@ -520,7 +520,7 @@
                             </p>
                             <p>
                             <div class="w3-row-padding">
-                                <div class="w3-col s8 m8 l8">
+                                <div class="w3-col s12 m7 l8">
                                     <input
                                         type="text"
                                         id="rename-group-name{{ group['group_id'] }}"
@@ -529,7 +529,7 @@
                                         autocomplete="off"
                                     >
                                 </div>
-                                <div class="w3-col s4 m4 l4">
+                                <div class="w3-col s12 m5 l4">
                                     <a
                                         class="w3-button w3-green block"
                                         href="javascript:rename_group({{ group['group_id'] }})"
@@ -541,7 +541,7 @@
                             </p>
                             <h5>{{ lc['group_token_seed'] }}</h5>
                             <div class="w3-row-padding">
-                                <div class="w3-col s8 m8 l8">
+                                <div class="w3-col s12 m12 l8">
                                     <input
                                         type="text"
                                         id="task-editor-seed-input{{ group['group_id'] }}"
@@ -553,7 +553,7 @@
                                         required
                                     >
                                 </div>
-                                <div class="w3-col s2 m2 l2">
+                                <div class="w3-col s12 m6 l2">
                                     <a
                                         class="w3-button w3-blue block"
                                         href="javascript:group_randomize_seed({{ group['group_id'] }})"
@@ -561,7 +561,7 @@
                                         {{ lc['taskeditor_randomize_seed'] }}
                                     </a>
                                 </div>
-                                <div class="w3-col s2 m2 l2">
+                                <div class="w3-col s12 m6 l2">
                                     <a
                                         class="w3-button w3-green block"
                                         href="javascript:group_update_seed({{ group['group_id'] }})"
@@ -572,7 +572,7 @@
                             </div>
                             <h5>{{ lc['parent_group'] }}</h5>
                             <div class="w3-row-padding">
-                                <div class="w3-col s8 m8 l8">
+                                <div class="w3-col s12 m6 l8">
                                     <select
                                         class="w3-input w3-border"
                                         id="group-parent{{ group['group_id'] }}"
@@ -589,7 +589,7 @@
                                         {% end %}
                                     </select>
                                 </div>
-                                <div class="w3-col s4 m4 l4">
+                                <div class="w3-col s12 m6 l4">
                                     <a
                                         href="javascript:update_group_parent({{ group['group_id'] }})"
                                         class="w3-button w3-green block"
@@ -687,8 +687,8 @@
                                 class="w3-button w3-blue"
                                 href="/team_profile?team={{ team.team_name }}"
                             >{{ lc['view_profile'] }}</a></p>
-                            <div class="w3-row">
-                                <div class="w3-col s10 m10 w10">
+                            <div class="w3-row-padding">
+                                <div class="w3-col s12 m8 l9">
                                     <input
                                         type="password"
                                         placeholder="{{ lc['new_password'] }}"
@@ -696,9 +696,9 @@
                                         id="new-password-{{ team.team_name }}"
                                     >
                                 </div>
-                                <div class="w3-col s2 m2 w2">
+                                <div class="w3-col s12 m4 l3">
                                     <a
-                                        class="w3-button w3-green"
+                                        class="w3-button w3-green block"
                                         href="javascript:change_password('{{ team.team_name }}')"
                                     >
                                         {{ lc['change_password'] }}
@@ -724,34 +724,36 @@
                 </div>
                 <div class="w3-container hidden" id="tabcontent-submissions">
                     <h2>{{ lc['admintab_submissions'] }}</h2>
-                    <table class="w3-table w3-border w3-striped">
-                        <tr>
-                            <th>{{ lc['team_name'] }}</th>
-                            <th>{{ lc['task_name'] }}</th>
-                            <th>{{ lc['submitted_flag'] }}</th>
-                            <th>{{ lc['is_correct'] }}</th>
-                            <th>{{ lc['points'] }}</th>
-                            <th>{{ lc['submission_time'] }}</th>
-                        </tr>
-                        {% for sub in reversed(sorted(submissions, key = lambda x: x['time'])) %}
-                            {% try %}
-                                {% set task = read_task(sub['task_id']) %}
-                                <tr>
-                                    <td>{{ sub['team_name'] }}</td>
-                                    <td>{{ task.title }}</td>
-                                    <td style="font-family: monospace">{{ sub['flag'] }}</td>
-                                    {% if sub['is_correct'] %}
-                                        <td class="w3-text-green">{{ lc['yes'] }}</td>
-                                    {% else %}
-                                        <td class="w3-text-red">{{ lc['no'] }}</td>
-                                    {% end %}
-                                    <td>{{ sub['points'] }}</td>
-                                    <td>{{ conf['date_fmt_func'](sub['time']) }}</td>
-                                </tr>
-                            {% except KeyError %}
+                    <div style="overflow: auto"> <!-- Enable horizontal scrolling -->
+                        <table class="w3-table w3-border w3-striped">
+                            <tr>
+                                <th>{{ lc['team_name'] }}</th>
+                                <th>{{ lc['task_name'] }}</th>
+                                <th>{{ lc['submitted_flag'] }}</th>
+                                <th>{{ lc['is_correct'] }}</th>
+                                <th>{{ lc['points'] }}</th>
+                                <th>{{ lc['submission_time'] }}</th>
+                            </tr>
+                            {% for sub in reversed(sorted(submissions, key = lambda x: x['time'])) %}
+                                {% try %}
+                                    {% set task = read_task(sub['task_id']) %}
+                                    <tr>
+                                        <td>{{ sub['team_name'] }}</td>
+                                        <td>{{ task.title }}</td>
+                                        <td style="font-family: monospace">{{ sub['flag'] }}</td>
+                                        {% if sub['is_correct'] %}
+                                            <td class="w3-text-green">{{ lc['yes'] }}</td>
+                                        {% else %}
+                                            <td class="w3-text-red">{{ lc['no'] }}</td>
+                                        {% end %}
+                                        <td>{{ sub['points'] }}</td>
+                                        <td>{{ conf['date_fmt_func'](sub['time']) }}</td>
+                                    </tr>
+                                {% except KeyError %}
+                                {% end %}
                             {% end %}
-                        {% end %}
-                    </table>
+                        </table>
+                    </div>
                 </div>
                 <div class="w3-container hidden" id="tabcontent-task-gen">
                     <h2>{{ lc['admintab_task_gen'] }}</h2>
