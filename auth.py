@@ -219,6 +219,7 @@ def delete_team(team_name):
         cur.execute('DELETE FROM sessions WHERE username = ?', (team_name,))
         cur.execute('DELETE FROM users WHERE username = ?', (team_name,))
         cur.execute('DELETE FROM submissions WHERE team_name = ?', (team_name,))
+        cur.execute('DELETE FROM hint_purchases WHERE team_name = ?', (team_name,))
         db.commit()
     session_cache.remove_for(team_name)
 

@@ -124,6 +124,7 @@ class Task:
         }
 
     def check_flag(self, flag, team_name):
+        logger.info('Checking flag {}', repr(flag))
         now = time.time()
         global last_solves, last_solves_lock
         with last_solves_lock:
@@ -134,6 +135,7 @@ class Task:
         for flag_checker in self.flags:
             fc_type = flag_checker['type']
             fc_data = flag_checker['data']
+            print(repr(fc_type), repr(fc_data))
             if fc_type == 'string':
                 if flag == fc_data:
                     return True
@@ -508,8 +510,12 @@ def api_submit_flag(api, sess, args):
                 param='task_id',
             )
         )
+
+    cteam = team.read_team(sess.username)
+    token = task_gen.get_token(sess.username, task_id)
+
     try:
-        task = read_task(task_id)
+        task = task_gen.get_generated_task(task_id, token, cteam)
     except TaskNotFoundError:
         raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
 
