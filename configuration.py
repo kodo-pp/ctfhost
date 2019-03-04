@@ -10,7 +10,7 @@ configuration = {
     'hide_password_in_logs':   True,
     'tasks_path':              'db/tasks',
     'groups_path':             'db/groups',
-    'lang_list':               ['ru_RU'],
+    'lang_list':               ['en_US'],
     'task_maxid_path':         'db/tasks-etc/maxid.txt',
     'group_maxid_path':        'db/tasks-etc/maxgroupid.txt',
     'min_submission_interval': 30,

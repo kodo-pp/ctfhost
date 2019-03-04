@@ -891,6 +891,7 @@
                 </div>
                 <div class="w3-container hidden" id="tabcontent-competition-ctl">
                     <h2>{{ lc['admintab_competition_ctl'] }}</h2>
+                    <h3>{{ lc['competition_time'] }}</h3>
                     <p>
                         {{ lc['local_timezone'] }}: <span id="local_timezone_output">...</span>.
                         {{ lc['use_localtime_msg'] }}
@@ -920,6 +921,18 @@
                         const start_time_picker = flatpickr('#competition-start-time-input', flatpickr_config);
                         const end_time_picker = flatpickr('#competition-end-time-input', flatpickr_config);
                     </script>
+                    <hr>
+                    <h3>{{ lc['competition_configuration'] }}</h3>
+                    <p>
+                        <input type="checkbox" id="competition-enable-registration">
+                        <label for="competition-enable-registration">
+                            {{ lc['competition_enable_registration'] }}
+                        </label>
+                    </p>
+                    <hr>
+                    <h3>{{ lc['competition_submit_or_discard'] }}</h3>
+                    <a class="w3-button w3-red" href="javascript:location.reload()">{{ lc['discard'] }}</a>
+                    <a class="w3-button w3-green" href="javascript:location.reload()">{{ lc['save'] }}</a>
                 </div>
             </div>
         </div>
