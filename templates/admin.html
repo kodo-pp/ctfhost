@@ -5,12 +5,15 @@
         <link rel="stylesheet" href="/static/w3css/w3.css">
         <link rel="stylesheet" href="/static/ctfhost-common.css">
         <link rel="stylesheet" href="/static/task-editor.css">
+        <link rel="stylesheet" href="/static/flatpickr/flatpickr.min.css">
         <script>
             locale_messages = {% raw str(lc) %}; /* should work */
         </script>
         <script src="/static/admin/task-editor.js"></script>
         <script src="/static/http-request.js"></script>
         <script src="/static/ace/src-min/ace.js"></script>
+        <script src="/static/flatpickr/flatpickr.min.js"></script>
+        <script src="/static/flatpickr/locale/{{ lc['lang_code'] }}.js"></script>
         <meta charset="utf-8">
         <title>{{ conf['ctfname'] }} - {{ lc['admin_page'] }}</title>
         <script>
@@ -322,6 +325,13 @@
                 }
             }
 
+            function get_utc_unix_timestamp(date)
+            {
+                let local_unix_timestamp = date.getTime() / 1000;
+                let timezone_offset_seconds = date.getTimezoneOffset() * 60;
+                return parseInt(local_unix_timestamp + timezone_offset_seconds);
+            }
+
             window.addEventListener('load', setup_tabs);
             window.addEventListener('load', setup_group_parents);
 
@@ -460,11 +470,24 @@
         <div class="w3-container">
             <h1>{{ lc['admin_page'] }}</h1>
             <div class="w3-bar w3-dark-grey" id="tabset">
-                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-tasks">{{ lc['admintab_tasks'] }}</span>
-                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-groups">{{ lc['admintab_groups'] }}</span>
-                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-task-gen">{{ lc['admintab_task_gen'] }}</span>
-                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-teams">{{ lc['admintab_teams'] }}</span>
-                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-submissions">{{ lc['admintab_submissions'] }}</span>
+                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-tasks">
+                    {{ lc['admintab_tasks'] }}
+                </span>
+                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-groups">
+                    {{ lc['admintab_groups'] }}
+                </span>
+                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-task-gen">
+                    {{ lc['admintab_task_gen'] }}
+                </span>
+                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-teams">
+                    {{ lc['admintab_teams'] }}
+                </span>
+                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-submissions">
+                    {{ lc['admintab_submissions'] }}
+                </span>
+                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-competition-ctl">
+                    {{ lc['admintab_competition_ctl'] }}
+                </span>
             </div>
             <div id="tabcontents">
                 <div class="w3-container hidden" id="tabcontent-groups">
@@ -865,6 +888,38 @@
                             </p>
                         </div>
                     {% end %}
+                </div>
+                <div class="w3-container hidden" id="tabcontent-competition-ctl">
+                    <h2>{{ lc['admintab_competition_ctl'] }}</h2>
+                    <p>
+                        {{ lc['local_timezone'] }}: <span id="local_timezone_output">...</span>.
+                        {{ lc['use_localtime_msg'] }}
+                    </p>
+                    <p><label for="competition-start-time-input">{{ lc['competition_start_time'] }}</label></p>
+                    <p><input type="text" id="competition-start-time-input"></p>
+                    <p><label for="competition-end-time-input">{{ lc['competition_end_time'] }}</label></p>
+                    <p><input type="text" id="competition-end-time-input"></p>
+                    <script>
+                        (function() {
+                            const tz_out = document.getElementById('local_timezone_output');
+                            const tz_offset_minutes = new Date(Date.now()).getTimezoneOffset();
+                            const tz_offset_hours = (tz_offset_minutes < 0 ? '' : '+') +
+                                Math.round(tz_offset_minutes / 30) / 2;
+                            tz_out.innerHTML = 'UTC ' + tz_offset_hours;
+                        })()
+
+                        let flatpickr_config = {
+                            enableTime: true,
+                        }
+                        if (flatpickr.l10ns["{{ lc['lang_code'] }}"] !== undefined) {
+                            flatpickr.localize(flatpickr.l10ns["{{ lc['lang_code'] }}"]);
+                            flatpickr_config['dateFormat'] = "{{ lc['date_fmt'] }}";
+                            flatpickr_config['timeFormat'] = "{{ lc['time_fmt'] }}";
+                            flatpickr_config['time_24hr'] = {{ 'false' if int(lc['24hr']) == 0 else 'true'}};
+                        }
+                        const start_time_picker = flatpickr('#competition-start-time-input', flatpickr_config);
+                        const end_time_picker = flatpickr('#competition-end-time-input', flatpickr_config);
+                    </script>
                 </div>
             </div>
         </div>
