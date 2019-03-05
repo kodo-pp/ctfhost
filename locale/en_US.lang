@@ -162,3 +162,5 @@ competition_configuration           = Configuration
 competition_submit_or_discard       = Save / Discard
 save                                = Save
 discard                             = Discard
+bool                                = bool
+competition_ctl_successful          = Competition configuration saved

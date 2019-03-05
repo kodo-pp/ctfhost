@@ -313,7 +313,7 @@
             function group_update_seed(group_id)
             {
                 let in_seed = document.getElementById(`task-editor-seed-input${group_id}`);
-                data = {
+                let data = {
                     'group_id': group_id,
                     'new_seed': in_seed.value
                 }
@@ -330,6 +330,29 @@
                 let local_unix_timestamp = date.getTime() / 1000;
                 let timezone_offset_seconds = date.getTimezoneOffset() * 60;
                 return parseInt(local_unix_timestamp + timezone_offset_seconds);
+            }
+
+
+            function save_competition_ctl()
+            {
+                const start_ts = get_utc_unix_timestamp(start_time_picker.selectedDates[0]);
+                const end_ts = get_utc_unix_timestamp(end_time_picker.selectedDates[0]);
+
+                const allow_team_self_registration = document.getElementById(
+                    'competition-enable-registration'
+                ).value == 'on';
+
+                let data = {
+                    'start_time': start_ts,
+                    'end_time': end_ts,
+                    'allow_team_self_registration': allow_team_self_registration,
+                }
+                try {
+                    make_http_request('/api/competition_ctl', JSON.stringify(data));
+                    alert("{{ lc['competition_ctl_successful'] }}");
+                } catch (e) {
+                    error_message(e.message);
+                }
             }
 
             window.addEventListener('load', setup_tabs);
@@ -920,6 +943,14 @@
                         }
                         const start_time_picker = flatpickr('#competition-start-time-input', flatpickr_config);
                         const end_time_picker = flatpickr('#competition-end-time-input', flatpickr_config);
+
+                        start_time_picker.setDate(new Date({{ comp.start_time }}));
+                        end_time_picker.setDate(new Date({{ comp.end_time }}));
+                        window.addEventListener('load', function() {
+                            document.getElementById('competition-enable-registration').value = "{{
+                                'on' if comp.allow_team_self_registration else 'off'
+                            }}";
+                        })
                     </script>
                     <hr>
                     <h3>{{ lc['competition_configuration'] }}</h3>
@@ -932,7 +963,7 @@
                     <hr>
                     <h3>{{ lc['competition_submit_or_discard'] }}</h3>
                     <a class="w3-button w3-red" href="javascript:location.reload()">{{ lc['discard'] }}</a>
-                    <a class="w3-button w3-green" href="javascript:location.reload()">{{ lc['save'] }}</a>
+                    <a class="w3-button w3-green" href="javascript:save_competition_ctl()">{{ lc['save'] }}</a>
                 </div>
             </div>
         </div>

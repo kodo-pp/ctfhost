@@ -16,6 +16,7 @@ import auth
 import tasks
 import team
 import task_gen
+import competition as compctl
 from localization import Localization, lc
 from configuration import configuration
 from template import render_template
@@ -66,6 +67,7 @@ class AdminHandler(tornado.web.RequestHandler):
             read_task        = tasks.read_task,
             build_group_path = tasks.build_group_path,
             task_gen         = task_gen,
+            comp             = compctl.competition,
         ))
 
 

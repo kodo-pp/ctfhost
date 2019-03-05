@@ -162,3 +162,5 @@ competition_configuration           = Конфигурация
 competition_submit_or_discard       = Сохранить / Отменить
 save                                = Сохранить
 discard                             = Отменить
+bool                                = логическое значение
+competition_ctl_successful          = Конфигурация сроревнования была сохранена
