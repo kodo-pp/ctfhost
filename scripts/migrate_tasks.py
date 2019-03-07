@@ -5,7 +5,13 @@ import os
 import sys
 import secrets
 import re
+import glob
 import traceback as tb
+
+sys.path.insert(0, os.path.realpath('.'))
+
+from configuration import configuration
+
 
 DEFAULTS = {
     'text': '',
@@ -72,10 +78,11 @@ def migrate_task(task_path):
 
 def main():
     if '--help' in sys.argv or '-h' in sys.argv:
-        print('Usage: {prog} [path/to/task.json] ...'.format(prog=sys.argv[0]))
+        print('Usage: {prog}'.format(prog=sys.argv[0]))
         print('Add missing attributes to tasks')
         sys.exit(0)
-    for task_path in sys.argv[1:]:
+    tasks_dir = configuration['tasks_path']
+    for task_path in glob.glob(os.path.join(tasks_dir, '*', 'task.json')):
         try:
             migrate_task(task_path)
         except BaseException as e:

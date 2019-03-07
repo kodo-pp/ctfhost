@@ -107,9 +107,4 @@ venv.bak/
 *.backup
 
 # DB
-*.db
-db/tasks
-db/tasks-etc
-db/groups
-db/groups-etc
-db/competition-ctl/
+db

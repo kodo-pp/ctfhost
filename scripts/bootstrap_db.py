@@ -2,15 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import sqlite3
-from sys import argv
+from sys import argv, path
 from hashlib import sha512
 from os import urandom, access, R_OK, _exit as exit, rename
+from os.path import realpath
 from base64 import b64encode
 from secrets import token_hex
 
+path.insert(0, realpath('.'))
 
-db_path = 'ctfhost.db'
-sql_script_path = 'bootstrap.sql'
+from configuration import configuration
+
+
+db_path = configuration['db_path']
+sql_script_path = 'scripts/bootstrap.sql'
 password_raw_length = 12
 
 def main():

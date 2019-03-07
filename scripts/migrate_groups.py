@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 
 import json
+import sys
 import os
 import sys
 import secrets
+import glob
+
+sys.path.insert(0, os.path.realpath('.'))
+
+from configuration import configuration
+
 
 DEFAULTS = {
     'name':   'Unnamed group',
@@ -34,10 +41,12 @@ def migrate_group(group_path):
 
 def main():
     if '--help' in sys.argv or '-h' in sys.argv:
-        print('Usage: {prog} [path/to/group.json] ...'.format(prog=sys.argv[0]))
+        print('Usage: {prog}'.format(prog=sys.argv[0]))
         print('Add missing attributes to groups')
         sys.exit(0)
-    for group_path in sys.argv[1:]:
+
+    groups_dir = configuration['groups_path']
+    for group_path in glob.glob(os.path.join(groups_dir, '*', 'group.json')):
         try:
             migrate_group(group_path)
         except BaseException as e:
