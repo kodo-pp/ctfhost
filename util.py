@@ -1,6 +1,7 @@
 import os
 import secrets
 import importlib
+import time
 
 from configuration import configuration
 
@@ -13,6 +14,10 @@ def get_ctfhost_seed():
         return seed
     with open(path) as f:
         return f.read().strip()
+
+
+def get_current_utc_time():
+    return int(time.mktime(time.gmtime()))
 
 
 def import_file(filename, module_name='imported_file'):

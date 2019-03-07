@@ -934,6 +934,7 @@
 
                         let flatpickr_config = {
                             enableTime: true,
+                            enableSeconds: true,
                         }
                         if (flatpickr.l10ns["{{ lc['lang_code'] }}"] !== undefined) {
                             flatpickr.localize(flatpickr.l10ns["{{ lc['lang_code'] }}"]);
@@ -944,8 +945,8 @@
                         const start_time_picker = flatpickr('#competition-start-time-input', flatpickr_config);
                         const end_time_picker = flatpickr('#competition-end-time-input', flatpickr_config);
 
-                        start_time_picker.setDate(new Date({{ comp.start_time }}));
-                        end_time_picker.setDate(new Date({{ comp.end_time }}));
+                        start_time_picker.setDate(new Date({{ comp.start_time }} * 1000));
+                        end_time_picker.setDate(new Date({{ comp.end_time }} * 1000));
                         window.addEventListener('load', function() {
                             document.getElementById('competition-enable-registration').value = "{{
                                 'on' if comp.allow_team_self_registration else 'off'
