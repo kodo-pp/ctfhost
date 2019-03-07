@@ -15,6 +15,7 @@ import task_gen
 from configuration import configuration
 from api import api, GUEST, USER, ADMIN, ApiArgumentError
 from localization import lc
+from competition import competition
 
 
 last_solves = {}
@@ -477,7 +478,7 @@ def api_get_task(api, sess, args):
     http = args['http_handler']
     request = json.loads(http.request.body)
     task_id = request['task_id']
-
+    
     try:
         task_id = int(task_id)
     except (ValueError, TypeError) as e:
@@ -500,6 +501,9 @@ def api_submit_flag(api, sess, args):
     request = json.loads(http.request.body)
     task_id = request['task_id']
     flag_data = request['flag']
+    
+    if not competition.is_running() and not sess.is_admin:
+        raise Exception(lc.get('competition_is_not_running'))
 
     try:
         task_id = int(task_id)
@@ -794,6 +798,9 @@ def api_access_hint(api, sess, args):
     hint_hexid = request['hint_hexid']
     team_name  = sess.username
 
+    if not competition.is_running() and not sess.is_admin:
+        raise Exception(lc.get('competition_is_not_running'))
+
     try:
         task_id = int(task_id)
     except (ValueError, TypeError) as e:
@@ -810,7 +817,7 @@ def api_access_hint(api, sess, args):
 
 api.add('add_or_update_task', api_add_or_update_task, access_level=ADMIN)
 api.add('delete_task',        api_delete_task,        access_level=ADMIN)
-api.add('get_task',           api_get_task,           access_level=USER)
+api.add('get_task',           api_get_task,           access_level=ADMIN)
 api.add('submit_flag',        api_submit_flag,        access_level=USER)
 api.add('add_group',          api_add_group,          access_level=ADMIN)
 api.add('rename_group',       api_rename_group,       access_level=ADMIN)

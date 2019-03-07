@@ -22,6 +22,18 @@ class Competition:
             'allow_team_self_registration': self.allow_team_self_registration,
         }
 
+    def is_running(self):
+        now = util.get_current_utc_time()
+        return self.start_time <= now < self.end_time
+
+    def has_finished(self):
+        now = util.get_current_utc_time()
+        return now >= self.end_time
+
+    def has_started(self):
+        now = util.get_current_utc_time()
+        return now >= self.start_time
+
 
 def read_competition_config():
     conf_dir = os.path.dirname(configuration['competition_config_path'])
@@ -98,12 +110,6 @@ def api_competition_ctl(api, sess, args):
 
     http.write(json.dumps({'success': True}))
 
-
-def is_running():
-    now = util.get_current_utc_time()
-    start_time = competition.start_time
-    end_time = competition.end_time
-    return start_time <= now < end_time
 
 
 competition = Competition(**read_competition_config())

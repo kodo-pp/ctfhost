@@ -164,3 +164,5 @@ save                                = Save
 discard                             = Discard
 bool                                = bool
 competition_ctl_successful          = Competition configuration saved
+competition_has_finished            = Competition has finished
+competition_has_not_started         = Competition has not started

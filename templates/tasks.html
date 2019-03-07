@@ -9,6 +9,11 @@
         <title>{{ conf['ctfname'] }} - {{ lc['tasks'] }}</title>
         <script src="/static/http-request.js"></script>
         <script>
+            const competition_start_time = {{ comp.start_time }};
+            const competition_end_time = {{ comp.end_time }};
+        </script>
+        <script src="/static/clock.js"></script>
+        <script>
             function toggle_task(task_id)
             {
                 let inner = document.getElementById(`task-id${task_id}-inner`);
@@ -70,99 +75,108 @@
     </head>
     <body>
         <div class="w3-bar w3-dark-grey">
-            <a class="w3-bar-item w3-mobile w3-mobile w3-button" href="/">{{ lc['home_page'] }}</a>
-            <span class="w3-bar-item w3-mobile w3-mobile w3-green">{{ lc['tasks'] }}</span>
-            <a class="w3-bar-item w3-mobile w3-mobile w3-button" href="/team_profile?team={{ session.username }}">
+            <a class="w3-bar-item w3-mobile w3-button" href="/">{{ lc['home_page'] }}</a>
+            <span class="w3-bar-item w3-mobile w3-green">{{ lc['tasks'] }}</span>
+            <a class="w3-bar-item w3-mobile w3-button" href="/team_profile?team={{ session.username }}">
                 {{ lc['team_profile'] }}
             </a>
-            <a class="w3-bar-item w3-mobile w3-mobile w3-button" href="/scoreboard">{{ lc['scoreboard'] }}</a>
+            <a class="w3-bar-item w3-mobile w3-button" href="/scoreboard">{{ lc['scoreboard'] }}</a>
             {% if session.is_admin %}
-                <a class="w3-bar-item w3-mobile w3-mobile w3-button" href="/admin">{{ lc['admin_page'] }}</a>
+                <a class="w3-bar-item w3-mobile w3-button" href="/admin">{{ lc['admin_page'] }}</a>
             {% end %}
-            <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
-            <span class="w3-bar-item w3-mobile w3-mobile w3-light-grey w3-right">
+            <a class="w3-bar-item w3-mobile w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
+            <span class="w3-bar-item w3-mobile w3-light-grey w3-right">
                 {{ lc['signed_in_as'].format(session.username) }}
+            </span>
+            <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock">
+                1:53:15
             </span>
         </div>
         <div class="w3-container">
             <h1>{{ lc['tasks'] }}</h1>
             <h2>{{ lc['points_message'].format(points=team.points) }}</h2>
-            {% for task in sorted(tasks, key = lambda t: (-t.order, t.value, t.title, t.task_id)) %}
-                <p>
-                {% if task.task_id in team.solves %}
-                    <div class="w3-container w3-light-grey w3-leftbar w3-border-green">
-                {% else %}
-                    <div class="w3-container w3-light-grey w3-leftbar w3-border-light-grey">
-                {% end %}
+            {% if comp.is_running() or session.is_admin %}
+                {% for task in sorted(tasks, key = lambda t: (-t.order, t.value, t.title, t.task_id)) %}
+                    <p>
                     {% if task.task_id in team.solves %}
-                        <h3>{{ task.title }} [{{ task.value }}] ({{ lc['solved'] }})</h3>
+                        <div class="w3-container w3-light-grey w3-leftbar w3-border-green">
                     {% else %}
-                        <h3>{{ task.title }} [{{ task.value }}]</h3>
+                        <div class="w3-container w3-light-grey w3-leftbar w3-border-light-grey">
                     {% end %}
-                    {% for label in task.labels %}
-                        <span class="ctfhost-task-view-label">{{ label }}</span>
-                    {% end %}
-                    <p><a
-                        href="javascript:toggle_task({{ task.task_id }});"
-                        class="w3-button w3-green"
-                        id="task-id{{ task.task_id }}-toggle-btn"
-                    >{{ lc['task_show'] }}</a></p>
-                    <div id="task-id{{ task.task_id }}-inner" class="hidden">
-                        <div style="overflow: auto">
-                            {% raw task.get_pretty_text() %}
-                        </div>
-                        {% if len(task.hints) > 0 %}
-                            <h4>{{ lc['hints'] }}</h4>
+                        {% if task.task_id in team.solves %}
+                            <h3>{{ task.title }} [{{ task.value }}] ({{ lc['solved'] }})</h3>
+                        {% else %}
+                            <h3>{{ task.title }} [{{ task.value }}]</h3>
                         {% end %}
-                        <p>
-                            {% for hint in task.hints %}
+                        {% for label in task.labels %}
+                            <span class="ctfhost-task-view-label">{{ label }}</span>
+                        {% end %}
+                        <p><a
+                            href="javascript:toggle_task({{ task.task_id }});"
+                            class="w3-button w3-green"
+                            id="task-id{{ task.task_id }}-toggle-btn"
+                        >{{ lc['task_show'] }}</a></p>
+                        <div id="task-id{{ task.task_id }}-inner" class="hidden">
+                            <div style="overflow: auto">
+                                {% raw task.get_pretty_text() %}
+                            </div>
+                            {% if len(task.hints) > 0 %}
+                                <h4>{{ lc['hints'] }}</h4>
+                            {% end %}
                             <p>
-                                {% if (task.task_id, hint['hexid'], hint['cost']) in hint_purchases %}
-                                    <!-- FIXME: Fix this -->
-                                    <a
-                                        href="javascript:alert({{ repr(hint['text']) }})"
-                                        class="w3-button w3-green"
-                                    >
-                                        {{ lc['view_hint'] }} ({{ hint['cost'] }})
-                                    </a>
-                                {% else %}
-                                    <a
-                                        href="javascript:purchase_hint(
-                                            {{ task.task_id }},
-                                            {{ repr(hint['hexid']) }}
-                                        )"
-                                        class="w3-button w3-dark-grey"
-                                    >
-                                        {{ lc['buy_hint'] }} ({{ hint['cost'] }})
-                                    </a>
+                                {% for hint in task.hints %}
+                                <p>
+                                    {% if (task.task_id, hint['hexid'], hint['cost']) in hint_purchases %}
+                                        <!-- FIXME: Fix this -->
+                                        <a
+                                            href="javascript:alert({{ repr(hint['text']) }})"
+                                            class="w3-button w3-green"
+                                        >
+                                            {{ lc['view_hint'] }} ({{ hint['cost'] }})
+                                        </a>
+                                    {% else %}
+                                        <a
+                                            href="javascript:purchase_hint(
+                                                {{ task.task_id }},
+                                                {{ repr(hint['hexid']) }}
+                                            )"
+                                            class="w3-button w3-dark-grey"
+                                        >
+                                            {{ lc['buy_hint'] }} ({{ hint['cost'] }})
+                                        </a>
+                                    {% end %}
+                                </p>
                                 {% end %}
                             </p>
-                            {% end %}
-                        </p>
-                        <p>
-                            <div class="w3-row-padding">
-                                <div class="w3-col s12 m8 l10">
-                                    <input
-                                        type="text"
-                                        class="w3-input w3-border"
-                                        id="flag-input-id{{ task.task_id }}"
-                                        placeholder="{{ lc['input_flag'] }}"
-                                        style="font-family: monospace"
-                                    >
+                            <p>
+                                <div class="w3-row-padding">
+                                    <div class="w3-col s12 m8 l10">
+                                        <input
+                                            type="text"
+                                            class="w3-input w3-border"
+                                            id="flag-input-id{{ task.task_id }}"
+                                            placeholder="{{ lc['input_flag'] }}"
+                                            style="font-family: monospace"
+                                        >
+                                    </div>
+                                    <div class="w3-col s12 m4 l2">
+                                        <input
+                                            type="button"
+                                            class="w3-input w3-green w3-button ctfhost-combo-input-submit"
+                                            onclick="submit_flag({{ task.task_id }});"
+                                            value="{{ lc['submit_flag'] }}"
+                                        >
+                                    </div>
                                 </div>
-                                <div class="w3-col s12 m4 l2">
-                                    <input
-                                        type="button"
-                                        class="w3-input w3-green w3-button ctfhost-combo-input-submit"
-                                        onclick="submit_flag({{ task.task_id }});"
-                                        value="{{ lc['submit_flag'] }}"
-                                    >
-                                </div>
-                            </div>
-                        </p>
+                            </p>
+                        </div>
                     </div>
-                </div>
-                </p>
+                    </p>
+                {% end %}
+            {% elif comp.has_finished %}
+                <h2>{{ lc['competition_has_finished'] }}</h2>
+            {% else %}
+                <h2>{{ lc['competition_has_not_started'] }}</h2>
             {% end %}
         </div>
     </body>

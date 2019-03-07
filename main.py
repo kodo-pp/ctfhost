@@ -178,7 +178,7 @@ class EditTeamInfoSubmitHandler(tornado.web.RequestHandler):
             return
         tm = team.read_team(session.username)
         tm.full_name = disp_name
-        tm.email = email
+        tm.email = email if email != '' else None
         team.write_team(tm)
         self.write(render_template('edit_team_info_ok.html', session=session))
 
@@ -195,6 +195,7 @@ class AdminRegHandler(tornado.web.RequestHandler):
         password_c = self.get_argument('password-c', None)
         disp_name = self.get_argument('disp-name', None)
         email = self.get_argument('email', None)
+        #is_admin = self.get_argument('is_admin', False)
         
         if username is None or username == '':
             self.write(render_template('reg_error.html', error=lc.get('no_username')))
@@ -212,7 +213,13 @@ class AdminRegHandler(tornado.web.RequestHandler):
             self.write(render_template('reg_error.html', error=lc.get('user_already_exists')))
             return
 
-        auth.register_user(username=username, password=password, disp_name=disp_name, email=email)
+        auth.register_user(
+            username = username,
+            password = password,
+            disp_name = disp_name,
+            email = email,
+            #is_admin = is_admin,
+        )
         self.redirect('/admin')
 
 class LoginHandler(tornado.web.RequestHandler):
@@ -305,6 +312,7 @@ class TasksHandler(tornado.web.RequestHandler):
                 tasks          = task_list,
                 team           = current_team,
                 hint_purchases = hint_purchases,
+                comp           = compctl.competition,
             )
         )
 
