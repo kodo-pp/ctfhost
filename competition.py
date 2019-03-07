@@ -85,7 +85,7 @@ def api_competition_ctl(api, sess, args):
         )
 
     try:
-        allow_team_self_registration = bool(start_time)
+        allow_team_self_registration = bool(allow_team_self_registration)
     except (ValueError, TypeError) as e:
         raise Exception(
             lc.get('api_invalid_data_type').format(

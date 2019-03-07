@@ -17,5 +17,5 @@ configuration = {
     'date_fmt_func':           date_fmt.default_date_fmt,
     'gen_config_presets_path': 'presets/gen',
     'ctfhost_seed_path':       'db/ctfhost-seed.txt',
-    'competition_config_path': 'db/competition-ctl/competition-ctl.json'
+    'competition_config_path': 'db/competition-ctl/competition-ctl.json',
 }

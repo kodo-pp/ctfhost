@@ -4,6 +4,12 @@
         <link rel="shortcut icon" href="/static/favicon.png">
         <link rel="stylesheet" href="/static/w3css/w3.css">
         <link rel="stylesheet" href="/static/ctfhost-common.css">
+        <script>
+            const locale_messages = {% raw str(lc) %};
+            const competition_start_time = {{ comp.start_time }};
+            const competition_end_time = {{ comp.end_time }};
+        </script>
+        <script src="/static/clock.js"></script>
         <meta charset="utf-8">
         <title>{{ conf['ctfname'] }} - {{ lc['signin'] }}</title>
     </head>
@@ -12,7 +18,10 @@
         <div class="w3-bar w3-dark-grey">
             <a class="w3-bar-item w3-mobile w3-button" href="/">{{ lc['home_page'] }}</a>
             <span class="w3-bar-item w3-mobile w3-green">{{ lc['signin'] }}</span>
-            <a class="w3-bar-item w3-mobile w3-button" href="/signup">{{ lc['signup'] }}</a>
+            {% if comp.allow_team_self_registration %}
+                <a class="w3-bar-item w3-mobile w3-button" href="/signup">{{ lc['signup'] }}</a>
+            {% end %}
+            <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
         </div>
         <div class="w3-container">
             <h1>
@@ -31,9 +40,11 @@
             <p>
                 <input type="submit" class="w3-btn w3-green" value="{{ lc['signin'] }}">
             </p>
-            <p>
-                <a href="/signup">{{ lc['maybe_signup'] }}</a>
-            </p>
+            {% if comp.allow_team_self_registration %}
+                <p>
+                    <a href="/signup">{{ lc['maybe_signup'] }}</a>
+                </p>
+            {% end %}
         </form>
     </body>
 </html>

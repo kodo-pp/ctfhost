@@ -16,7 +16,7 @@ import auth
 import tasks
 import team
 import task_gen
-import competition as compctl
+from competition import competition
 from localization import Localization, lc
 from configuration import configuration
 from template import render_template
@@ -67,7 +67,6 @@ class AdminHandler(tornado.web.RequestHandler):
             read_task        = tasks.read_task,
             build_group_path = tasks.build_group_path,
             task_gen         = task_gen,
-            comp             = compctl.competition,
         ))
 
 
@@ -236,6 +235,9 @@ class RegisterHandler(tornado.web.RequestHandler):
         if auth.load_session(session_id) is not None:
             self.redirect('/')
             return
+        if not competition.allow_team_self_registration:
+            self.write(render_template('reg_error.html', error=lc.get('registration_disabled')))
+            return
         self.write(render_template('register.html'))
 
 class LogoutHandler(tornado.web.RequestHandler):
@@ -269,6 +271,8 @@ class AuthHandler(tornado.web.RequestHandler):
 
 class RegHandler(tornado.web.RequestHandler):
     def post(self):
+        if not competition.allow_team_self_registration:
+            self.write(render_template('reg_error.html', error=lc.get('registration_disabled')))
         username = self.get_argument('username', None)
         password = self.get_argument('password', None)
         password_c = self.get_argument('password-c', None)
@@ -312,7 +316,6 @@ class TasksHandler(tornado.web.RequestHandler):
                 tasks          = task_list,
                 team           = current_team,
                 hint_purchases = hint_purchases,
-                comp           = compctl.competition,
             )
         )
 
@@ -351,9 +354,11 @@ class ScoreboardHandler(tornado.web.RequestHandler):
         task_list = list(tasks.get_task_list())
         self.write(render_template('scoreboard.html', session=session, team_list=team_list, task_list=task_list))
 
+
 class FaviconHandler(tornado.web.RequestHandler):
     def get(self):
         self.redirect('/static/favicon.png')
+
 
 def make_app():
     return tornado.web.Application([
@@ -384,6 +389,7 @@ def main():
 
     app = make_app()
     app.listen(8888)
+    logger.info('Listening on port 8888')
     tornado.ioloop.IOLoop.current().start()
 
 

@@ -336,7 +336,7 @@
 
                 const allow_team_self_registration = document.getElementById(
                     'competition-enable-registration'
-                ).value == 'on';
+                ).checked;
 
                 let data = {
                     'start_time': start_ts,
@@ -485,6 +485,7 @@
             <span class="w3-bar-item w3-mobile w3-mobile w3-light-grey w3-right w3-mobile">
                 {{ lc['signed_in_as'].format(session.username) }}
             </span>
+            <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
         </div>
         <div class="w3-container">
             <h1>{{ lc['admin_page'] }}</h1>
@@ -950,9 +951,9 @@
                         start_time_picker.setDate(mklocaltime({{ comp.start_time }}));
                         end_time_picker.setDate(mklocaltime({{ comp.end_time }}));
                         window.addEventListener('load', function() {
-                            document.getElementById('competition-enable-registration').value = "{{
-                                'on' if comp.allow_team_self_registration else 'off'
-                            }}";
+                            document.getElementById('competition-enable-registration').checked = {{
+                                'true' if comp.allow_team_self_registration else 'false'
+                            }};
                         })
                     </script>
                     <hr>

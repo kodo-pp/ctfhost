@@ -171,3 +171,4 @@ clock_finished_reload               = Finished. Please reload the page
 clock_not_started                   = Not started
 clock_finished                      = Finished
 days                                = d.
+registration_disabled               = Team self-registration is disabled

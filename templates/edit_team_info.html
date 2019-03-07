@@ -4,6 +4,12 @@
         <link rel="shortcut icon" href="/static/favicon.png">
         <link rel="stylesheet" href="/static/w3css/w3.css">
         <link rel="stylesheet" href="/static/ctfhost-common.css">
+        <script>
+            const locale_messages = {% raw str(lc) %};
+            const competition_start_time = {{ comp.start_time }};
+            const competition_end_time = {{ comp.end_time }};
+        </script>
+        <script src="/static/clock.js"></script>
         <meta charset="utf-8">
         <title>{{ conf['ctfname'] }} - {{ lc['edit_team_info'] }}</title>
     </head>
@@ -21,6 +27,7 @@
             <span class="w3-bar-item w3-mobile w3-light-grey w3-right">
                 {{ lc['signed_in_as'].format(session.username) }}
             </span>
+            <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
         </div>
         <div class="w3-container">
             <h1>
