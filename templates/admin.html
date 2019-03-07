@@ -7,8 +7,11 @@
         <link rel="stylesheet" href="/static/task-editor.css">
         <link rel="stylesheet" href="/static/flatpickr/flatpickr.min.css">
         <script>
-            locale_messages = {% raw str(lc) %}; /* should work */
+            const locale_messages = {% raw str(lc) %};
+            const competition_start_time = {{ comp.start_time }};
+            const competition_end_time = {{ comp.end_time }};
         </script>
+        <script src="/static/clock.js"></script>
         <script src="/static/admin/task-editor.js"></script>
         <script src="/static/http-request.js"></script>
         <script src="/static/ace/src-min/ace.js"></script>
@@ -323,13 +326,6 @@
                 } catch (e) {
                     error_message(e.message);
                 }
-            }
-
-            function get_utc_unix_timestamp(date)
-            {
-                let local_unix_timestamp = date.getTime() / 1000;
-                let timezone_offset_seconds = date.getTimezoneOffset() * 60;
-                return parseInt(local_unix_timestamp + timezone_offset_seconds);
             }
 
 
@@ -926,11 +922,17 @@
                     <script>
                         (function() {
                             const tz_out = document.getElementById('local_timezone_output');
-                            const tz_offset_minutes = new Date(Date.now()).getTimezoneOffset();
+                            const tz_offset_minutes = -new Date(Date.now()).getTimezoneOffset();
                             const tz_offset_hours = (tz_offset_minutes < 0 ? '' : '+') +
                                 Math.round(tz_offset_minutes / 30) / 2;
                             tz_out.innerHTML = 'UTC ' + tz_offset_hours;
                         })()
+
+                        function mklocaltime(utc_unix_ts)
+                        {
+                            const off = new Date().getTimezoneOffset() * 60;
+                            return new Date((utc_unix_ts - off) * 1000);
+                        }
 
                         let flatpickr_config = {
                             enableTime: true,
@@ -945,8 +947,8 @@
                         const start_time_picker = flatpickr('#competition-start-time-input', flatpickr_config);
                         const end_time_picker = flatpickr('#competition-end-time-input', flatpickr_config);
 
-                        start_time_picker.setDate(new Date({{ comp.start_time }} * 1000));
-                        end_time_picker.setDate(new Date({{ comp.end_time }} * 1000));
+                        start_time_picker.setDate(mklocaltime({{ comp.start_time }}));
+                        end_time_picker.setDate(mklocaltime({{ comp.end_time }}));
                         window.addEventListener('load', function() {
                             document.getElementById('competition-enable-registration').value = "{{
                                 'on' if comp.allow_team_self_registration else 'off'

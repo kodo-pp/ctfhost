@@ -20,6 +20,22 @@ window.addEventListener('load', function() {
         }
     };
 
+    const format_int = function(x, n) {
+        let s = parseInt(x).toString();
+        if (s.length < n) {
+            s = '0'.repeat(n - s.length) + s;
+        }
+        return s;
+    };
+
+    const format_time_interval = function(days, hours, minutes, seconds) {
+        if (days == 0) {
+            return `${hours}:${format_int(minutes,2)}:${format_int(seconds,2)}`;
+        } else {
+            return `${days} ${locale_messages['days']} ${hours}:${format_int(minutes,2)}:${format_int(seconds,2)}`;
+        }
+    };
+
     const update_function = function() {
         const clock = document.getElementById('ctfhost-clock');
         const start_time = competition_start_time;
@@ -35,7 +51,7 @@ window.addEventListener('load', function() {
         }
         const end_time = competition_end_time;
         const current_time = get_utc_unix_timestamp(new Date(Date.now()));
-        const delta_time = end_time - current_time;
+        let delta_time = end_time - current_time;
         if (current_time < start_time) {
             clock.innerHTML = locale_messages['clock_not_started'];
         } else if (delta_time <= 0) {
@@ -48,15 +64,13 @@ window.addEventListener('load', function() {
             const hours = delta_time % 24;
             delta_time = parseInt(delta_time / 24);
             const days = delta_time;
-            if (days > 0) {
-                clock.innerHTML = `${days}:${hours}:${minutes}:${seconds}`;
-            } else {
-                clock.innerHTML = `${hours}:${minutes}:${seconds}`;
-            }
+
+            clock.innerHTML = format_time_interval(days, hours, minutes, seconds);
         }
     };
 
     const init_phase = get_phase();
 
+    update_function();
     setInterval(update_function, 1000);
 });

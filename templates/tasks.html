@@ -9,6 +9,7 @@
         <title>{{ conf['ctfname'] }} - {{ lc['tasks'] }}</title>
         <script src="/static/http-request.js"></script>
         <script>
+            const locale_messages = {% raw str(lc) %};
             const competition_start_time = {{ comp.start_time }};
             const competition_end_time = {{ comp.end_time }};
         </script>
@@ -173,7 +174,7 @@
                     </div>
                     </p>
                 {% end %}
-            {% elif comp.has_finished %}
+            {% elif comp.has_finished() %}
                 <h2>{{ lc['competition_has_finished'] }}</h2>
             {% else %}
                 <h2>{{ lc['competition_has_not_started'] }}</h2>
