@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import time
+import subprocess as sp
 from contextlib import closing
 from threading import Lock
 
@@ -44,8 +45,12 @@ class InvalidInheritError(Exception):
     pass
 
 
-def check_flag_with_program(prog, flag):
-    raise NotImplementedError('Checker program is not yet implemented')
+def check_flag_with_program(prog, flag, task, token, team_name):
+    task_dir = os.path.join(configuration['tasks_path'], str(task.task_id))
+    prog = prog.replace('@task_dir@', task_dir)
+    prog = prog.replace('@team_name@', team_name)
+    result = sp.run([prog], text=True, input='\n'.join([str(task.task_id), flag, token, team_name]))
+    return result.returncode == 0
 
 
 class Task:
@@ -136,7 +141,6 @@ class Task:
         for flag_checker in self.flags:
             fc_type = flag_checker['type']
             fc_data = flag_checker['data']
-            print(repr(fc_type), repr(fc_data))
             if fc_type == 'string':
                 if flag == fc_data:
                     return True
@@ -144,7 +148,13 @@ class Task:
                 if re.match(fc_data, flag) is not None:
                     return True
             elif fc_type == 'program':
-                if check_flag_with_program(fc_data, flag):
+                if check_flag_with_program(
+                    prog = fc_data,
+                    flag = flag,
+                    task = self,
+                    token = task_gen.get_token(team_name, self.task_id),
+                    team_name = team_name
+                ):
                     return True
         return False
 
