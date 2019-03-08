@@ -13,7 +13,7 @@ class Localization:
             if not lang_file.is_file() or not lang_file.name.endswith('.lang'):
                 continue
             config = ConfigParser()
-            config.read(lang_file)
+            config.read(lang_file, encoding='utf-8')
             lang_info = config['information']
             lang_data = config['data']
             self.languages[lang_info['id']] = {
