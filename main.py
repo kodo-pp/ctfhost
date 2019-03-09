@@ -81,6 +81,45 @@ class AdminNewTeamHandler(tornado.web.RequestHandler):
         self.write(render_template('admin_new_team.html', session=session))
 
 
+class GetAttachmentHandler(tornado.web.RequestHandler):
+    def get(self, _):
+        session_id = self.get_cookie('session_id')
+        session = auth.load_session(session_id)
+        if session is None:
+            raise tornado.web.HTTPError(403)
+
+        task_id = self.get_argument('task', None)
+        if task_id is None:
+            raise tornado.web.HTTPError(418)
+
+        try:
+            task_id = int(task_id)
+        except (ValueError, TypeError) as e:
+            raise tornado.web.HTTPError(404)
+
+        try:
+            tasks.read_task(task_id)
+        except tasks.TaskNotFoundError:
+            raise tornado.web.HTTPError(404)
+
+        filename = self.get_argument('file', None)
+        if filename is None:
+            raise tornado.web.HTTPError(404)
+        
+        try:
+            filepath = tasks.get_attachment(task_id=task_id, team_name=session.username, filename=filename)
+        except tasks.AttachmentNotFoundError:
+            raise tornado.web.HTTPError(404)
+        with open(filepath, 'rb') as f:
+            self.set_header('Content-Type', 'application/octet-stream')
+            while True:
+                data = f.read(64 * 1024)
+                if len(data) == 0:
+                    break
+                self.write(data)
+            self.finish() 
+
+
 class ChangePasswordHandler(tornado.web.RequestHandler):
     def get(self):
         session_id = self.get_cookie('session_id')
@@ -379,6 +418,7 @@ def make_app():
         (r'/edit_team_info', EditTeamInfoHandler),
         (r'/edit_team_info_submit', EditTeamInfoSubmitHandler),
         (r'/scoreboard', ScoreboardHandler),
+        (r'/get_attachment/(.*)', GetAttachmentHandler),
         (r'/favicon.ico', FaviconHandler),
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': './static'})
     ], debug=True)

@@ -44,6 +44,18 @@ class TooFrequentSubmissions(Exception):
 class InvalidInheritError(Exception):
     pass
 
+class AttachmentNotFoundError(Exception):
+    pass
+
+
+def get_attachment(task_id, team_name, filename):
+    token = task_gen.get_token(task_id=task_id, team_name=team_name)
+    path = os.path.join(configuration['tasks_path'], str(task_id), 'generated', token, 'files', filename)
+    if os.path.isfile(path):
+        return path
+    else:
+        raise AttachmentNotFoundError()
+
 
 def check_flag_with_program(prog, flag, task, token, team_name):
     task_dir = os.path.join(configuration['tasks_path'], str(task.task_id))
