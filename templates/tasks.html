@@ -121,32 +121,44 @@
                             </div>
                             {% if len(task.hints) > 0 %}
                                 <h4>{{ lc['hints'] }}</h4>
-                            {% end %}
-                            <p>
-                                {% for hint in task.hints %}
                                 <p>
-                                    {% if (task.task_id, hint['hexid'], hint['cost']) in hint_purchases %}
-                                        <!-- FIXME: Fix this -->
+                                    {% for hint in task.hints %}
+                                    <p>
+                                        {% if (task.task_id, hint['hexid'], hint['cost']) in hint_purchases %}
+                                            <!-- FIXME: Fix this -->
+                                            <a
+                                                href="javascript:alert({{ repr(hint['text']) }})"
+                                                class="w3-button w3-green"
+                                            >
+                                                {{ lc['view_hint'] }} ({{ hint['cost'] }})
+                                            </a>
+                                        {% else %}
+                                            <a
+                                                href="javascript:purchase_hint(
+                                                    {{ task.task_id }},
+                                                    {{ repr(hint['hexid']) }}
+                                                )"
+                                                class="w3-button w3-dark-grey"
+                                            >
+                                                {{ lc['buy_hint'] }} ({{ hint['cost'] }})
+                                            </a>
+                                        {% end %}
+                                    </p>
+                                    {% end %}
+                                </p>
+                            {% end %}
+                            {% if len(task.files) > 0 %}
+                                <h4>{{ lc['attached_files'] }}</h4>
+                                <p>
+                                    {% for file in task.files %}
                                         <a
-                                            href="javascript:alert({{ repr(hint['text']) }})"
-                                            class="w3-button w3-green"
-                                        >
-                                            {{ lc['view_hint'] }} ({{ hint['cost'] }})
-                                        </a>
-                                    {% else %}
-                                        <a
-                                            href="javascript:purchase_hint(
-                                                {{ task.task_id }},
-                                                {{ repr(hint['hexid']) }}
-                                            )"
-                                            class="w3-button w3-dark-grey"
-                                        >
-                                            {{ lc['buy_hint'] }} ({{ hint['cost'] }})
+                                            class="w3-button w3-blue"
+                                            href="/get_attachment?team={{ team.team_name }}&task={{ task.task_id }}&file={{ file }}">
+                                            {{ file }}
                                         </a>
                                     {% end %}
                                 </p>
-                                {% end %}
-                            </p>
+                            {% end %}
                             <p>
                                 <div class="w3-row-padding">
                                     <div class="w3-col s12 m8 l10">

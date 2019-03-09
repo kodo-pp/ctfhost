@@ -172,3 +172,6 @@ clock_not_started                   = Not started
 clock_finished                      = Finished
 days                                = d.
 registration_disabled               = Team self-registration is disabled
+attached_files                      = Attached files
+how_to_attach_files                 = Attach files by putting them to task files directory
+task_files_dir                      = Task files directory: {dir}

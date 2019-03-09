@@ -53,6 +53,14 @@ def check_flag_with_program(prog, flag, task, token, team_name):
     return result.returncode == 0
 
 
+def get_attached_files(task_id):
+    task_files_dir = os.path.join(configuration['tasks_path'], str(task_id), 'files')
+    os.makedirs(task_files_dir, exist_ok=True)
+    for entry in os.scandir(task_files_dir):
+        if entry.is_file():
+            yield entry.name
+
+
 class Task:
     def __init__(self, task_id, info):
         self.task_id     = task_id
@@ -65,7 +73,22 @@ class Task:
         self.order       = info['order']
         self.seed        = info['seed']
         self.hints       = info['hints']
+        self.files       = list(get_attached_files(task_id))
+        self.genfiles    = self.Genfiles(task_id)
         self.validate()
+
+    class Genfiles:
+        def __init__(self, task_id):
+            self.task_id = task_id
+            self.src_path = os.path.join(configuration['tasks_path'], str(task_id), 'files')
+
+        def get_gen_path(self, token):
+            return os.path.join(configuration['tasks_path'], str(self.task_id), 'generated', token, 'files')
+
+        def prepare(self, token):
+            path = self.get_gen_path(token)
+            if os.path.exists(path):
+                shutil.rmtree(path)
 
     def get_pretty_text(self):
         # TODO: maybe cache the resulting HTML is the performance boost is noticeable
@@ -127,6 +150,7 @@ class Task:
             'order':   self.order,
             'seed':    self.seed,
             'hints':   self.hints,
+            'files':   self.files,
         }
 
     def check_flag(self, flag, team_name):

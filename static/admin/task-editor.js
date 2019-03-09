@@ -4,7 +4,19 @@ function ActionError(text)
 }
 
 
-function open_task_editor(task_id, text, title, value, labels, loaded_flags, group, order, seed, loaded_hints)
+function open_task_editor(
+    task_id,
+    text,
+    title,
+    value,
+    labels,
+    loaded_flags,
+    group,
+    order,
+    seed,
+    loaded_hints,
+    loaded_files,
+)
 {
     let overlay = document.querySelector('#task-editor-overlay');
     if (overlay === null) {
@@ -17,6 +29,14 @@ function open_task_editor(task_id, text, title, value, labels, loaded_flags, gro
 
     document.getElementById('task-editor-flags').innerHTML = '';
     document.getElementById('task-editor-hints').innerHTML = '';
+    const task_files_dir = `${configuration['tasks_path']}/${task_id}/files`;
+    if (task_id !== null) {
+        document.getElementById('task-editor-attached-files-label').innerHTML =
+            `<p>${locale_messages['task_files_dir'].replace('{dir}', task_files_dir)}</p>`;
+    } else {
+        document.getElementById('task-editor-attached-files-label').innerHTML = '';
+    }
+    document.getElementById('task-editor-attached-files').innerHTML = '';
     flags = {};
     hints = {};
     flagno = 0;
@@ -58,6 +78,12 @@ function open_task_editor(task_id, text, title, value, labels, loaded_flags, gro
         let no = hintno;
         add_hint();
         hints[no] = hint;
+    }
+
+    if (task_id !== null) {
+        for (let file of loaded_files) {
+            add_attached_file(file);
+        }
     }
     update_ui();
 }
@@ -242,6 +268,15 @@ function add_flag()
 
     // Костыль № 9247
     update_flags_ui();
+}
+
+
+function add_attached_file(filename)
+{
+    const file_template = `<li>${filename}</li>`
+    let container = document.getElementById('task-editor-attached-files');
+    
+    container.innerHTML += hint_input_template.split('##no##').join(hintno.toString());
 }
 
 

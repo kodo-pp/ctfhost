@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/static/flatpickr/flatpickr.min.css">
         <script>
             const locale_messages = {% raw str(lc) %};
+            const configuration = {'tasks_path': {% raw repr(conf['tasks_path']) %}};
             const competition_start_time = {{ comp.start_time }};
             const competition_end_time = {{ comp.end_time }};
         </script>
@@ -91,17 +92,19 @@
                         let order = 0;
                         let seed = mkseed();
                         let hints = [];
+                        let files = [];
                         if (task_id !== null) {
                             let loaded_task = load_task(task_id);
-                            text = loaded_task.task.text;
-                            title = loaded_task.task.title;
-                            value = loaded_task.task.value;
-                            labels = loaded_task.task.labels;
-                            group = loaded_task.task.group;
-                            loaded_flags = loaded_task.task.flags;
-                            order = loaded_task.task.order;
-                            seed = loaded_task.task.seed;
-                            hints = loaded_task.task.hints;
+                            text            = loaded_task.task.text;
+                            title           = loaded_task.task.title;
+                            value           = loaded_task.task.value;
+                            labels          = loaded_task.task.labels;
+                            group           = loaded_task.task.group;
+                            loaded_flags    = loaded_task.task.flags;
+                            order           = loaded_task.task.order;
+                            seed            = loaded_task.task.seed;
+                            hints           = loaded_task.task.hints;
+                            files           = loaded_task.task.files;
                         }
                         open_task_editor(
                             task_id,
@@ -113,7 +116,8 @@
                             group,
                             order,
                             seed,
-                            hints
+                            hints,
+                            files,
                         );
                     } catch (e) {
                         error_message(e.message);
@@ -444,16 +448,26 @@
                         </div>
                     </div>
                 </p>
+
                 <p>{{ lc['flags'] }}</p>
                 <div id="task-editor-flags"></div> <!-- Filled by task-editor.js -->
                 <p>
                     <a href="javascript:add_flag()" class="w3-button w3-green">{{ lc['add_flag'] }}</a>
                 </p>
+
+                <p>{{ lc['attached_files'] }}</p>
+                <div class="w3-container">
+                    <div id="task-editor-attached-files-label"></div> <!-- Filled by task-editor.js -->
+                    <div id="task-editor-attached-files"></div> <!-- Filled by task-editor.js -->
+                    <p>{{ lc['how_to_attach_files'] }}</p>
+                </div>
+
                 <p>{{ lc['hints'] }}</p>
                 <div id="task-editor-hints"></div> <!-- Filled by task-editor.js -->
                 <p>
                     <a href="javascript:add_hint()" class="w3-button w3-green">{{ lc['add_hint'] }}</a>
                 </p>
+
                 <p>
                     <label for="task-editor-order-input">{{ lc['taskeditor_order'] }}</label>
                     <input
