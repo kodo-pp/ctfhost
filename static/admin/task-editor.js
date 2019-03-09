@@ -276,7 +276,7 @@ function add_attached_file(filename)
     const file_template = `<li>${filename}</li>`
     let container = document.getElementById('task-editor-attached-files');
     
-    container.innerHTML += hint_input_template.split('##no##').join(hintno.toString());
+    container.innerHTML += file_template;
 }
 
 
