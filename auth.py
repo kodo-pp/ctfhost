@@ -6,6 +6,7 @@ import time
 import os
 import json
 import secrets
+import re
 from contextlib import closing
 
 from loguru import logger
@@ -14,6 +15,7 @@ from configuration import configuration
 from localization import lc
 from api import api, GUEST, USER, ADMIN, ApiArgumentError
 
+
 class Session:
     def __init__(self, id, username, expires_at, is_admin):
         self.id = id
@@ -21,17 +23,25 @@ class Session:
         self.is_admin = is_admin
         self.expires_at = expires_at
 
+
 class BaseAuthenticationError(Exception):
     def __init__(self):
         self.text = 'basic_authentication_error'
+
 
 class AuthenticationError(BaseAuthenticationError):
     def __init__(self):
         self.text = 'invalid_username_or_password'
 
+
 class BaseRegistrationError(Exception):
     def __init__(self):
         self.text = 'basic_registration_error'
+
+
+class RegValidationFailedError(BaseRegistrationError):
+    def __init__(self):
+        self.text = 'reg_validation_failed'
 
 
 class SessionCache:
@@ -152,9 +162,19 @@ def authenticate_user(username, password):
             return create_session(username)
 
 
-def register_user(username, password, disp_name=None, email=None):
-    if disp_name == '':
-        disp_name = None
+def validate_user_creds(username, disp_name, email):
+    if not re.match(r'^[a-zA-Z0-9_.+-]{1,100}$', username):
+        return False
+    if len(disp_name.encode('utf-8')) >= 1000:
+        return False
+    if len(email.encode('utf-8')) >= 1000:
+        return False
+    return True
+
+
+def register_user(username, password, disp_name, email=None):
+    if not validate_user_creds(username=username, disp_name=disp_name, email=email):
+        raise RegValidationFailedError()
     if email == '':
         email = None
     password_hash = hashlib.sha512(password.encode()).hexdigest()

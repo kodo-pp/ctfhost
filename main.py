@@ -27,6 +27,7 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(render_template('index.html', session=auth.load_session(self.get_cookie('session_id'))))
 
+
 class ApiHandler(tornado.web.RequestHandler):
     def post(self, *a):
         session = auth.load_session(self.get_cookie('session_id'))
@@ -49,6 +50,7 @@ class ApiHandler(tornado.web.RequestHandler):
 
     def get(self, *a):
         self.post(*a)
+
 
 class AdminHandler(tornado.web.RequestHandler):
     def get(self):
@@ -251,13 +253,17 @@ class AdminRegHandler(tornado.web.RequestHandler):
             self.write(render_template('reg_error.html', error=lc.get('user_already_exists')))
             return
 
-        auth.register_user(
-            username = username,
-            password = password,
-            disp_name = disp_name,
-            email = email,
-            #is_admin = is_admin,
-        )
+        try:
+            auth.register_user(
+                username = username,
+                password = password,
+                disp_name = disp_name,
+                email = email,
+                #is_admin = is_admin,
+            )
+        except auth.BaseRegistrationError as e:
+            self.write(self.render_template('reg_error', error=lc.get(e.text)))
+            return
         self.redirect('/admin')
 
 class LoginHandler(tornado.web.RequestHandler):
@@ -334,7 +340,11 @@ class RegHandler(tornado.web.RequestHandler):
             self.write(render_template('reg_error.html', error=lc.get('user_already_exists')))
             return
 
-        auth.register_user(username=username, password=password, disp_name=disp_name, email=email)
+        try:
+            auth.register_user(username=username, password=password, disp_name=disp_name, email=email)
+        except auth.BaseRegistrationError as e:
+            self.write(render_template('reg_error.html', error=lc.get(e.text)))
+            return
         self.redirect('/')
 
 
