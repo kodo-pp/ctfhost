@@ -1,194 +1,194 @@
 <!doctype html>
 <html lang="{{ lc['lang_code'] }}" dir="ltr">
-    <head>
-        <link rel="shortcut icon" href="/static/favicon.png">
-        <link rel="stylesheet" href="/static/w3css/w3.css">
-        <link rel="stylesheet" href="/static/ctfhost-common.css">
-        <link rel="stylesheet" href="/static/pygments.css">
-        <meta charset="utf-8">
-        <title>{{ conf['ctfname'] }} - {{ lc['tasks'] }}</title>
-        <script src="/static/http-request.js"></script>
-        <script>
-            const locale_messages = {% raw str(lc) %};
-            const competition_start_time = {{ comp.start_time }};
-            const competition_end_time = {{ comp.end_time }};
-        </script>
-        <script src="/static/clock.js"></script>
-        <script>
-            function toggle_task(task_id)
-            {
-                let inner = document.getElementById(`task-id${task_id}-inner`);
-                let toggle_btn = document.getElementById(`task-id${task_id}-toggle-btn`);
-                if (!inner) {
-                    throw Error(`No inner element for task with id ${id} found`);
-                }
-                if (!toggle_btn) {
-                    throw Error(`No toggle button for task with id ${id} found`);
-                }
+  <head>
+    <link rel="shortcut icon" href="/static/favicon.png">
+    <link rel="stylesheet" href="/static/w3css/w3.css">
+    <link rel="stylesheet" href="/static/ctfhost-common.css">
+    <link rel="stylesheet" href="/static/pygments.css">
+    <meta charset="utf-8">
+    <title>{{ conf['ctfname'] }} - {{ lc['tasks'] }}</title>
+    <script src="/static/http-request.js"></script>
+    <script>
+      const locale_messages = {% raw str(lc) %};
+      const competition_start_time = {{ comp.start_time }};
+      const competition_end_time = {{ comp.end_time }};
+    </script>
+    <script src="/static/clock.js"></script>
+    <script>
+      function toggle_task(task_id)
+      {
+        let inner = document.getElementById(`task-id${task_id}-inner`);
+        let toggle_btn = document.getElementById(`task-id${task_id}-toggle-btn`);
+        if (!inner) {
+          throw Error(`No inner element for task with id ${id} found`);
+        }
+        if (!toggle_btn) {
+          throw Error(`No toggle button for task with id ${id} found`);
+        }
 
-                if (inner.classList.contains('hidden')) {
-                    toggle_btn.classList.remove('w3-green');
-                    toggle_btn.classList.add('w3-grey');
-                    toggle_btn.innerHTML = '{{ lc['task_hide'] }}';
-                } else {
-                    toggle_btn.classList.remove('w3-grey');
-                    toggle_btn.classList.add('w3-green');
-                    toggle_btn.innerHTML = '{{ lc['task_show'] }}';
-                }
+        if (inner.classList.contains('hidden')) {
+          toggle_btn.classList.remove('w3-green');
+          toggle_btn.classList.add('w3-grey');
+          toggle_btn.innerHTML = '{{ lc['task_hide'] }}';
+        } else {
+          toggle_btn.classList.remove('w3-grey');
+          toggle_btn.classList.add('w3-green');
+          toggle_btn.innerHTML = '{{ lc['task_show'] }}';
+        }
 
-                inner.classList.toggle('hidden');
-            }
+        inner.classList.toggle('hidden');
+      }
 
-            function submit_flag(task_id)
-            {
-                let flag = document.getElementById(`flag-input-id${task_id}`).value;
-                let result;
-                try {
-                    result = make_http_request('/api/submit_flag', JSON.stringify({
-                        'task_id': task_id,
-                        'flag': flag
-                    }));
-                } catch (e) {
-                    alert('{{ lc['error'] }}: ' + e.message);
-                    return;
-                }
-                if (result.flag_correct) {
-                    location.reload();
-                } else {
-                    alert('{{ lc['incorrect_flag'] }}');
-                }
-            }
+      function submit_flag(task_id)
+      {
+        let flag = document.getElementById(`flag-input-id${task_id}`).value;
+        let result;
+        try {
+          result = make_http_request('/api/submit_flag', JSON.stringify({
+            'task_id': task_id,
+            'flag': flag
+          }));
+        } catch (e) {
+          alert('{{ lc['error'] }}: ' + e.message);
+          return;
+        }
+        if (result.flag_correct) {
+          location.reload();
+        } else {
+          alert('{{ lc['incorrect_flag'] }}');
+        }
+      }
 
-            function purchase_hint(task_id, hint_hexid)
-            {
-                try {
-                    make_http_request('/api/access_hint', JSON.stringify({
-                        'task_id': task_id,
-                        'hint_hexid': hint_hexid
-                    }));
-                } catch (e) {
-                    alert('{{ lc['error'] }}: ' + e.message);
-                    return;
-                }
-                location.reload();
-            }
-        </script>
-    </head>
-    <body>
-        <div class="w3-bar w3-dark-grey">
-            <a class="w3-bar-item w3-mobile w3-button" href="/">{{ lc['home_page'] }}</a>
-            <span class="w3-bar-item w3-mobile w3-green">{{ lc['tasks'] }}</span>
-            <a class="w3-bar-item w3-mobile w3-button" href="/team_profile?team={{ session.username }}">
-                {{ lc['team_profile'] }}
-            </a>
-            <a class="w3-bar-item w3-mobile w3-button" href="/scoreboard">{{ lc['scoreboard'] }}</a>
-            {% if session.is_admin %}
-                <a class="w3-bar-item w3-mobile w3-button" href="/admin">{{ lc['admin_page'] }}</a>
-            {% end %}
-            <a class="w3-bar-item w3-mobile w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
-            <span class="w3-bar-item w3-mobile w3-light-grey w3-right">
-                {{ lc['signed_in_as'].format(session.username) }}
-            </span>
-            <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
-        </div>
-        <div class="w3-container">
-            <h1>{{ lc['tasks'] }}</h1>
-            <h2>{{ lc['points_message'].format(points=team.points) }}</h2>
-            {% if comp.is_running() or session.is_admin %}
-                {% for task in sorted(tasks, key = lambda t: (-t.order, t.value, t.title, t.task_id)) %}
-                    <p>
-                    {% if task.task_id in team.solves %}
-                        <div class="w3-container w3-light-grey w3-leftbar w3-border-green">
-                    {% else %}
-                        <div class="w3-container w3-light-grey w3-leftbar w3-border-light-grey">
-                    {% end %}
-                        {% if task.task_id in team.solves %}
-                            <h3>{{ task.title }} [{{ task.value }}] ({{ lc['solved'] }})</h3>
-                        {% else %}
-                            <h3>{{ task.title }} [{{ task.value }}]</h3>
-                        {% end %}
-                        {% for label in task.labels %}
-                            <span class="ctfhost-task-view-label">{{ label }}</span>
-                        {% end %}
-                        <p><a
-                            href="javascript:toggle_task({{ task.task_id }});"
-                            class="w3-button w3-green"
-                            id="task-id{{ task.task_id }}-toggle-btn"
-                        >{{ lc['task_show'] }}</a></p>
-                        <div id="task-id{{ task.task_id }}-inner" class="hidden">
-                            <div style="overflow: auto">
-                                {% raw task.get_pretty_text() %}
-                            </div>
-                            {% if len(task.hints) > 0 %}
-                                <h4>{{ lc['hints'] }}</h4>
-                                <p>
-                                    {% for hint in task.hints %}
-                                    <p>
-                                        {% if (task.task_id, hint['hexid'], hint['cost']) in hint_purchases %}
-                                            <!-- FIXME: Fix this -->
-                                            <a
-                                                href="javascript:alert({{ repr(hint['text']) }})"
-                                                class="w3-button w3-green"
-                                            >
-                                                {{ lc['view_hint'] }} ({{ hint['cost'] }})
-                                            </a>
-                                        {% else %}
-                                            <a
-                                                href="javascript:purchase_hint(
-                                                    {{ task.task_id }},
-                                                    {{ repr(hint['hexid']) }}
-                                                )"
-                                                class="w3-button w3-dark-grey"
-                                            >
-                                                {{ lc['buy_hint'] }} ({{ hint['cost'] }})
-                                            </a>
-                                        {% end %}
-                                    </p>
-                                    {% end %}
-                                </p>
-                            {% end %}
-                            {% if len(task.files) > 0 %}
-                                <h4>{{ lc['attached_files'] }}</h4>
-                                <p>
-                                    {% for file in task.files %}
-                                        <a
-                                            class="w3-button w3-blue"
-                                            href="/get_attachment/{{file}}?task={{task.task_id}}&file={{file}}">
-                                            {{ file }}
-                                        </a>
-                                    {% end %}
-                                </p>
-                            {% end %}
-                            <p>
-                                <div class="w3-row-padding">
-                                    <div class="w3-col s12 m8 l10">
-                                        <input
-                                            type="text"
-                                            class="w3-input w3-border"
-                                            id="flag-input-id{{ task.task_id }}"
-                                            placeholder="{{ lc['input_flag'] }}"
-                                            style="font-family: monospace"
-                                        >
-                                    </div>
-                                    <div class="w3-col s12 m4 l2">
-                                        <input
-                                            type="button"
-                                            class="w3-input w3-green w3-button ctfhost-combo-input-submit"
-                                            onclick="submit_flag({{ task.task_id }});"
-                                            value="{{ lc['submit_flag'] }}"
-                                        >
-                                    </div>
-                                </div>
-                            </p>
-                        </div>
-                    </div>
-                    </p>
-                {% end %}
-            {% elif comp.has_finished() %}
-                <h2>{{ lc['competition_has_finished'] }}</h2>
+      function purchase_hint(task_id, hint_hexid)
+      {
+        try {
+          make_http_request('/api/access_hint', JSON.stringify({
+            'task_id': task_id,
+            'hint_hexid': hint_hexid
+          }));
+        } catch (e) {
+          alert('{{ lc['error'] }}: ' + e.message);
+          return;
+        }
+        location.reload();
+      }
+    </script>
+  </head>
+  <body>
+    <div class="w3-bar w3-dark-grey">
+      <a class="w3-bar-item w3-mobile w3-button" href="/">{{ lc['home_page'] }}</a>
+      <span class="w3-bar-item w3-mobile w3-green">{{ lc['tasks'] }}</span>
+      <a class="w3-bar-item w3-mobile w3-button" href="/team_profile?team={{ session.username }}">
+        {{ lc['team_profile'] }}
+      </a>
+      <a class="w3-bar-item w3-mobile w3-button" href="/scoreboard">{{ lc['scoreboard'] }}</a>
+      {% if session.is_admin %}
+        <a class="w3-bar-item w3-mobile w3-button" href="/admin">{{ lc['admin_page'] }}</a>
+      {% end %}
+      <a class="w3-bar-item w3-mobile w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
+      <span class="w3-bar-item w3-mobile w3-light-grey w3-right">
+        {{ lc['signed_in_as'].format(session.username) }}
+      </span>
+      <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
+    </div>
+    <div class="w3-container">
+      <h1>{{ lc['tasks'] }}</h1>
+      <h2>{{ lc['points_message'].format(points=team.points) }}</h2>
+      {% if comp.is_running() or session.is_admin %}
+        {% for task in sorted(tasks, key = lambda t: (-t.order, t.value, t.title, t.task_id)) %}
+          <p>
+          {% if task.task_id in team.solves %}
+            <div class="w3-container w3-light-grey w3-leftbar w3-border-green">
+          {% else %}
+            <div class="w3-container w3-light-grey w3-leftbar w3-border-light-grey">
+          {% end %}
+            {% if task.task_id in team.solves %}
+              <h3>{{ task.title }} [{{ task.value }}] ({{ lc['solved'] }})</h3>
             {% else %}
-                <h2>{{ lc['competition_has_not_started'] }}</h2>
+              <h3>{{ task.title }} [{{ task.value }}]</h3>
             {% end %}
-        </div>
-    </body>
+            {% for label in task.labels %}
+              <span class="ctfhost-task-view-label">{{ label }}</span>
+            {% end %}
+            <p><a
+              href="javascript:toggle_task({{ task.task_id }});"
+              class="w3-button w3-green"
+              id="task-id{{ task.task_id }}-toggle-btn"
+            >{{ lc['task_show'] }}</a></p>
+            <div id="task-id{{ task.task_id }}-inner" class="hidden">
+              <div style="overflow: auto">
+                {% raw task.get_pretty_text() %}
+              </div>
+              {% if len(task.hints) > 0 %}
+                <h4>{{ lc['hints'] }}</h4>
+                <p>
+                  {% for hint in task.hints %}
+                  <p>
+                    {% if (task.task_id, hint['hexid'], hint['cost']) in hint_purchases %}
+                      <!-- FIXME: Fix this -->
+                      <a
+                        href="javascript:alert({{ repr(hint['text']) }})"
+                        class="w3-button w3-green"
+                      >
+                        {{ lc['view_hint'] }} ({{ hint['cost'] }})
+                      </a>
+                    {% else %}
+                      <a
+                        href="javascript:purchase_hint(
+                          {{ task.task_id }},
+                          {{ repr(hint['hexid']) }}
+                        )"
+                        class="w3-button w3-dark-grey"
+                      >
+                        {{ lc['buy_hint'] }} ({{ hint['cost'] }})
+                      </a>
+                    {% end %}
+                  </p>
+                  {% end %}
+                </p>
+              {% end %}
+              {% if len(task.files) > 0 %}
+                <h4>{{ lc['attached_files'] }}</h4>
+                <p>
+                  {% for file in task.files %}
+                    <a
+                      class="w3-button w3-blue"
+                      href="/get_attachment/{{file}}?task={{task.task_id}}&file={{file}}">
+                      {{ file }}
+                    </a>
+                  {% end %}
+                </p>
+              {% end %}
+              <p>
+                <div class="w3-row-padding">
+                  <div class="w3-col s12 m8 l10">
+                    <input
+                      type="text"
+                      class="w3-input w3-border"
+                      id="flag-input-id{{ task.task_id }}"
+                      placeholder="{{ lc['input_flag'] }}"
+                      style="font-family: monospace"
+                    >
+                  </div>
+                  <div class="w3-col s12 m4 l2">
+                    <input
+                      type="button"
+                      class="w3-input w3-green w3-button ctfhost-combo-input-submit"
+                      onclick="submit_flag({{ task.task_id }});"
+                      value="{{ lc['submit_flag'] }}"
+                    >
+                  </div>
+                </div>
+              </p>
+            </div>
+          </div>
+          </p>
+        {% end %}
+      {% elif comp.has_finished() %}
+        <h2>{{ lc['competition_has_finished'] }}</h2>
+      {% else %}
+        <h2>{{ lc['competition_has_not_started'] }}</h2>
+      {% end %}
+    </div>
+  </body>
 </html>

@@ -1,70 +1,70 @@
 <!doctype html>
 <html lang="{{ lc['lang_code'] }}">
-    <head>
-        <link rel="shortcut icon" href="/static/favicon.png">
-        <link rel="stylesheet" href="/static/w3css/w3.css">
-        <link rel="stylesheet" href="/static/ctfhost-common.css">
-        <script>
-            const locale_messages = {% raw str(lc) %};
-            const competition_start_time = {{ comp.start_time }};
-            const competition_end_time = {{ comp.end_time }};
-        </script>
-        <script src="/static/clock.js"></script>
-        <meta charset="utf-8">
-        <title>{{ conf['ctfname'] }} - {{ lc['edit_team_info'] }}</title>
-    </head>
+  <head>
+    <link rel="shortcut icon" href="/static/favicon.png">
+    <link rel="stylesheet" href="/static/w3css/w3.css">
+    <link rel="stylesheet" href="/static/ctfhost-common.css">
+    <script>
+      const locale_messages = {% raw str(lc) %};
+      const competition_start_time = {{ comp.start_time }};
+      const competition_end_time = {{ comp.end_time }};
+    </script>
+    <script src="/static/clock.js"></script>
+    <meta charset="utf-8">
+    <title>{{ conf['ctfname'] }} - {{ lc['edit_team_info'] }}</title>
+  </head>
 
-    <body>
-        <div class="w3-bar w3-dark-grey">
-            <a class="w3-bar-item w3-mobile w3-button" href="/">{{ lc['home_page'] }}</a>
-            <a class="w3-bar-item w3-mobile w3-button" href="/tasks">{{ lc['tasks'] }}</a>
-            <span class="w3-bar-item w3-mobile w3-green">{{ lc['team_profile'] }}</span>
-            <a class="w3-bar-item w3-mobile w3-button" href="/scoreboard">{{ lc['scoreboard'] }}</a>
-            {% if session.is_admin %}
-                <a class="w3-bar-item w3-mobile w3-button" href="/admin">{{ lc['admin_page'] }}</a>
-            {% end %}
-            <a class="w3-bar-item w3-mobile w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
-            <span class="w3-bar-item w3-mobile w3-light-grey w3-right">
-                {{ lc['signed_in_as'].format(session.username) }}
-            </span>
-            <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
-        </div>
-        <div class="w3-container">
-            <h1>
-                {{ conf['ctfname'] }} - {{ lc['edit_team_info'] }}
-            </h1>
-        </div>
-        <form action="/edit_team_info_submit" method="POST" class="w3-container">
-            <p>
-                <label for="input-disp-name">{{ lc['disp_name'] }}</label>
-                <input
-                    type="text"
-                    class="w3-input w3-border"
-                    id="input-disp-name"
-                    name="disp_name"
-                    placeholder="{{ lc['disp_name'] }}"
-                    autocomplete="false"
-                    value="{{ team.full_name }}"
-                >
-            </p>
-            <p>
-                <label for="input-email">{{ lc['email'] }}</label>
-                <input
-                    type="email"
-                    class="w3-input w3-border"
-                    id="input-email"
-                    name="email"
-                    placeholder="{{ lc['email'] }}"
-                    autocomplete="false"
-                    value="{{ team.email if team.email is not None else '' }}"
-                >
-            </p>
-            <p>
-                <input type="submit" class="w3-button w3-green" value="{{ lc['edit_team_info'] }}">
-            </p>
-            <p>
-                <a href="/team_profile?team={{ session.username }}">{{ lc['return_to_profile'] }}</a>
-            </p>
-        </form>
-    </body>
+  <body>
+    <div class="w3-bar w3-dark-grey">
+      <a class="w3-bar-item w3-mobile w3-button" href="/">{{ lc['home_page'] }}</a>
+      <a class="w3-bar-item w3-mobile w3-button" href="/tasks">{{ lc['tasks'] }}</a>
+      <span class="w3-bar-item w3-mobile w3-green">{{ lc['team_profile'] }}</span>
+      <a class="w3-bar-item w3-mobile w3-button" href="/scoreboard">{{ lc['scoreboard'] }}</a>
+      {% if session.is_admin %}
+        <a class="w3-bar-item w3-mobile w3-button" href="/admin">{{ lc['admin_page'] }}</a>
+      {% end %}
+      <a class="w3-bar-item w3-mobile w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
+      <span class="w3-bar-item w3-mobile w3-light-grey w3-right">
+        {{ lc['signed_in_as'].format(session.username) }}
+      </span>
+      <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
+    </div>
+    <div class="w3-container">
+      <h1>
+        {{ conf['ctfname'] }} - {{ lc['edit_team_info'] }}
+      </h1>
+    </div>
+    <form action="/edit_team_info_submit" method="POST" class="w3-container">
+      <p>
+        <label for="input-disp-name">{{ lc['disp_name'] }}</label>
+        <input
+          type="text"
+          class="w3-input w3-border"
+          id="input-disp-name"
+          name="disp_name"
+          placeholder="{{ lc['disp_name'] }}"
+          autocomplete="false"
+          value="{{ team.full_name }}"
+        >
+      </p>
+      <p>
+        <label for="input-email">{{ lc['email'] }}</label>
+        <input
+          type="email"
+          class="w3-input w3-border"
+          id="input-email"
+          name="email"
+          placeholder="{{ lc['email'] }}"
+          autocomplete="false"
+          value="{{ team.email if team.email is not None else '' }}"
+        >
+      </p>
+      <p>
+        <input type="submit" class="w3-button w3-green" value="{{ lc['edit_team_info'] }}">
+      </p>
+      <p>
+        <a href="/team_profile?team={{ session.username }}">{{ lc['return_to_profile'] }}</a>
+      </p>
+    </form>
+  </body>
 </html>

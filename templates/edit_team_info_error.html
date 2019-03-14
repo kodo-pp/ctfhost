@@ -1,28 +1,28 @@
 <!doctype html>
 <html lang="{{ lc['lang_code'] }}" dir="ltr">
-    <head>
-        <link rel="shortcut icon" href="/static/favicon.png">
-        <link rel="stylesheet" href="/static/w3css/w3.css">
-        <link rel="stylesheet" href="/static/ctfhost-common.css">
-        <script>
-            const locale_messages = {% raw str(lc) %};
-            const competition_start_time = {{ comp.start_time }};
-            const competition_end_time = {{ comp.end_time }};
-        </script>
-        <script src="/static/clock.js"></script>
-        <meta charset="utf-8">
-        <title>{{ lc['edit_team_info_error'] }}</title>
-    </head>
-    <body>
-        <div class="w3-bar w3-dark-grey">
-            <a class="w3-bar-item w3-mobile w3-button" href="/">{{ lc['home_page'] }}</a>
-            <span class="w3-bar-item w3-mobile w3-red">{{ lc['edit_team_info_error'] }}</span>
-            <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
-        </div>
-        <div class="w3-container">
-            <h1>{{ lc['edit_team_info_error'] }}</h1>
-            <p>{{ error_message }}</p>
-            <a href="/team_profile?team={{ session.username }}">{{ lc['return_to_profile'] }}</a>
-        </div>
-    </body>
+  <head>
+    <link rel="shortcut icon" href="/static/favicon.png">
+    <link rel="stylesheet" href="/static/w3css/w3.css">
+    <link rel="stylesheet" href="/static/ctfhost-common.css">
+    <script>
+      const locale_messages = {% raw str(lc) %};
+      const competition_start_time = {{ comp.start_time }};
+      const competition_end_time = {{ comp.end_time }};
+    </script>
+    <script src="/static/clock.js"></script>
+    <meta charset="utf-8">
+    <title>{{ lc['edit_team_info_error'] }}</title>
+  </head>
+  <body>
+    <div class="w3-bar w3-dark-grey">
+      <a class="w3-bar-item w3-mobile w3-button" href="/">{{ lc['home_page'] }}</a>
+      <span class="w3-bar-item w3-mobile w3-red">{{ lc['edit_team_info_error'] }}</span>
+      <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
+    </div>
+    <div class="w3-container">
+      <h1>{{ lc['edit_team_info_error'] }}</h1>
+      <p>{{ error_message }}</p>
+      <a href="/team_profile?team={{ session.username }}">{{ lc['return_to_profile'] }}</a>
+    </div>
+  </body>
 </html>

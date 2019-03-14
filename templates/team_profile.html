@@ -1,73 +1,73 @@
 <!doctype html>
 <html lang="{{ lc['lang_code'] }}" dir="ltr">
-    <head>
-        <link rel="shortcut icon" href="/static/favicon.png">
-        <link rel="stylesheet" href="/static/w3css/w3.css">
-        <link rel="stylesheet" href="/static/ctfhost-common.css">
-        <script>
-            const locale_messages = {% raw str(lc) %};
-            const competition_start_time = {{ comp.start_time }};
-            const competition_end_time = {{ comp.end_time }};
-        </script>
-        <script src="/static/clock.js"></script>
-        <meta charset="utf-8">
-        <title>{{ conf['ctfname'] }} - {{ lc['team_profile_of'].format(of=team.full_name) }}</title>
-    </head>
-    <body>
-        <div class="w3-bar w3-dark-grey">
-            <a class="w3-bar-item w3-mobile w3-button" href="/">{{ lc['home_page'] }}</a>
-            <a class="w3-bar-item w3-mobile w3-button" href="/tasks">{{ lc['tasks'] }}</a>
-            {% if session.username == team.team_name %}
-                <span class="w3-bar-item w3-mobile w3-green">{{ lc['team_profile'] }}</span>
-            {% else %}
-                <a class="w3-bar-item w3-mobile w3-button" href="/team_profile?team={{ session.username }}">
-                    {{ lc['team_profile'] }}
-                </a>
-            {% end %}
-            <a class="w3-bar-item w3-mobile w3-button" href="/scoreboard">{{ lc['scoreboard'] }}</a>
-            {% if session.is_admin %}
-                <a class="w3-bar-item w3-mobile w3-button" href="/admin">{{ lc['admin_page'] }}</a>
-            {% end %}
-            <a class="w3-bar-item w3-mobile w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
-            <span class="w3-bar-item w3-mobile w3-light-grey w3-right">
-                {{ lc['signed_in_as'].format(session.username) }}
-            </span>
-            <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
-        </div>
-        <div class="w3-container">
-            <h1>{{ lc['team_profile_of'].format(of=team.full_name) }}</h1>
-            <h2>{{ lc['team_info_and_contacts'] }}</h2>
-            <p><strong>{{ lc['nickname'] }}:</strong> {{ team.team_name }}</p>
-            <p><strong>{{ lc['team_name'] }}:</strong> {{ team.full_name }}</p>
-            <p>
-                <strong>{{ lc['email'] }}:</strong>
-                {% if team.email is not None %}
-                    <a href="mailto:{{ team.email }}">{{ team.email }}</a>
-                {% else %}
-                    {{ lc['unknown'] }}
-                {% end %}
-            </p>
-            {% if session.username == team.team_name %}
-                <a href="/edit_team_info" class="w3-button w3-green">{{ lc['edit_team_info'] }}</a>
-                <a href="/change_password" class="w3-button w3-green">{{ lc['change_password'] }}</a>
-            {% end %}
-            <hr>
-            <h2>{{ lc['solves'] }}</h2>
-            <table class="w3-table w3-border w3-striped">
-                <tr>
-                    <th>{{ lc['task_name'] }}</th>
-                    <th>{{ lc['solve_time'] }}</th>
-                    <th>{{ lc['points'] }}</th>
-                </tr>
-                <h3>{{ lc['points_message'].format(points=team.points) }}</h3>
-                {% for task_id, (time, points) in reversed(sorted(team.solves.items(), key = lambda x: x[1])) %}
-                    <tr>
-                        <td>{{ tasks_module.read_task(task_id).title }}</td>
-                        <td>{{ conf['date_fmt_func'](time) }}</td>
-                        <td>{{ points }}</td>
-                    </tr>
-                {% end %}
-            </ul>
-        </div>
-    </body>
+  <head>
+    <link rel="shortcut icon" href="/static/favicon.png">
+    <link rel="stylesheet" href="/static/w3css/w3.css">
+    <link rel="stylesheet" href="/static/ctfhost-common.css">
+    <script>
+      const locale_messages = {% raw str(lc) %};
+      const competition_start_time = {{ comp.start_time }};
+      const competition_end_time = {{ comp.end_time }};
+    </script>
+    <script src="/static/clock.js"></script>
+    <meta charset="utf-8">
+    <title>{{ conf['ctfname'] }} - {{ lc['team_profile_of'].format(of=team.full_name) }}</title>
+  </head>
+  <body>
+    <div class="w3-bar w3-dark-grey">
+      <a class="w3-bar-item w3-mobile w3-button" href="/">{{ lc['home_page'] }}</a>
+      <a class="w3-bar-item w3-mobile w3-button" href="/tasks">{{ lc['tasks'] }}</a>
+      {% if session.username == team.team_name %}
+        <span class="w3-bar-item w3-mobile w3-green">{{ lc['team_profile'] }}</span>
+      {% else %}
+        <a class="w3-bar-item w3-mobile w3-button" href="/team_profile?team={{ session.username }}">
+          {{ lc['team_profile'] }}
+        </a>
+      {% end %}
+      <a class="w3-bar-item w3-mobile w3-button" href="/scoreboard">{{ lc['scoreboard'] }}</a>
+      {% if session.is_admin %}
+        <a class="w3-bar-item w3-mobile w3-button" href="/admin">{{ lc['admin_page'] }}</a>
+      {% end %}
+      <a class="w3-bar-item w3-mobile w3-button w3-right" href="/lout">{{ lc['logout'] }}</a>
+      <span class="w3-bar-item w3-mobile w3-light-grey w3-right">
+        {{ lc['signed_in_as'].format(session.username) }}
+      </span>
+      <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
+    </div>
+    <div class="w3-container">
+      <h1>{{ lc['team_profile_of'].format(of=team.full_name) }}</h1>
+      <h2>{{ lc['team_info_and_contacts'] }}</h2>
+      <p><strong>{{ lc['nickname'] }}:</strong> {{ team.team_name }}</p>
+      <p><strong>{{ lc['team_name'] }}:</strong> {{ team.full_name }}</p>
+      <p>
+        <strong>{{ lc['email'] }}:</strong>
+        {% if team.email is not None %}
+          <a href="mailto:{{ team.email }}">{{ team.email }}</a>
+        {% else %}
+          {{ lc['unknown'] }}
+        {% end %}
+      </p>
+      {% if session.username == team.team_name %}
+        <a href="/edit_team_info" class="w3-button w3-green">{{ lc['edit_team_info'] }}</a>
+        <a href="/change_password" class="w3-button w3-green">{{ lc['change_password'] }}</a>
+      {% end %}
+      <hr>
+      <h2>{{ lc['solves'] }}</h2>
+      <table class="w3-table w3-border w3-striped">
+        <tr>
+          <th>{{ lc['task_name'] }}</th>
+          <th>{{ lc['solve_time'] }}</th>
+          <th>{{ lc['points'] }}</th>
+        </tr>
+        <h3>{{ lc['points_message'].format(points=team.points) }}</h3>
+        {% for task_id, (time, points) in reversed(sorted(team.solves.items(), key = lambda x: x[1])) %}
+          <tr>
+            <td>{{ tasks_module.read_task(task_id).title }}</td>
+            <td>{{ conf['date_fmt_func'](time) }}</td>
+            <td>{{ points }}</td>
+          </tr>
+        {% end %}
+      </ul>
+    </div>
+  </body>
 </html>

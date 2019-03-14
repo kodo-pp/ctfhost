@@ -1,989 +1,989 @@
 <!doctype html>
 <html lang="{{ lc['lang_code'] }}" dir="ltr">
-    <head>
-        <link rel="shortcut icon" href="/static/favicon.png">
-        <link rel="stylesheet" href="/static/w3css/w3.css">
-        <link rel="stylesheet" href="/static/ctfhost-common.css">
-        <link rel="stylesheet" href="/static/task-editor.css">
-        <link rel="stylesheet" href="/static/flatpickr/flatpickr.min.css">
-        <script>
-            const locale_messages = {% raw str(lc) %};
-            const configuration = {'tasks_path': {% raw repr(conf['tasks_path']) %}};
-            const competition_start_time = {{ comp.start_time }};
-            const competition_end_time = {{ comp.end_time }};
-        </script>
-        <script src="/static/clock.js"></script>
-        <script src="/static/admin/task-editor.js"></script>
-        <script src="/static/http-request.js"></script>
-        <script src="/static/ace/src-min/ace.js"></script>
-        <script src="/static/flatpickr/flatpickr.min.js"></script>
-        <script src="/static/flatpickr/locale/{{ lc['lang_code'] }}.js"></script>
-        <meta charset="utf-8">
-        <title>{{ conf['ctfname'] }} - {{ lc['admin_page'] }}</title>
-        <script>
-            function select_tab(tab_name)
-            {
-                let tabs = document.querySelectorAll('#tabset>.w3-bar-item');
-                for (let tab of tabs) {
-                    if (tab.id == 'tab-' + tab_name) {
-                        tab.classList.remove('w3-button');
-                        tab.classList.add('w3-green');
-                    } else {
-                        tab.classList.add('w3-button');
-                        tab.classList.remove('w3-green');
-                    }
-                }
+  <head>
+    <link rel="shortcut icon" href="/static/favicon.png">
+    <link rel="stylesheet" href="/static/w3css/w3.css">
+    <link rel="stylesheet" href="/static/ctfhost-common.css">
+    <link rel="stylesheet" href="/static/task-editor.css">
+    <link rel="stylesheet" href="/static/flatpickr/flatpickr.min.css">
+    <script>
+      const locale_messages = {% raw str(lc) %};
+      const configuration = {'tasks_path': {% raw repr(conf['tasks_path']) %}};
+      const competition_start_time = {{ comp.start_time }};
+      const competition_end_time = {{ comp.end_time }};
+    </script>
+    <script src="/static/clock.js"></script>
+    <script src="/static/admin/task-editor.js"></script>
+    <script src="/static/http-request.js"></script>
+    <script src="/static/ace/src-min/ace.js"></script>
+    <script src="/static/flatpickr/flatpickr.min.js"></script>
+    <script src="/static/flatpickr/locale/{{ lc['lang_code'] }}.js"></script>
+    <meta charset="utf-8">
+    <title>{{ conf['ctfname'] }} - {{ lc['admin_page'] }}</title>
+    <script>
+      function select_tab(tab_name)
+      {
+        let tabs = document.querySelectorAll('#tabset>.w3-bar-item');
+        for (let tab of tabs) {
+          if (tab.id == 'tab-' + tab_name) {
+            tab.classList.remove('w3-button');
+            tab.classList.add('w3-green');
+          } else {
+            tab.classList.add('w3-button');
+            tab.classList.remove('w3-green');
+          }
+        }
 
-                let tabcontents = document.querySelectorAll('#tabcontents>div');
-                for (let tabc of tabcontents) {
-                    if (tabc.id == 'tabcontent-' + tab_name) {
-                        tabc.classList.remove('hidden');
-                    } else {
-                        tabc.classList.add('hidden');
-                    }
-                }
+        let tabcontents = document.querySelectorAll('#tabcontents>div');
+        for (let tabc of tabcontents) {
+          if (tabc.id == 'tabcontent-' + tab_name) {
+            tabc.classList.remove('hidden');
+          } else {
+            tabc.classList.add('hidden');
+          }
+        }
+      }
+
+      function setup_tabs()
+      {
+        let tabs = document.querySelectorAll('#tabset>.w3-bar-item');
+        for (let tab of tabs) {
+          let tab_name = tab.id.replace(/^tab-/, '');
+          tab.addEventListener('click', function() {
+            select_tab(tab_name);
+          });
+        }
+        select_tab('tasks');
+      }
+
+      function load_task(task_id)
+      {
+        return make_http_request('/api/get_task', JSON.stringify({'task_id': task_id}));
+      }
+
+      function mkhexid(n)
+      {
+        let a = new Uint8Array(n);
+        crypto.getRandomValues(a);
+        let hex_str = '';
+        const alp = '0123456789abcdef';
+        for (let b of a) {
+          hex_str += (alp[(b & 0xF0) >> 4]);
+          hex_str += (alp[b & 0xF]);
+        }
+        return hex_str;
+      }
+
+      function mkseed()
+      {
+        return mkhexid(8);
+      }
+
+      function edit_task(task_id)
+      {
+        setTimeout(function() {
+          try {
+            let text = 'Task text...';
+            let title = 'Unnamed task';
+            let value = 100;
+            let labels = [];
+            let loaded_flags = [];
+            let group = 0;
+            let order = 0;
+            let seed = mkseed();
+            let hints = [];
+            let files = [];
+            if (task_id !== null) {
+              let loaded_task = load_task(task_id);
+              text      = loaded_task.task.text;
+              title       = loaded_task.task.title;
+              value       = loaded_task.task.value;
+              labels      = loaded_task.task.labels;
+              group       = loaded_task.task.group;
+              loaded_flags  = loaded_task.task.flags;
+              order       = loaded_task.task.order;
+              seed      = loaded_task.task.seed;
+              hints       = loaded_task.task.hints;
+              files       = loaded_task.task.files;
             }
+            open_task_editor(
+              task_id,
+              text,
+              title,
+              value,
+              labels,
+              loaded_flags,
+              group,
+              order,
+              seed,
+              hints,
+              files,
+            );
+          } catch (e) {
+            error_message(e.message);
+            throw e;
+          }
+        }, 0);
+      }
 
-            function setup_tabs()
-            {
-                let tabs = document.querySelectorAll('#tabset>.w3-bar-item');
-                for (let tab of tabs) {
-                    let tab_name = tab.id.replace(/^tab-/, '');
-                    tab.addEventListener('click', function() {
-                        select_tab(tab_name);
-                    });
-                }
-                select_tab('tasks');
-            }
+      function delete_task(task_id)
+      {
+        if (!confirm('{{ lc['confirm_task_deletion'] }}')) {
+          return false;
+        }
 
-            function load_task(task_id)
-            {
-                return make_http_request('/api/get_task', JSON.stringify({'task_id': task_id}));
-            }
+        let response;
+        try {
+          response = make_http_request('/api/delete_task', JSON.stringify({'task_id': task_id}));
+        } catch (e) {
+          if (e instanceof ActionError) {
+            error_message(e.message);
+            return;
+          } else {
+            throw e;
+          }
+        }
+        location.reload();
+      }
 
-            function mkhexid(n)
-            {
-                let a = new Uint8Array(n);
-                crypto.getRandomValues(a);
-                let hex_str = '';
-                const alp = '0123456789abcdef';
-                for (let b of a) {
-                    hex_str += (alp[(b & 0xF0) >> 4]);
-                    hex_str += (alp[b & 0xF]);
-                }
-                return hex_str;
-            }
+      function error_message(msg)
+      {
+        let error_message = '{{ lc['error'] }}: ' + msg;
+        alert(error_message);
+      }
+  
+      function change_password(team_name)
+      {
+        if (!confirm('{{ lc['change_password_confirm_msg'] }}')) {
+          return;
+        }
+        let new_password = document.getElementById(`new-password-${team_name}`).value;
+        try {
+          make_http_request('/api/change_password', JSON.stringify({
+            'team_name': team_name,
+            'new_password': new_password,
+            'old_password': "doesn't matter"
+          }));
+          alert('{{ lc['password_changed_successfully'] }}');
+        } catch (e) {
+          error_message(e.message);
+        }
+      }
 
-            function mkseed()
-            {
-                return mkhexid(8);
-            }
+      function logout_team(team_name)
+      {
+        if (!confirm('{{ lc['logout_team_confirm_msg'] }}')) {
+          return;
+        }
+        try {
+          make_http_request('/api/logout_team', JSON.stringify({
+            'team_name': team_name
+          }));
+          alert('{{ lc['team_logged_out_successfully'] }}');
+        } catch (e) {
+          error_message(e.message);
+        }
+      }
 
-            function edit_task(task_id)
-            {
-                setTimeout(function() {
-                    try {
-                        let text = 'Task text...';
-                        let title = 'Unnamed task';
-                        let value = 100;
-                        let labels = [];
-                        let loaded_flags = [];
-                        let group = 0;
-                        let order = 0;
-                        let seed = mkseed();
-                        let hints = [];
-                        let files = [];
-                        if (task_id !== null) {
-                            let loaded_task = load_task(task_id);
-                            text            = loaded_task.task.text;
-                            title           = loaded_task.task.title;
-                            value           = loaded_task.task.value;
-                            labels          = loaded_task.task.labels;
-                            group           = loaded_task.task.group;
-                            loaded_flags    = loaded_task.task.flags;
-                            order           = loaded_task.task.order;
-                            seed            = loaded_task.task.seed;
-                            hints           = loaded_task.task.hints;
-                            files           = loaded_task.task.files;
-                        }
-                        open_task_editor(
-                            task_id,
-                            text,
-                            title,
-                            value,
-                            labels,
-                            loaded_flags,
-                            group,
-                            order,
-                            seed,
-                            hints,
-                            files,
-                        );
-                    } catch (e) {
-                        error_message(e.message);
-                        throw e;
-                    }
-                }, 0);
-            }
+      function delete_team(team_name)
+      {
+        if (!confirm('{{ lc['delete_team_confirm_msg'] }}')) {
+          return;
+        }
+        try {
+          make_http_request('/api/delete_team', JSON.stringify({
+            'team_name': team_name
+          }));
+          location.reload();
+        } catch (e) {
+          error_message(e.message);
+        }
+      }
+      
+      function add_group(parent_id)
+      {
+        let name = document.getElementById(`add-group-name${parent_id}`).value;
+        let data = {
+          'parent': parent_id,
+          'name': name,
+          'seed': mkseed()
+        };
+        try {
+          make_http_request('/api/add_group', JSON.stringify(data));
+          location.reload();
+        } catch (e) {
+          error_message(e.message);
+        }
+      }
 
-            function delete_task(task_id)
-            {
-                if (!confirm('{{ lc['confirm_task_deletion'] }}')) {
-                    return false;
-                }
+      function rename_group(group_id)
+      {
+        let new_name = document.getElementById(`rename-group-name${group_id}`).value;
+        let data = {
+          'group_id': group_id,
+          'new_name': new_name
+        };
+        try {
+          make_http_request('/api/rename_group', JSON.stringify(data));
+          location.reload();
+        } catch (e) {
+          error_message(e.message);
+        }
+      }
 
-                let response;
-                try {
-                    response = make_http_request('/api/delete_task', JSON.stringify({'task_id': task_id}));
-                } catch (e) {
-                    if (e instanceof ActionError) {
-                        error_message(e.message);
-                        return;
-                    } else {
-                        throw e;
-                    }
-                }
-                location.reload();
-            }
+      function update_group_parent(group_id)
+      {
+        let new_parent = document.getElementById(`group-parent${group_id}`).value;
+        let data = {
+          'group_id': group_id,
+          'new_parent': new_parent
+        };
+        try {
+          make_http_request('/api/reparent_group', JSON.stringify(data));
+          location.reload();
+        } catch (e) {
+          error_message(e.message);
+        }
+      }
 
-            function error_message(msg)
-            {
-                let error_message = '{{ lc['error'] }}: ' + msg;
-                alert(error_message);
-            }
-    
-            function change_password(team_name)
-            {
-                if (!confirm('{{ lc['change_password_confirm_msg'] }}')) {
-                    return;
-                }
-                let new_password = document.getElementById(`new-password-${team_name}`).value;
-                try {
-                    make_http_request('/api/change_password', JSON.stringify({
-                        'team_name': team_name,
-                        'new_password': new_password,
-                        'old_password': "doesn't matter"
-                    }));
-                    alert('{{ lc['password_changed_successfully'] }}');
-                } catch (e) {
-                    error_message(e.message);
-                }
-            }
+      function delete_group(group_id)
+      {
+        if (!confirm("{{ lc['confirm_group_deletion'] }}")) {
+          return;
+        }
+        let data = {
+          'group_id': group_id
+        };
+        try {
+          make_http_request('/api/delete_group', JSON.stringify(data));
+          location.reload();
+        } catch (e) {
+          error_message(e.message);
+        }
+      }
 
-            function logout_team(team_name)
-            {
-                if (!confirm('{{ lc['logout_team_confirm_msg'] }}')) {
-                    return;
-                }
-                try {
-                    make_http_request('/api/logout_team', JSON.stringify({
-                        'team_name': team_name
-                    }));
-                    alert('{{ lc['team_logged_out_successfully'] }}');
-                } catch (e) {
-                    error_message(e.message);
-                }
-            }
+      function update_gen_config(uid)
+      {
+        let ace = gen_config_editors[uid];
+        let new_config = ace.getValue();
 
-            function delete_team(team_name)
-            {
-                if (!confirm('{{ lc['delete_team_confirm_msg'] }}')) {
-                    return;
-                }
-                try {
-                    make_http_request('/api/delete_team', JSON.stringify({
-                        'team_name': team_name
-                    }));
-                    location.reload();
-                } catch (e) {
-                    error_message(e.message);
-                }
-            }
-            
-            function add_group(parent_id)
-            {
-                let name = document.getElementById(`add-group-name${parent_id}`).value;
-                let data = {
-                    'parent': parent_id,
-                    'name': name,
-                    'seed': mkseed()
-                };
-                try {
-                    make_http_request('/api/add_group', JSON.stringify(data));
-                    location.reload();
-                } catch (e) {
-                    error_message(e.message);
-                }
-            }
+        let data;
+        if (uid[0] == 't') {
+          // task
+          data = {
+            'what': 'task',
+            'task_id': parseInt(uid.replace(/^[a-z]+/, '')),
+            'new_config': new_config
+          }
+        } else {
+          // group
+          data = {
+            'what': 'group',
+            'group_id': parseInt(uid.replace(/^[a-z]+/, '')),
+            'new_config': new_config
+          }
+        }
+        try {
+          make_http_request('/api/update_gen_config', JSON.stringify(data));
+          alert("{{ lc['gen_config_update_success'] }}");
+          //location.reload();
+        } catch (e) {
+          error_message(e.message);
+        }
+      }
 
-            function rename_group(group_id)
-            {
-                let new_name = document.getElementById(`rename-group-name${group_id}`).value;
-                let data = {
-                    'group_id': group_id,
-                    'new_name': new_name
-                };
-                try {
-                    make_http_request('/api/rename_group', JSON.stringify(data));
-                    location.reload();
-                } catch (e) {
-                    error_message(e.message);
-                }
-            }
+      function setup_group_parents()
+      {
+        {% for group in groups.values() %}
+          document.getElementById('group-parent{{ group['group_id'] }}').value = {{ group['parent'] }};
+        {% end %}
+      }
 
-            function update_group_parent(group_id)
-            {
-                let new_parent = document.getElementById(`group-parent${group_id}`).value;
-                let data = {
-                    'group_id': group_id,
-                    'new_parent': new_parent
-                };
-                try {
-                    make_http_request('/api/reparent_group', JSON.stringify(data));
-                    location.reload();
-                } catch (e) {
-                    error_message(e.message);
-                }
-            }
+      function taskeditor_randomize_seed()
+      {
+        let in_seed = document.getElementById('task-editor-seed-input');
+        in_seed.value = mkseed();
+      }
 
-            function delete_group(group_id)
-            {
-                if (!confirm("{{ lc['confirm_group_deletion'] }}")) {
-                    return;
-                }
-                let data = {
-                    'group_id': group_id
-                };
-                try {
-                    make_http_request('/api/delete_group', JSON.stringify(data));
-                    location.reload();
-                } catch (e) {
-                    error_message(e.message);
-                }
-            }
+      function toggle_task_gen_visible(uid)
+      {
+        let container = document.getElementById(`gen-config-wrapper${uid}`);
+        container.classList.toggle('hidden');
+      }
 
-            function update_gen_config(uid)
-            {
-                let ace = gen_config_editors[uid];
-                let new_config = ace.getValue();
+      function group_randomize_seed(group_id)
+      {
+        let in_seed = document.getElementById(`task-editor-seed-input${group_id}`);
+        in_seed.value = mkseed();
+      }
 
-                let data;
-                if (uid[0] == 't') {
-                    // task
-                    data = {
-                        'what': 'task',
-                        'task_id': parseInt(uid.replace(/^[a-z]+/, '')),
-                        'new_config': new_config
-                    }
-                } else {
-                    // group
-                    data = {
-                        'what': 'group',
-                        'group_id': parseInt(uid.replace(/^[a-z]+/, '')),
-                        'new_config': new_config
-                    }
-                }
-                try {
-                    make_http_request('/api/update_gen_config', JSON.stringify(data));
-                    alert("{{ lc['gen_config_update_success'] }}");
-                    //location.reload();
-                } catch (e) {
-                    error_message(e.message);
-                }
-            }
-
-            function setup_group_parents()
-            {
-                {% for group in groups.values() %}
-                    document.getElementById('group-parent{{ group['group_id'] }}').value = {{ group['parent'] }};
-                {% end %}
-            }
-
-            function taskeditor_randomize_seed()
-            {
-                let in_seed = document.getElementById('task-editor-seed-input');
-                in_seed.value = mkseed();
-            }
-
-            function toggle_task_gen_visible(uid)
-            {
-                let container = document.getElementById(`gen-config-wrapper${uid}`);
-                container.classList.toggle('hidden');
-            }
-
-            function group_randomize_seed(group_id)
-            {
-                let in_seed = document.getElementById(`task-editor-seed-input${group_id}`);
-                in_seed.value = mkseed();
-            }
-
-            function group_update_seed(group_id)
-            {
-                let in_seed = document.getElementById(`task-editor-seed-input${group_id}`);
-                let data = {
-                    'group_id': group_id,
-                    'new_seed': in_seed.value
-                }
-                try {
-                    make_http_request('/api/update_group_seed', JSON.stringify(data));
-                    alert("{{ lc['group_seed_update_success'] }}");
-                } catch (e) {
-                    error_message(e.message);
-                }
-            }
+      function group_update_seed(group_id)
+      {
+        let in_seed = document.getElementById(`task-editor-seed-input${group_id}`);
+        let data = {
+          'group_id': group_id,
+          'new_seed': in_seed.value
+        }
+        try {
+          make_http_request('/api/update_group_seed', JSON.stringify(data));
+          alert("{{ lc['group_seed_update_success'] }}");
+        } catch (e) {
+          error_message(e.message);
+        }
+      }
 
 
-            function save_competition_ctl()
-            {
-                const start_ts = get_utc_unix_timestamp(start_time_picker.selectedDates[0]);
-                const end_ts = get_utc_unix_timestamp(end_time_picker.selectedDates[0]);
+      function save_competition_ctl()
+      {
+        const start_ts = get_utc_unix_timestamp(start_time_picker.selectedDates[0]);
+        const end_ts = get_utc_unix_timestamp(end_time_picker.selectedDates[0]);
 
-                const allow_team_self_registration = document.getElementById(
-                    'competition-enable-registration'
-                ).checked;
+        const allow_team_self_registration = document.getElementById(
+          'competition-enable-registration'
+        ).checked;
 
-                let data = {
-                    'start_time': start_ts,
-                    'end_time': end_ts,
-                    'allow_team_self_registration': allow_team_self_registration,
-                }
-                try {
-                    make_http_request('/api/competition_ctl', JSON.stringify(data));
-                    alert("{{ lc['competition_ctl_successful'] }}");
-                } catch (e) {
-                    error_message(e.message);
-                }
-            }
+        let data = {
+          'start_time': start_ts,
+          'end_time': end_ts,
+          'allow_team_self_registration': allow_team_self_registration,
+        }
+        try {
+          make_http_request('/api/competition_ctl', JSON.stringify(data));
+          alert("{{ lc['competition_ctl_successful'] }}");
+        } catch (e) {
+          error_message(e.message);
+        }
+      }
 
-            window.addEventListener('load', setup_tabs);
-            window.addEventListener('load', setup_group_parents);
+      window.addEventListener('load', setup_tabs);
+      window.addEventListener('load', setup_group_parents);
 
-            gen_config_editors = {};
-        </script>
-    </head>
-    <body>
-        <div id="task-editor-overlay">
-            <div id="task-editor-box">
-                <h3>{{ lc['task_editor'] }}</h3>
-                <input type="hidden" id="task-editor-taskid-input">
-                <p>
-                    <label for="task-editor-title-input">{{ lc['taskeditor_title'] }}</label>
-                    <input
-                        type="text"
-                        id="task-editor-title-input"
-                        placeholder="{{ lc['taskeditor_title'] }}"
-                        class="w3-input w3-border"
-                        required
-                    >
-                </p>
-                <p>
-                    <label for="task-editor-value-input">{{ lc['taskeditor_value'] }}</label>
-                    <input
-                        type="number"
-                        step=1
-                        id="task-editor-value-input"
-                        placeholder="{{ lc['taskeditor_value'] }}"
-                        class="w3-input w3-border"
-                        pattern="[1-9][0-9]*"
-                        required
-                    >
-                </p>
-                <p>
-                    <label for="task-editor-labels-input">{{ lc['taskeditor_labels'] }}</label>
-                    <input
-                        type="text"
-                        id="task-editor-labels-input"
-                        placeholder="{{ lc['taskeditor_labels'] }}"
-                        class="w3-input w3-border"
-                    >
-                </p>
-                <p>
-                    <label for="task-editor-groupname-input">{{ lc['taskeditor_group'] }}</label>
-                    <select id="task-editor-groupname-input" class="w3-input w3-border">
-                        <option value="0">
-                            {{ lc['root_group'] }}
-                        </option>
-                        {% for group in groups.values() %}
-                            <option value="{{ group['group_id'] }}">
-                                {{ group['name'] }}
-                            </option>
-                        {% end %}
-                    </select>
-                </p>
-                <p>
-                    <label for="task-editor-text-input">{{ lc['taskeditor_text'] }}</label>
-                    <!--
-                    OLD TEXTAREA 
-                    <textarea id="task-editor-text-input" class="w3-input w3-border">
-                    </textarea>
-                    -->
+      gen_config_editors = {};
+    </script>
+  </head>
+  <body>
+    <div id="task-editor-overlay">
+      <div id="task-editor-box">
+        <h3>{{ lc['task_editor'] }}</h3>
+        <input type="hidden" id="task-editor-taskid-input">
+        <p>
+          <label for="task-editor-title-input">{{ lc['taskeditor_title'] }}</label>
+          <input
+            type="text"
+            id="task-editor-title-input"
+            placeholder="{{ lc['taskeditor_title'] }}"
+            class="w3-input w3-border"
+            required
+          >
+        </p>
+        <p>
+          <label for="task-editor-value-input">{{ lc['taskeditor_value'] }}</label>
+          <input
+            type="number"
+            step=1
+            id="task-editor-value-input"
+            placeholder="{{ lc['taskeditor_value'] }}"
+            class="w3-input w3-border"
+            pattern="[1-9][0-9]*"
+            required
+          >
+        </p>
+        <p>
+          <label for="task-editor-labels-input">{{ lc['taskeditor_labels'] }}</label>
+          <input
+            type="text"
+            id="task-editor-labels-input"
+            placeholder="{{ lc['taskeditor_labels'] }}"
+            class="w3-input w3-border"
+          >
+        </p>
+        <p>
+          <label for="task-editor-groupname-input">{{ lc['taskeditor_group'] }}</label>
+          <select id="task-editor-groupname-input" class="w3-input w3-border">
+            <option value="0">
+              {{ lc['root_group'] }}
+            </option>
+            {% for group in groups.values() %}
+              <option value="{{ group['group_id'] }}">
+                {{ group['name'] }}
+              </option>
+            {% end %}
+          </select>
+        </p>
+        <p>
+          <label for="task-editor-text-input">{{ lc['taskeditor_text'] }}</label>
+          <!--
+          OLD TEXTAREA 
+          <textarea id="task-editor-text-input" class="w3-input w3-border">
+          </textarea>
+          -->
 
-                    <!-- NEW ACE -->
-                    <div id="task-editor-text-input" style="width: 100%; height: 300px;" class="w3-border"></div>
-                    <script>
-                        (function() {
-                            let vim = ace.edit('task-editor-text-input');
-                            vim.session.setMode('ace/mode/markdown');
-                        })()
-                    </script>
-                </p>
-                <p>
-                    <label for="task-editor-seed-input">{{ lc['taskeditor_seed'] }}</label>
-                    <div class="w3-row-padding">
-                        <div class="w3-col s12 m8 l9">
-                            <input
-                                type="text"
-                                id="task-editor-seed-input"
-                                placeholder="{{ lc['taskeditor_seed'] }}"
-                                class="w3-input w3-border"
-                                regex="[0-9a-f]{16}"
-                                autocomplete="off"
-                                required
-                            >
-                        </div>
-                        <div class="w3-col s12 m4 l3">
-                            <a class="w3-button w3-green block" href="javascript:taskeditor_randomize_seed()">
-                                {{ lc['taskeditor_randomize_seed'] }}
-                            </a>
-                        </div>
-                    </div>
-                </p>
-
-                <p>{{ lc['flags'] }}</p>
-                <div id="task-editor-flags"></div> <!-- Filled by task-editor.js -->
-                <p>
-                    <a href="javascript:add_flag()" class="w3-button w3-green">{{ lc['add_flag'] }}</a>
-                </p>
-
-                <p>{{ lc['attached_files'] }}</p>
-                <div class="w3-container">
-                    <div id="task-editor-attached-files-label"></div> <!-- Filled by task-editor.js -->
-                    <ul id="task-editor-attached-files" class="w3-ul"></ul> <!-- Filled by task-editor.js -->
-                    <p>{{ lc['how_to_attach_files'] }}</p>
-                </div>
-
-                <p>{{ lc['hints'] }}</p>
-                <div id="task-editor-hints"></div> <!-- Filled by task-editor.js -->
-                <p>
-                    <a href="javascript:add_hint()" class="w3-button w3-green">{{ lc['add_hint'] }}</a>
-                </p>
-
-                <p>
-                    <label for="task-editor-order-input">{{ lc['taskeditor_order'] }}</label>
-                    <input
-                        type="number"
-                        step="1"
-                        id="task-editor-order-input"
-                        placeholder="{{ lc['taskeditor_order'] }}"
-                        class="w3-input w3-border"
-                        pattern="[1-9][0-9]*"
-                        value="0"
-                        required
-                    >
-                </p>
-                <p>
-                    <a id="task-editor-cancel-button" class="w3-button w3-red">{{ lc['taskeditor_cancel'] }}</a>
-                    <a id="task-editor-submit-button" class="w3-button w3-green">{{ lc['taskeditor_submit'] }}</a>
-                </p>
+          <!-- NEW ACE -->
+          <div id="task-editor-text-input" style="width: 100%; height: 300px;" class="w3-border"></div>
+          <script>
+            (function() {
+              let vim = ace.edit('task-editor-text-input');
+              vim.session.setMode('ace/mode/markdown');
+            })()
+          </script>
+        </p>
+        <p>
+          <label for="task-editor-seed-input">{{ lc['taskeditor_seed'] }}</label>
+          <div class="w3-row-padding">
+            <div class="w3-col s12 m8 l9">
+              <input
+                type="text"
+                id="task-editor-seed-input"
+                placeholder="{{ lc['taskeditor_seed'] }}"
+                class="w3-input w3-border"
+                regex="[0-9a-f]{16}"
+                autocomplete="off"
+                required
+              >
             </div>
-        </div>
-        <div class="w3-bar w3-dark-grey">
-            <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-mobile" href="/">{{ lc['home_page'] }}</a>
-            <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-mobile" href="/tasks">{{ lc['tasks'] }}</a>
-            <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-mobile" href="/team_profile?team={{ session.username }}">
-                {{ lc['team_profile'] }}
-            </a>
-            <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-mobile" href="/scoreboard">{{ lc['scoreboard'] }}</a>
-            <span class="w3-bar-item w3-mobile w3-mobile w3-green w3-mobile">{{ lc['admin_page'] }}</span>
-            <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-right w3-mobile" href="/lout">{{ lc['logout'] }}</a>
-            <span class="w3-bar-item w3-mobile w3-mobile w3-light-grey w3-right w3-mobile">
-                {{ lc['signed_in_as'].format(session.username) }}
-            </span>
-            <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
-        </div>
+            <div class="w3-col s12 m4 l3">
+              <a class="w3-button w3-green block" href="javascript:taskeditor_randomize_seed()">
+                {{ lc['taskeditor_randomize_seed'] }}
+              </a>
+            </div>
+          </div>
+        </p>
+
+        <p>{{ lc['flags'] }}</p>
+        <div id="task-editor-flags"></div> <!-- Filled by task-editor.js -->
+        <p>
+          <a href="javascript:add_flag()" class="w3-button w3-green">{{ lc['add_flag'] }}</a>
+        </p>
+
+        <p>{{ lc['attached_files'] }}</p>
         <div class="w3-container">
-            <h1>{{ lc['admin_page'] }}</h1>
-            <div class="w3-bar w3-dark-grey" id="tabset">
-                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-tasks">
-                    {{ lc['admintab_tasks'] }}
-                </span>
-                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-groups">
-                    {{ lc['admintab_groups'] }}
-                </span>
-                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-task-gen">
-                    {{ lc['admintab_task_gen'] }}
-                </span>
-                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-teams">
-                    {{ lc['admintab_teams'] }}
-                </span>
-                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-submissions">
-                    {{ lc['admintab_submissions'] }}
-                </span>
-                <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-competition-ctl">
-                    {{ lc['admintab_competition_ctl'] }}
-                </span>
-            </div>
-            <div id="tabcontents">
-                <div class="w3-container hidden" id="tabcontent-groups">
-                    <h2>{{ lc['admintab_groups'] }}</h2>
-                    <p>
-                    <div class="w3-row-padding">
-                        <div class="w3-col s12 m8 l9">
-                            <input
-                                type="text"
-                                id="add-group-name0"
-                                class="w3-input w3-border"
-                                placeholder="{{ lc['group_name'] }}">
-                        </div>
-                        <div class="w3-col s12 m4 l3">
-                            <a
-                                class="w3-button w3-green block"
-                                href="javascript:add_group(0)"
-                            >
-                                {{ lc['add_group'] }}
-                            </a>
-                        </div>
-                    </div>
-                    </p>
-                    {% for group in groups.values() %}
-                        <p>
-                        <div class="w3-container w3-light-grey" style="padding-bottom: 10px;">
-                            <span style="color: grey;">
-                                {% try %}
-                                    {{ '/'.join(build_group_path(groups, group['group_id'])[:-1]) + '/' }}
-                                {% except BaseException as e %}
-                                    {{ lc['error_building_group_path'] }}
-                                {% end %}
-                            </span>
-                            <h3>{{ group['name'] }}</h3>
-                            <p>
-                            <div class="w3-row-padding">
-                                <div class="w3-col s12 m7 l8">
-                                    <input
-                                        type="text"
-                                        id="add-group-name{{ group['group_id'] }}"
-                                        class="w3-input w3-border"
-                                        placeholder="{{ lc['group_name'] }}">
-                                    </div>
-                                <div class="w3-col s12 m5 l4">
-                                    <a
-                                        class="w3-button w3-green block"
-                                        href="javascript:add_group({{ group['group_id'] }})"
-                                    >
-                                        {{ lc['add_subgroup'] }}
-                                    </a>
-                                </div>
-                            </div>
-                            </p>
-                            <p>
-                            <div class="w3-row-padding">
-                                <div class="w3-col s12 m7 l8">
-                                    <input
-                                        type="text"
-                                        id="rename-group-name{{ group['group_id'] }}"
-                                        class="w3-input w3-border"
-                                        placeholder="{{ lc['group_new_name'] }}"
-                                        autocomplete="off"
-                                    >
-                                </div>
-                                <div class="w3-col s12 m5 l4">
-                                    <a
-                                        class="w3-button w3-green block"
-                                        href="javascript:rename_group({{ group['group_id'] }})"
-                                    >
-                                        {{ lc['rename_group'] }}
-                                    </a>
-                                </div>
-                            </div>
-                            </p>
-                            <h5>{{ lc['group_token_seed'] }}</h5>
-                            <div class="w3-row-padding">
-                                <div class="w3-col s12 m12 l8">
-                                    <input
-                                        type="text"
-                                        id="task-editor-seed-input{{ group['group_id'] }}"
-                                        placeholder="{{ lc['group_token_seed'] }}"
-                                        class="w3-input w3-border"
-                                        regex="[0-9a-f]{16}"
-                                        value="{{ group['seed'] }}"
-                                        autocomplete="off"
-                                        required
-                                    >
-                                </div>
-                                <div class="w3-col s12 m6 l2">
-                                    <a
-                                        class="w3-button w3-blue block"
-                                        href="javascript:group_randomize_seed({{ group['group_id'] }})"
-                                    >
-                                        {{ lc['taskeditor_randomize_seed'] }}
-                                    </a>
-                                </div>
-                                <div class="w3-col s12 m6 l2">
-                                    <a
-                                        class="w3-button w3-green block"
-                                        href="javascript:group_update_seed({{ group['group_id'] }})"
-                                    >
-                                        {{ lc['taskeditor_update_seed'] }}
-                                    </a>
-                                </div>
-                            </div>
-                            <h5>{{ lc['parent_group'] }}</h5>
-                            <div class="w3-row-padding">
-                                <div class="w3-col s12 m6 l8">
-                                    <select
-                                        class="w3-input w3-border"
-                                        id="group-parent{{ group['group_id'] }}"
-                                    >
-                                        <option value="0">
-                                            {{ lc['root_group'] }}
-                                        </option>
-                                        {% for parent in groups.values() %}
-                                            {% if group['group_id'] != parent['group_id'] %}
-                                                <option value="{{ parent['group_id'] }}">
-                                                    {{ parent['name'] }}
-                                                </option>
-                                            {% end %}
-                                        {% end %}
-                                    </select>
-                                </div>
-                                <div class="w3-col s12 m6 l4">
-                                    <a
-                                        href="javascript:update_group_parent({{ group['group_id'] }})"
-                                        class="w3-button w3-green block"
-                                    >
-                                        {{ lc['update_group_parent'] }}
-                                    </a>
-                                </div>
-                            </div>
-                            <p>
-                                <h5>{{ lc['subgroups'] }}</h5>
-                                <ul class="w3-ul">
-                                    {% set any_subgroup = False %}
-                                    {% for subgroup in groups.values() %}
-                                        {% if subgroup['parent'] == group['group_id'] %}
-                                            {% set any_subgroup = True %}
-                                            <li>{{ subgroup['name'] }}</li>
-                                        {% end %}
-                                    {% end %}
-                                    {% if not any_subgroup %}
-                                        <p style="padding-left: 10px">
-                                            <em>{{ lc['empty_list'] }}</em>
-                                        </p>
-                                    {% end %}
-                                </ul>
-                            </p>
-                            <p>
-                                <h5>{{ lc['subtasks'] }}</h5>
-                                <ul class="w3-ul">
-                                    {% set any_task = False %}
-                                    {% for task in tasks %}
-                                        {% if task.group == group['group_id'] %}
-                                            {% set any_task = True %}
-                                            <li>{{ task.title }}</li>
-                                        {% end %}
-                                    {% end %}
-                                    {% if not any_task %}
-                                        <p style="padding-left: 10px">
-                                            <em>{{ lc['empty_list'] }}</em>
-                                        </p>
-                                    {% end %}
-                                </ul>
-                            </p>
-                            <p>
-                                <a
-                                    href="javascript:delete_group({{ group['group_id'] }})"
-                                    class="w3-button w3-red"
-                                >
-                                    {{ lc['delete_group'] }}
-                                </a>
-                            </p>
-                        </div>
-                        </p>
-                    {% end %}
-                </div>
-                <div class="w3-container hidden" id="tabcontent-tasks">
-                    <h2>{{ lc['admintab_tasks'] }}</h2>
-                    <p>
-                        <a class="w3-button w3-green" href="javascript:edit_task(null)">
-                            {{ lc['admin_task_add'] }}
-                        </a>
-                    </p>
-                    {% for task in tasks %}
-                        <div class="w3-container w3-light-grey" style="margin: 10px 0 10px 0;">
-                            <span style="color: grey;">
-                                {% try %}
-                                    {{ '/'.join(build_group_path(groups, task.group)) + '/' }}
-                                {% except BaseException as e %}
-                                    {{ lc['error_building_group_path'] }}
-                                {% end %}
-                            </span>
-                            <h3>{{ task.title }} [{{ task.value }}]</h3>
-                            <p>
-                                <a
-                                    class="w3-button w3-blue"
-                                    onclick="edit_task({{ task.task_id }})"
-                                >{{ lc['admin_task_edit'] }}</a>
-                                <a
-                                    class="w3-button w3-red"
-                                    onclick="delete_task({{ task.task_id }})"
-                                >{{ lc['admin_task_delete'] }}</a>
-                            </p>
-                        </div>
-                    {% end %}
-                </div>
-                <div class="w3-container hidden" id="tabcontent-teams">
-                    <h2>{{ lc['admintab_teams'] }}</h2>
-                    <a class="w3-button w3-green" href="/admin_new_team">
-                        {{ lc['register_new_team'] }}
-                    </a>
-                    {% for team in teams %}
-                        <div class="w3-light-grey w3-container" style="margin: 10px 0px 10px 0px">
-                            <h3>{{ team.full_name }}</h3>
-                            <p><strong>{{ lc['nickname'] }}</strong>: {{ team.team_name }}</p>
-                            <p><a
-                                class="w3-button w3-blue"
-                                href="/team_profile?team={{ team.team_name }}"
-                            >{{ lc['view_profile'] }}</a></p>
-                            <div class="w3-row-padding">
-                                <div class="w3-col s12 m8 l9">
-                                    <input
-                                        type="password"
-                                        placeholder="{{ lc['new_password'] }}"
-                                        class="w3-input w3-border"
-                                        id="new-password-{{ team.team_name }}"
-                                    >
-                                </div>
-                                <div class="w3-col s12 m4 l3">
-                                    <a
-                                        class="w3-button w3-green block"
-                                        href="javascript:change_password('{{ team.team_name }}')"
-                                    >
-                                        {{ lc['change_password'] }}
-                                    </a>
-                                </div>
-                            </div>
-                            <p>
-                                <a
-                                    class="w3-button w3-red"
-                                    href="javascript:delete_team('{{ team.team_name }}')"
-                                >
-                                    {{ lc['delete_team'] }}
-                                </a>
-                                <a
-                                    class="w3-button w3-deep-orange"
-                                    href="javascript:logout_team('{{ team.team_name }}')"
-                                >
-                                    {{ lc['logout_team'] }}
-                                </a>
-                            </p>
-                        </div>
-                    {% end %}
-                </div>
-                <div class="w3-container hidden" id="tabcontent-submissions">
-                    <h2>{{ lc['admintab_submissions'] }}</h2>
-                    <div style="overflow: auto"> <!-- Enable horizontal scrolling -->
-                        <table class="w3-table w3-border w3-striped">
-                            <tr>
-                                <th>{{ lc['team_name'] }}</th>
-                                <th>{{ lc['task_name'] }}</th>
-                                <th>{{ lc['submitted_flag'] }}</th>
-                                <th>{{ lc['is_correct'] }}</th>
-                                <th>{{ lc['points'] }}</th>
-                                <th>{{ lc['submission_time'] }}</th>
-                            </tr>
-                            {% for sub in reversed(sorted(submissions, key = lambda x: x['time'])) %}
-                                {% try %}
-                                    {% set task = read_task(sub['task_id']) %}
-                                    <tr>
-                                        <td>{{ sub['team_name'] }}</td>
-                                        <td>{{ task.title }}</td>
-                                        <td style="font-family: monospace">{{ sub['flag'] }}</td>
-                                        {% if sub['is_correct'] %}
-                                            <td class="w3-text-green">{{ lc['yes'] }}</td>
-                                        {% else %}
-                                            <td class="w3-text-red">{{ lc['no'] }}</td>
-                                        {% end %}
-                                        <td>{{ sub['points'] }}</td>
-                                        <td>{{ conf['date_fmt_func'](sub['time']) }}</td>
-                                    </tr>
-                                {% except KeyError %}
-                                {% end %}
-                            {% end %}
-                        </table>
-                    </div>
-                </div>
-                <div class="w3-container hidden" id="tabcontent-task-gen">
-                    <h2>{{ lc['admintab_task_gen'] }}</h2>
-                    <h3>{{ lc['tasks'] }}</h3>
-                    {% for task in tasks %}
-                        <div class="w3-container w3-light-grey" style="margin: 10px 0 10px 0;">
-                            <span style="color: grey;">
-                                {% try %}
-                                    {{ '/'.join(build_group_path(groups, task.group)) + '/' }}
-                                {% except BaseException as e %}
-                                    {{ lc['error_building_group_path'] }}
-                                {% end %}
-                            </span>
-                            <h4>{{ task.title }} ({{ lc['task'] }})</h4>
-                            <p>
-                                <strong>{{ lc['task_token_seed'] }}:</strong>
-                                <code style="font-family: monospace">{{ task.seed }}</code>
-                            </p>
-                            <div id="gen-config-wrapper{{ 'task' + str(task.task_id) }}" class="w3-container hidden">
-                                <div id="gen-config-editor{{ 'task' + str(task.task_id) }}">{{
-                                    task_gen.read_task_generation_config(task.task_id) 
-                                }}</div>
-                                <style>
-                                    #gen-config-editor{{ 'task' + str(task.task_id) }} {
-                                        width: 100%;
-                                        height: 400px;
-                                    }
-                                </style>
-                                <script>
-                                    (function() {
-                                        let editor = ace.edit('gen-config-editor{{ 'task' + str(task.task_id) }}');
-                                        gen_config_editors['task{{ task.task_id }}'] = editor;
-                                        editor.session.setMode('ace/mode/python');
-                                    })()
-                                </script>
-                                <p>
-                                    <a
-                                        class="w3-button w3-green"
-                                        href="javascript:update_gen_config('{{ 'task' + str(task.task_id) }}')"
-                                    >
-                                        {{ lc['update_gen_config'] }}
-                                    </a>
-                                </p>
-                            </div>
-                            <p>
-                                <a
-                                    class="w3-button w3-green"
-                                    href="javascript:toggle_task_gen_visible('{{ 'task' + str(task.task_id) }}')"
-                                >
-                                    {{ lc['show_or_hide'] }}
-                                </a>
-                            </p>
-                        </div>
-                    {% end %}
-                    <hr>
-                    <h3>{{ lc['groups'] }}</h3>
-                    {% for group in groups.values() %}
-                        <div class="w3-container w3-light-grey" style="margin: 10px 0 10px 0;">
-                            <span style="color: grey;">
-                                {% try %}
-                                    {{ '/'.join(build_group_path(groups, group['group_id'])) + '/' }}
-                                {% except BaseException as e %}
-                                    {{ lc['error_building_group_path'] }}
-                                {% end %}
-                            </span>
-                            <h4>{{ group['name'] }} ({{ lc['group'] }})</h4>
-                            <p>
-                                <strong>{{ lc['group_token_seed'] }}:</strong>
-                                <code style="font-family: monospace">{{ group['seed'] }}</code>
-                            </p>
-                            <div
-                                id="gen-config-wrapper{{ 'group' + str(group['group_id']) }}"
-                                class="w3-container hidden"
-                            >
-                                <div id="gen-config-editor{{ 'group' + str(group['group_id']) }}">{{
-                                    task_gen.read_group_generation_config(group['group_id'])
-                                }}</div>
-                                <style>
-                                    #gen-config-editor{{ 'group' + str(group['group_id']) }} {
-                                        width: 100%;
-                                        height: 400px;
-                                    }
-                                </style>
-                                <script>
-                                    (function() {
-                                        let editor = ace.edit(
-                                            'gen-config-editor{{ 'group' + str(group['group_id']) }}'
-                                        );
-                                        gen_config_editors['group{{ group['group_id'] }}'] = editor;
-                                        editor.session.setMode('ace/mode/python');
-                                    })()
-                                </script>
-                                <p>
-                                    <a
-                                        class="w3-button w3-green"
-                                        href="javascript:update_gen_config('{{ 'group' + str(group['group_id']) }}')"
-                                    >
-                                        {{ lc['update_gen_config'] }}
-                                    </a>
-                                </p>
-                            </div>
-                            <p>
-                                <a
-                                    class="w3-button w3-green"
-                                    href="javascript:toggle_task_gen_visible('{{ 'group' + str(group['group_id']) }}')"
-                                >
-                                    {{ lc['show_or_hide'] }}
-                                </a>
-                            </p>
-                        </div>
-                    {% end %}
-                </div>
-                <div class="w3-container hidden" id="tabcontent-competition-ctl">
-                    <h2>{{ lc['admintab_competition_ctl'] }}</h2>
-                    <h3>{{ lc['competition_time'] }}</h3>
-                    <p>
-                        {{ lc['local_timezone'] }}: <span id="local_timezone_output">...</span>.
-                        {{ lc['use_localtime_msg'] }}
-                    </p>
-                    <p><label for="competition-start-time-input">{{ lc['competition_start_time'] }}</label></p>
-                    <p><input type="text" id="competition-start-time-input"></p>
-                    <p><label for="competition-end-time-input">{{ lc['competition_end_time'] }}</label></p>
-                    <p><input type="text" id="competition-end-time-input"></p>
-                    <script>
-                        (function() {
-                            const tz_out = document.getElementById('local_timezone_output');
-                            const tz_offset_minutes = -new Date(Date.now()).getTimezoneOffset();
-                            const tz_offset_hours = (tz_offset_minutes < 0 ? '' : '+') +
-                                Math.round(tz_offset_minutes / 30) / 2;
-                            tz_out.innerHTML = 'UTC ' + tz_offset_hours;
-                        })()
-
-                        function mklocaltime(utc_unix_ts)
-                        {
-                            const off = new Date().getTimezoneOffset() * 60;
-                            return new Date((utc_unix_ts - off) * 1000);
-                        }
-
-                        let flatpickr_config = {
-                            enableTime: true,
-                            enableSeconds: true,
-                        }
-                        if (flatpickr.l10ns["{{ lc['lang_code'] }}"] !== undefined) {
-                            flatpickr.localize(flatpickr.l10ns["{{ lc['lang_code'] }}"]);
-                            flatpickr_config['dateFormat'] = "{{ lc['date_fmt'] }}";
-                            flatpickr_config['timeFormat'] = "{{ lc['time_fmt'] }}";
-                            flatpickr_config['time_24hr'] = {{ 'false' if int(lc['24hr']) == 0 else 'true'}};
-                        }
-                        const start_time_picker = flatpickr('#competition-start-time-input', flatpickr_config);
-                        const end_time_picker = flatpickr('#competition-end-time-input', flatpickr_config);
-
-                        start_time_picker.setDate(mklocaltime({{ comp.start_time }}));
-                        end_time_picker.setDate(mklocaltime({{ comp.end_time }}));
-                        window.addEventListener('load', function() {
-                            document.getElementById('competition-enable-registration').checked = {{
-                                'true' if comp.allow_team_self_registration else 'false'
-                            }};
-                        })
-                    </script>
-                    <hr>
-                    <h3>{{ lc['competition_configuration'] }}</h3>
-                    <p>
-                        <input type="checkbox" id="competition-enable-registration">
-                        <label for="competition-enable-registration">
-                            {{ lc['competition_enable_registration'] }}
-                        </label>
-                    </p>
-                    <hr>
-                    <h3>{{ lc['competition_submit_or_discard'] }}</h3>
-                    <a class="w3-button w3-red" href="javascript:location.reload()">{{ lc['discard'] }}</a>
-                    <a class="w3-button w3-green" href="javascript:save_competition_ctl()">{{ lc['save'] }}</a>
-                </div>
-            </div>
+          <div id="task-editor-attached-files-label"></div> <!-- Filled by task-editor.js -->
+          <ul id="task-editor-attached-files" class="w3-ul"></ul> <!-- Filled by task-editor.js -->
+          <p>{{ lc['how_to_attach_files'] }}</p>
         </div>
-    </body>
+
+        <p>{{ lc['hints'] }}</p>
+        <div id="task-editor-hints"></div> <!-- Filled by task-editor.js -->
+        <p>
+          <a href="javascript:add_hint()" class="w3-button w3-green">{{ lc['add_hint'] }}</a>
+        </p>
+
+        <p>
+          <label for="task-editor-order-input">{{ lc['taskeditor_order'] }}</label>
+          <input
+            type="number"
+            step="1"
+            id="task-editor-order-input"
+            placeholder="{{ lc['taskeditor_order'] }}"
+            class="w3-input w3-border"
+            pattern="[1-9][0-9]*"
+            value="0"
+            required
+          >
+        </p>
+        <p>
+          <a id="task-editor-cancel-button" class="w3-button w3-red">{{ lc['taskeditor_cancel'] }}</a>
+          <a id="task-editor-submit-button" class="w3-button w3-green">{{ lc['taskeditor_submit'] }}</a>
+        </p>
+      </div>
+    </div>
+    <div class="w3-bar w3-dark-grey">
+      <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-mobile" href="/">{{ lc['home_page'] }}</a>
+      <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-mobile" href="/tasks">{{ lc['tasks'] }}</a>
+      <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-mobile" href="/team_profile?team={{ session.username }}">
+        {{ lc['team_profile'] }}
+      </a>
+      <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-mobile" href="/scoreboard">{{ lc['scoreboard'] }}</a>
+      <span class="w3-bar-item w3-mobile w3-mobile w3-green w3-mobile">{{ lc['admin_page'] }}</span>
+      <a class="w3-bar-item w3-mobile w3-mobile w3-button w3-right w3-mobile" href="/lout">{{ lc['logout'] }}</a>
+      <span class="w3-bar-item w3-mobile w3-mobile w3-light-grey w3-right w3-mobile">
+        {{ lc['signed_in_as'].format(session.username) }}
+      </span>
+      <span class="w3-bar-item w3-mobile w3-right" id="ctfhost-clock"></span>
+    </div>
+    <div class="w3-container">
+      <h1>{{ lc['admin_page'] }}</h1>
+      <div class="w3-bar w3-dark-grey" id="tabset">
+        <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-tasks">
+          {{ lc['admintab_tasks'] }}
+        </span>
+        <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-groups">
+          {{ lc['admintab_groups'] }}
+        </span>
+        <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-task-gen">
+          {{ lc['admintab_task_gen'] }}
+        </span>
+        <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-teams">
+          {{ lc['admintab_teams'] }}
+        </span>
+        <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-submissions">
+          {{ lc['admintab_submissions'] }}
+        </span>
+        <span class="w3-bar-item w3-mobile w3-mobile w3-button" id="tab-competition-ctl">
+          {{ lc['admintab_competition_ctl'] }}
+        </span>
+      </div>
+      <div id="tabcontents">
+        <div class="w3-container hidden" id="tabcontent-groups">
+          <h2>{{ lc['admintab_groups'] }}</h2>
+          <p>
+          <div class="w3-row-padding">
+            <div class="w3-col s12 m8 l9">
+              <input
+                type="text"
+                id="add-group-name0"
+                class="w3-input w3-border"
+                placeholder="{{ lc['group_name'] }}">
+            </div>
+            <div class="w3-col s12 m4 l3">
+              <a
+                class="w3-button w3-green block"
+                href="javascript:add_group(0)"
+              >
+                {{ lc['add_group'] }}
+              </a>
+            </div>
+          </div>
+          </p>
+          {% for group in groups.values() %}
+            <p>
+            <div class="w3-container w3-light-grey" style="padding-bottom: 10px;">
+              <span style="color: grey;">
+                {% try %}
+                  {{ '/'.join(build_group_path(groups, group['group_id'])[:-1]) + '/' }}
+                {% except BaseException as e %}
+                  {{ lc['error_building_group_path'] }}
+                {% end %}
+              </span>
+              <h3>{{ group['name'] }}</h3>
+              <p>
+              <div class="w3-row-padding">
+                <div class="w3-col s12 m7 l8">
+                  <input
+                    type="text"
+                    id="add-group-name{{ group['group_id'] }}"
+                    class="w3-input w3-border"
+                    placeholder="{{ lc['group_name'] }}">
+                  </div>
+                <div class="w3-col s12 m5 l4">
+                  <a
+                    class="w3-button w3-green block"
+                    href="javascript:add_group({{ group['group_id'] }})"
+                  >
+                    {{ lc['add_subgroup'] }}
+                  </a>
+                </div>
+              </div>
+              </p>
+              <p>
+              <div class="w3-row-padding">
+                <div class="w3-col s12 m7 l8">
+                  <input
+                    type="text"
+                    id="rename-group-name{{ group['group_id'] }}"
+                    class="w3-input w3-border"
+                    placeholder="{{ lc['group_new_name'] }}"
+                    autocomplete="off"
+                  >
+                </div>
+                <div class="w3-col s12 m5 l4">
+                  <a
+                    class="w3-button w3-green block"
+                    href="javascript:rename_group({{ group['group_id'] }})"
+                  >
+                    {{ lc['rename_group'] }}
+                  </a>
+                </div>
+              </div>
+              </p>
+              <h5>{{ lc['group_token_seed'] }}</h5>
+              <div class="w3-row-padding">
+                <div class="w3-col s12 m12 l8">
+                  <input
+                    type="text"
+                    id="task-editor-seed-input{{ group['group_id'] }}"
+                    placeholder="{{ lc['group_token_seed'] }}"
+                    class="w3-input w3-border"
+                    regex="[0-9a-f]{16}"
+                    value="{{ group['seed'] }}"
+                    autocomplete="off"
+                    required
+                  >
+                </div>
+                <div class="w3-col s12 m6 l2">
+                  <a
+                    class="w3-button w3-blue block"
+                    href="javascript:group_randomize_seed({{ group['group_id'] }})"
+                  >
+                    {{ lc['taskeditor_randomize_seed'] }}
+                  </a>
+                </div>
+                <div class="w3-col s12 m6 l2">
+                  <a
+                    class="w3-button w3-green block"
+                    href="javascript:group_update_seed({{ group['group_id'] }})"
+                  >
+                    {{ lc['taskeditor_update_seed'] }}
+                  </a>
+                </div>
+              </div>
+              <h5>{{ lc['parent_group'] }}</h5>
+              <div class="w3-row-padding">
+                <div class="w3-col s12 m6 l8">
+                  <select
+                    class="w3-input w3-border"
+                    id="group-parent{{ group['group_id'] }}"
+                  >
+                    <option value="0">
+                      {{ lc['root_group'] }}
+                    </option>
+                    {% for parent in groups.values() %}
+                      {% if group['group_id'] != parent['group_id'] %}
+                        <option value="{{ parent['group_id'] }}">
+                          {{ parent['name'] }}
+                        </option>
+                      {% end %}
+                    {% end %}
+                  </select>
+                </div>
+                <div class="w3-col s12 m6 l4">
+                  <a
+                    href="javascript:update_group_parent({{ group['group_id'] }})"
+                    class="w3-button w3-green block"
+                  >
+                    {{ lc['update_group_parent'] }}
+                  </a>
+                </div>
+              </div>
+              <p>
+                <h5>{{ lc['subgroups'] }}</h5>
+                <ul class="w3-ul">
+                  {% set any_subgroup = False %}
+                  {% for subgroup in groups.values() %}
+                    {% if subgroup['parent'] == group['group_id'] %}
+                      {% set any_subgroup = True %}
+                      <li>{{ subgroup['name'] }}</li>
+                    {% end %}
+                  {% end %}
+                  {% if not any_subgroup %}
+                    <p style="padding-left: 10px">
+                      <em>{{ lc['empty_list'] }}</em>
+                    </p>
+                  {% end %}
+                </ul>
+              </p>
+              <p>
+                <h5>{{ lc['subtasks'] }}</h5>
+                <ul class="w3-ul">
+                  {% set any_task = False %}
+                  {% for task in tasks %}
+                    {% if task.group == group['group_id'] %}
+                      {% set any_task = True %}
+                      <li>{{ task.title }}</li>
+                    {% end %}
+                  {% end %}
+                  {% if not any_task %}
+                    <p style="padding-left: 10px">
+                      <em>{{ lc['empty_list'] }}</em>
+                    </p>
+                  {% end %}
+                </ul>
+              </p>
+              <p>
+                <a
+                  href="javascript:delete_group({{ group['group_id'] }})"
+                  class="w3-button w3-red"
+                >
+                  {{ lc['delete_group'] }}
+                </a>
+              </p>
+            </div>
+            </p>
+          {% end %}
+        </div>
+        <div class="w3-container hidden" id="tabcontent-tasks">
+          <h2>{{ lc['admintab_tasks'] }}</h2>
+          <p>
+            <a class="w3-button w3-green" href="javascript:edit_task(null)">
+              {{ lc['admin_task_add'] }}
+            </a>
+          </p>
+          {% for task in tasks %}
+            <div class="w3-container w3-light-grey" style="margin: 10px 0 10px 0;">
+              <span style="color: grey;">
+                {% try %}
+                  {{ '/'.join(build_group_path(groups, task.group)) + '/' }}
+                {% except BaseException as e %}
+                  {{ lc['error_building_group_path'] }}
+                {% end %}
+              </span>
+              <h3>{{ task.title }} [{{ task.value }}]</h3>
+              <p>
+                <a
+                  class="w3-button w3-blue"
+                  onclick="edit_task({{ task.task_id }})"
+                >{{ lc['admin_task_edit'] }}</a>
+                <a
+                  class="w3-button w3-red"
+                  onclick="delete_task({{ task.task_id }})"
+                >{{ lc['admin_task_delete'] }}</a>
+              </p>
+            </div>
+          {% end %}
+        </div>
+        <div class="w3-container hidden" id="tabcontent-teams">
+          <h2>{{ lc['admintab_teams'] }}</h2>
+          <a class="w3-button w3-green" href="/admin_new_team">
+            {{ lc['register_new_team'] }}
+          </a>
+          {% for team in teams %}
+            <div class="w3-light-grey w3-container" style="margin: 10px 0px 10px 0px">
+              <h3>{{ team.full_name }}</h3>
+              <p><strong>{{ lc['nickname'] }}</strong>: {{ team.team_name }}</p>
+              <p><a
+                class="w3-button w3-blue"
+                href="/team_profile?team={{ team.team_name }}"
+              >{{ lc['view_profile'] }}</a></p>
+              <div class="w3-row-padding">
+                <div class="w3-col s12 m8 l9">
+                  <input
+                    type="password"
+                    placeholder="{{ lc['new_password'] }}"
+                    class="w3-input w3-border"
+                    id="new-password-{{ team.team_name }}"
+                  >
+                </div>
+                <div class="w3-col s12 m4 l3">
+                  <a
+                    class="w3-button w3-green block"
+                    href="javascript:change_password('{{ team.team_name }}')"
+                  >
+                    {{ lc['change_password'] }}
+                  </a>
+                </div>
+              </div>
+              <p>
+                <a
+                  class="w3-button w3-red"
+                  href="javascript:delete_team('{{ team.team_name }}')"
+                >
+                  {{ lc['delete_team'] }}
+                </a>
+                <a
+                  class="w3-button w3-deep-orange"
+                  href="javascript:logout_team('{{ team.team_name }}')"
+                >
+                  {{ lc['logout_team'] }}
+                </a>
+              </p>
+            </div>
+          {% end %}
+        </div>
+        <div class="w3-container hidden" id="tabcontent-submissions">
+          <h2>{{ lc['admintab_submissions'] }}</h2>
+          <div style="overflow: auto"> <!-- Enable horizontal scrolling -->
+            <table class="w3-table w3-border w3-striped">
+              <tr>
+                <th>{{ lc['team_name'] }}</th>
+                <th>{{ lc['task_name'] }}</th>
+                <th>{{ lc['submitted_flag'] }}</th>
+                <th>{{ lc['is_correct'] }}</th>
+                <th>{{ lc['points'] }}</th>
+                <th>{{ lc['submission_time'] }}</th>
+              </tr>
+              {% for sub in reversed(sorted(submissions, key = lambda x: x['time'])) %}
+                {% try %}
+                  {% set task = read_task(sub['task_id']) %}
+                  <tr>
+                    <td>{{ sub['team_name'] }}</td>
+                    <td>{{ task.title }}</td>
+                    <td style="font-family: monospace">{{ sub['flag'] }}</td>
+                    {% if sub['is_correct'] %}
+                      <td class="w3-text-green">{{ lc['yes'] }}</td>
+                    {% else %}
+                      <td class="w3-text-red">{{ lc['no'] }}</td>
+                    {% end %}
+                    <td>{{ sub['points'] }}</td>
+                    <td>{{ conf['date_fmt_func'](sub['time']) }}</td>
+                  </tr>
+                {% except KeyError %}
+                {% end %}
+              {% end %}
+            </table>
+          </div>
+        </div>
+        <div class="w3-container hidden" id="tabcontent-task-gen">
+          <h2>{{ lc['admintab_task_gen'] }}</h2>
+          <h3>{{ lc['tasks'] }}</h3>
+          {% for task in tasks %}
+            <div class="w3-container w3-light-grey" style="margin: 10px 0 10px 0;">
+              <span style="color: grey;">
+                {% try %}
+                  {{ '/'.join(build_group_path(groups, task.group)) + '/' }}
+                {% except BaseException as e %}
+                  {{ lc['error_building_group_path'] }}
+                {% end %}
+              </span>
+              <h4>{{ task.title }} ({{ lc['task'] }})</h4>
+              <p>
+                <strong>{{ lc['task_token_seed'] }}:</strong>
+                <code style="font-family: monospace">{{ task.seed }}</code>
+              </p>
+              <div id="gen-config-wrapper{{ 'task' + str(task.task_id) }}" class="w3-container hidden">
+                <div id="gen-config-editor{{ 'task' + str(task.task_id) }}">{{
+                  task_gen.read_task_generation_config(task.task_id) 
+                }}</div>
+                <style>
+                  #gen-config-editor{{ 'task' + str(task.task_id) }} {
+                    width: 100%;
+                    height: 400px;
+                  }
+                </style>
+                <script>
+                  (function() {
+                    let editor = ace.edit('gen-config-editor{{ 'task' + str(task.task_id) }}');
+                    gen_config_editors['task{{ task.task_id }}'] = editor;
+                    editor.session.setMode('ace/mode/python');
+                  })()
+                </script>
+                <p>
+                  <a
+                    class="w3-button w3-green"
+                    href="javascript:update_gen_config('{{ 'task' + str(task.task_id) }}')"
+                  >
+                    {{ lc['update_gen_config'] }}
+                  </a>
+                </p>
+              </div>
+              <p>
+                <a
+                  class="w3-button w3-green"
+                  href="javascript:toggle_task_gen_visible('{{ 'task' + str(task.task_id) }}')"
+                >
+                  {{ lc['show_or_hide'] }}
+                </a>
+              </p>
+            </div>
+          {% end %}
+          <hr>
+          <h3>{{ lc['groups'] }}</h3>
+          {% for group in groups.values() %}
+            <div class="w3-container w3-light-grey" style="margin: 10px 0 10px 0;">
+              <span style="color: grey;">
+                {% try %}
+                  {{ '/'.join(build_group_path(groups, group['group_id'])) + '/' }}
+                {% except BaseException as e %}
+                  {{ lc['error_building_group_path'] }}
+                {% end %}
+              </span>
+              <h4>{{ group['name'] }} ({{ lc['group'] }})</h4>
+              <p>
+                <strong>{{ lc['group_token_seed'] }}:</strong>
+                <code style="font-family: monospace">{{ group['seed'] }}</code>
+              </p>
+              <div
+                id="gen-config-wrapper{{ 'group' + str(group['group_id']) }}"
+                class="w3-container hidden"
+              >
+                <div id="gen-config-editor{{ 'group' + str(group['group_id']) }}">{{
+                  task_gen.read_group_generation_config(group['group_id'])
+                }}</div>
+                <style>
+                  #gen-config-editor{{ 'group' + str(group['group_id']) }} {
+                    width: 100%;
+                    height: 400px;
+                  }
+                </style>
+                <script>
+                  (function() {
+                    let editor = ace.edit(
+                      'gen-config-editor{{ 'group' + str(group['group_id']) }}'
+                    );
+                    gen_config_editors['group{{ group['group_id'] }}'] = editor;
+                    editor.session.setMode('ace/mode/python');
+                  })()
+                </script>
+                <p>
+                  <a
+                    class="w3-button w3-green"
+                    href="javascript:update_gen_config('{{ 'group' + str(group['group_id']) }}')"
+                  >
+                    {{ lc['update_gen_config'] }}
+                  </a>
+                </p>
+              </div>
+              <p>
+                <a
+                  class="w3-button w3-green"
+                  href="javascript:toggle_task_gen_visible('{{ 'group' + str(group['group_id']) }}')"
+                >
+                  {{ lc['show_or_hide'] }}
+                </a>
+              </p>
+            </div>
+          {% end %}
+        </div>
+        <div class="w3-container hidden" id="tabcontent-competition-ctl">
+          <h2>{{ lc['admintab_competition_ctl'] }}</h2>
+          <h3>{{ lc['competition_time'] }}</h3>
+          <p>
+            {{ lc['local_timezone'] }}: <span id="local_timezone_output">...</span>.
+            {{ lc['use_localtime_msg'] }}
+          </p>
+          <p><label for="competition-start-time-input">{{ lc['competition_start_time'] }}</label></p>
+          <p><input type="text" id="competition-start-time-input"></p>
+          <p><label for="competition-end-time-input">{{ lc['competition_end_time'] }}</label></p>
+          <p><input type="text" id="competition-end-time-input"></p>
+          <script>
+            (function() {
+              const tz_out = document.getElementById('local_timezone_output');
+              const tz_offset_minutes = -new Date(Date.now()).getTimezoneOffset();
+              const tz_offset_hours = (tz_offset_minutes < 0 ? '' : '+') +
+                Math.round(tz_offset_minutes / 30) / 2;
+              tz_out.innerHTML = 'UTC ' + tz_offset_hours;
+            })()
+
+            function mklocaltime(utc_unix_ts)
+            {
+              const off = new Date().getTimezoneOffset() * 60;
+              return new Date((utc_unix_ts - off) * 1000);
+            }
+
+            let flatpickr_config = {
+              enableTime: true,
+              enableSeconds: true,
+            }
+            if (flatpickr.l10ns["{{ lc['lang_code'] }}"] !== undefined) {
+              flatpickr.localize(flatpickr.l10ns["{{ lc['lang_code'] }}"]);
+              flatpickr_config['dateFormat'] = "{{ lc['date_fmt'] }}";
+              flatpickr_config['timeFormat'] = "{{ lc['time_fmt'] }}";
+              flatpickr_config['time_24hr'] = {{ 'false' if int(lc['24hr']) == 0 else 'true'}};
+            }
+            const start_time_picker = flatpickr('#competition-start-time-input', flatpickr_config);
+            const end_time_picker = flatpickr('#competition-end-time-input', flatpickr_config);
+
+            start_time_picker.setDate(mklocaltime({{ comp.start_time }}));
+            end_time_picker.setDate(mklocaltime({{ comp.end_time }}));
+            window.addEventListener('load', function() {
+              document.getElementById('competition-enable-registration').checked = {{
+                'true' if comp.allow_team_self_registration else 'false'
+              }};
+            })
+          </script>
+          <hr>
+          <h3>{{ lc['competition_configuration'] }}</h3>
+          <p>
+            <input type="checkbox" id="competition-enable-registration">
+            <label for="competition-enable-registration">
+              {{ lc['competition_enable_registration'] }}
+            </label>
+          </p>
+          <hr>
+          <h3>{{ lc['competition_submit_or_discard'] }}</h3>
+          <a class="w3-button w3-red" href="javascript:location.reload()">{{ lc['discard'] }}</a>
+          <a class="w3-button w3-green" href="javascript:save_competition_ctl()">{{ lc['save'] }}</a>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>

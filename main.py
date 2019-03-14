@@ -235,7 +235,17 @@ class AdminRegHandler(tornado.web.RequestHandler):
         password_c = self.get_argument('password-c', None)
         disp_name = self.get_argument('disp-name', None)
         email = self.get_argument('email', None)
-        #is_admin = self.get_argument('is_admin', False)
+        is_admin = self.get_argument('is_admin', False)
+
+        try:
+            is_admin = bool(is_admin)
+        except (ValueError, TypeError) as e:
+            self.write(render_template('reg_error.html', error=lc.get('api_invalid_data_type').format(
+                param = 'is_admin',
+                expected = lc.get('bool'),
+            )))
+            return
+            
         
         if username is None or username == '':
             self.write(render_template('reg_error.html', error=lc.get('no_username')))
