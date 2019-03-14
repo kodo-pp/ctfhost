@@ -176,3 +176,4 @@ attached_files                      = Attached files
 how_to_attach_files                 = Attach files by putting them to task files directory
 task_files_dir                      = Task files directory: {dir}
 reg_validation_failed               = Invalid format of username, team name or email
+is_admin                            = The user is an administrator

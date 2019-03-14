@@ -172,7 +172,7 @@ def validate_user_creds(username, disp_name, email):
     return True
 
 
-def register_user(username, password, disp_name, email=None):
+def register_user(username, password, disp_name, email=None, is_admin=False):
     if not validate_user_creds(username=username, disp_name=disp_name, email=email):
         raise RegValidationFailedError()
     if email == '':
@@ -190,8 +190,8 @@ def register_user(username, password, disp_name, email=None):
             raise BaseRegistrationError()
         logger.info('Registering user "{}"'.format(username))
         cur.execute(
-            'INSERT INTO users VALUES (?, ?, ?, ?, 0, ?)',
-            (username, password_hash, disp_name, email, token_seed)
+            'INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)',
+            (username, password_hash, disp_name, email, is_admin, token_seed)
         )
         db.commit()
 
