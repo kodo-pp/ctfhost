@@ -7,6 +7,7 @@ import os
 import json
 import secrets
 import re
+import copy
 from contextlib import closing
 
 from loguru import logger
@@ -55,7 +56,7 @@ class SessionCache:
         del self.cache[session_id]
 
     def remove_for(self, username):
-        for k, v in self.cache.items():
+        for k, v in copy.deepcopy(self.cache).items():
             if v.username == username:
                 del self.cache[k]
 
@@ -66,6 +67,11 @@ class SessionCache:
             self.cache.pop(session_id)
             return None
         return self.cache[session_id]
+
+    def maybe_set_admin(self, username, value):
+        for k, v in self.cache.items():
+            if v.username == username:
+                v.is_admin = value
 
 
 def load_session(session_id):
@@ -244,6 +250,14 @@ def delete_team(team_name):
     session_cache.remove_for(team_name)
 
 
+def set_admin(username, value):
+    session_cache.maybe_set_admin(username, value)
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute('UPDATE users SET is_admin = ? WHERE username = ?', (value, username))
+        db.commit()
+
+
 def api_change_password(api, sess, args):
     http = args['http_handler']
     request = json.loads(http.request.body)
@@ -296,8 +310,30 @@ def api_delete_team(api, sess, args):
     http.write(json.dumps({'success': True}))
 
 
+def api_set_admin(api, sess, args):
+    http = args['http_handler']
+    request = json.loads(http.request.body)
+    team_name = request['team_name']
+    value     = request['value']
+
+    if type(value) is not bool:
+        raise Exception(
+            lc.get('api_invalid_data_type').format(
+                expected = lc.get('bool'),
+                param    = 'value',
+            )
+        )
+
+    set_admin(team_name, value)
+    http.write(json.dumps({'success': True}))
+
+
+
+
+
 api.add('change_password', api_change_password, access_level=USER)
 api.add('logout_team',     api_logout_team,     access_level=ADMIN)
 api.add('delete_team',     api_delete_team,     access_level=ADMIN)
+api.add('set_admin',       api_set_admin,       access_level=ADMIN)
 
 session_cache = SessionCache()

@@ -329,7 +329,24 @@
           alert("{{ lc['group_seed_update_success'] }}");
         } catch (e) {
           error_message(e.message);
+          throw e;
         }
+      }
+
+      function set_admin(username, value)
+      {
+        let data = {
+          'team_name': username,
+          'value': value,
+        }
+        try {
+          make_http_request('/api/set_admin', JSON.stringify(data));
+          alert(value ? "{{ lc['make_admin_success'] }}" : "{{ lc['revoke_admin_success'] }}");
+        } catch (e) {
+          error_message(e.message);
+          throw e;
+        }
+        location.reload();
       }
 
 
@@ -740,6 +757,26 @@
             <div class="w3-light-grey w3-container" style="margin: 10px 0px 10px 0px">
               <h3>{{ team.full_name }}</h3>
               <p><strong>{{ lc['nickname'] }}</strong>: {{ team.team_name }}</p>
+              {% if team.is_admin %}
+                <p><strong>{{ lc['is_admin'] }}</strong></p>
+                <p>
+                  <a
+                    href="javascript:set_admin({{ repr(team.team_name) }}, false)"
+                    class="w3-button w3-red"
+                  >
+                    {{ lc['revoke_admin'] }}
+                  </a>
+                </p>
+              {% else %}
+                <p>
+                  <a
+                    href="javascript:set_admin({{ repr(team.team_name) }}, true)"
+                    class="w3-button w3-green"
+                  >
+                    {{ lc['make_admin'] }}
+                  </a>
+                </p>
+              {% end %}
               <p><a
                 class="w3-button w3-blue"
                 href="/team_profile?team={{ team.team_name }}"

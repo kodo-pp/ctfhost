@@ -177,3 +177,7 @@ how_to_attach_files                 = Attach files by putting them to task files
 task_files_dir                      = Task files directory: {dir}
 reg_validation_failed               = Invalid format of username, team name or email
 is_admin                            = The user is an administrator
+make_admin                          = Make an administrator
+revoke_admin                        = Revoke administrator privileges
+make_admin_success                  = User made an administrator
+revoke_admin_success                = Administrator privileges revoked

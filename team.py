@@ -24,6 +24,7 @@ class Team:
         self.points      = info['points']
         self.submissions = info['submissions']
         self.seed        = info['seed']
+        self.is_admin    = info['is_admin']
 
     def strip_private_data(self):
         self.submissions = []
@@ -88,9 +89,9 @@ def get_solves(team_name):
 def get_team_basic_info(team_name):
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
-        cur.execute('SELECT full_name, email, token_seed FROM users WHERE username = ?', (team_name,))
+        cur.execute('SELECT full_name, email, token_seed, is_admin FROM users WHERE username = ?', (team_name,))
         result = cur.fetchone()
-    return {'full_name': result[0], 'email': result[1], 'seed': result[2]}
+    return {'full_name': result[0], 'email': result[1], 'seed': result[2], 'is_admin': result[3]}
 
 
 def read_team(team_name):
