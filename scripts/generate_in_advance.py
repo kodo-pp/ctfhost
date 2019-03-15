@@ -25,8 +25,6 @@ def main():
     team_list = list(team.get_all_teams())
     task_list = list(tasks.get_task_list())
 
-    print(team_list)
-
     for tm in team_list:
         for ts in task_list:
             token = task_gen.get_token(team_name=tm.team_name, task_id=ts.task_id)
