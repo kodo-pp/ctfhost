@@ -89,7 +89,10 @@ def get_solves(team_name):
 def get_team_basic_info(team_name):
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
-        cur.execute('SELECT full_name, email, token_seed, is_admin FROM users WHERE username = ?', (team_name,))
+        cur.execute(
+            'SELECT full_name, email, token_seed, is_admin FROM users WHERE username = ? LIMIT 1',
+            (team_name,)
+        )
         result = cur.fetchone()
     return {'full_name': result[0], 'email': result[1], 'seed': result[2], 'is_admin': result[3]}
 

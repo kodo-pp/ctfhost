@@ -98,7 +98,7 @@ def load_session(session_id):
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute(
-            'SELECT username, expires FROM sessions WHERE expires > ? AND session_id_hash = ?',
+            'SELECT username, expires FROM sessions WHERE expires > ? AND session_id_hash = ? LIMIT 1',
             (int(time.time()), session_id_hash)
         )
 
@@ -109,7 +109,7 @@ def load_session(session_id):
         if session_expires_at is None:
             return None
         else:
-            cur.execute('SELECT is_admin FROM users WHERE username = ?', (username,))
+            cur.execute('SELECT is_admin FROM users WHERE username = ? LIMIT 1', (username,))
             is_admin = bool(cur.fetchone()[0])
             sess = Session(session_id, username, session_expires_at, is_admin)
             session_cache.add(sess)
@@ -128,7 +128,7 @@ def logout(session_id):
 def get_user_info(username):
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
-        cur.execute('SELECT full_name, email, is_admin FROM users WHERE username = ?', (username,))
+        cur.execute('SELECT full_name, email, is_admin FROM users WHERE username = ? LIMIT 1', (username,))
         full_name, email, is_admin = cur.fetchone()
         return {
             'full_name': full_name,
@@ -166,7 +166,7 @@ def authenticate_user(username, password):
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute(
-            'SELECT rowid FROM users WHERE username = ? AND password_hash = ?',
+            'SELECT rowid FROM users WHERE username = ? AND password_hash = ? LIMIT 1',
             (username, password_hash)
         )
         if len(cur.fetchall()) == 0:
@@ -200,7 +200,7 @@ def register_user(username, password, disp_name, email=None, is_admin=False):
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute(
-            'SELECT rowid FROM users WHERE username = ?',
+            'SELECT rowid FROM users WHERE username = ? LIMIT 1',
             (username,)
         )
         if len(cur.fetchall()) != 0:
@@ -218,7 +218,10 @@ def verify_password(user, passwd):
     password_hash = hash_password(passwd)
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
-        cur.execute('SELECT rowid FROM users WHERE username = ? AND password_hash = ?', (user, password_hash))
+        cur.execute(
+            'SELECT rowid FROM users WHERE username = ? AND password_hash = ? LIMIT 1',
+            (user, password_hash)
+        )
         return len(cur.fetchall()) > 0
 
 
