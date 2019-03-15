@@ -2,6 +2,8 @@
 
 import date_fmt
 import hashlib
+import util
+
 
 configuration = {
     # CTF name. Displayed in page title and on the homepage
@@ -53,7 +55,10 @@ configuration = {
     'competition_config_path': 'db/competition-ctl/competition-ctl.json',
     
     # Hash function used to hash passwords and session IDs
-    # Change to hashlib.sha256 or something like that if sha3 functions are not available.
+    # Change to util.make_hash_function(hashlib.sha256) or something like that if sha3 functions are not available
     # WARNING: if you change this function, all sessions and passwords in the database will become invalid!
-    'secure_hash_function':    hashlib.sha3_256,
+    'secure_hash_function':    util.make_hash_function(hashlib.sha3_256),
+
+    # Path to global hash salt file
+    'global_salt_path':        'db/salt.txt'
 }
