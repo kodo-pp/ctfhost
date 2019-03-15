@@ -4,7 +4,6 @@ import sqlite3
 import os
 from sys import argv, exit, stderr, path
 from contextlib import closing
-from hashlib import sha512
 from getpass import getpass
 
 path.insert(0, os.path.realpath('.'))
@@ -37,7 +36,7 @@ if password != password_c:
     print('Password and its confirmation do not match', file=stderr)
     exit(1)
 
-password_hash = sha512(password.encode()).hexdigest()
+password_hash = configuration['secure_hash_function'](password.encode()).hexdigest()
 
 with closing(sqlite3.connect(configuration['db_path'])) as db:
     cur = db.cursor()

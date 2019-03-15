@@ -74,6 +74,18 @@ class SessionCache:
                 v.is_admin = value
 
 
+def hash_session_id(session_id):
+    return apply_secure_hash(session_id.encode())
+
+
+def hash_password(password):
+    return apply_secure_hash(password.encode())
+
+
+def apply_secure_hash(data):
+    return configuration['secure_hash_function'](data).hexdigest()
+
+
 def load_session(session_id):
     if session_id is None:
         return None
@@ -81,11 +93,13 @@ def load_session(session_id):
     if cached_session is not None:
         return cached_session
 
+    session_id_hash = hash_session_id(session_id)
+
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute(
-            'SELECT username, expires FROM sessions WHERE expires > ? AND session_id = ?',
-            (int(time.time()), session_id)
+            'SELECT username, expires FROM sessions WHERE expires > ? AND session_id_hash = ?',
+            (int(time.time()), session_id_hash)
         )
 
         ls = cur.fetchone()
@@ -104,10 +118,11 @@ def load_session(session_id):
 
 def logout(session_id):
     logger.info('Deleting session {}'.format(session_id))
+    session_cache.remove(session_id)
+    session_id_hash = hash_session_id(session_id)
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
-        cur.execute('DELETE FROM sessions WHERE session_id = ?', (session_id,))
-    session_cache.remove(session_id)
+        cur.execute('DELETE FROM sessions WHERE session_id_hash = ?', (session_id_hash,))
 
 
 def get_user_info(username):
@@ -123,16 +138,13 @@ def get_user_info(username):
 
 
 def create_session(username):
-    session_id = hashlib.sha512(os.urandom(16)).hexdigest()
+    session_id = secrets.token_hex(32)
+    session_id_hash = hash_session_id(session_id)
     expires_at = int(time.time()) + configuration['session_duration']
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute('DELETE FROM sessions WHERE expires < ?', (int(time.time()),))
-        cur.execute('SELECT rowid FROM sessions WHERE username = ?', (username,))
-        if len(cur.fetchall()) > 0:
-            logger.info('Session for user "{}" already exists, deleting it'.format(username))
-            cur.execute('DELETE FROM sessions WHERE username = ?', (username,))
-        cur.execute('INSERT INTO sessions VALUES (?, ?, ?)', (session_id, username, expires_at))
+        cur.execute('INSERT INTO sessions VALUES (?, ?, ?)', (session_id_hash, username, expires_at))
         db.commit()
     is_admin = get_user_info(username)['is_admin']
     sess = Session(session_id, username, expires_at, is_admin)
@@ -150,7 +162,7 @@ def get_user_list():
 
 
 def authenticate_user(username, password):
-    password_hash = hashlib.sha512(password.encode()).hexdigest()
+    password_hash = hash_password(password)
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute(
@@ -183,7 +195,7 @@ def register_user(username, password, disp_name, email=None, is_admin=False):
         raise RegValidationFailedError()
     if email == '':
         email = None
-    password_hash = hashlib.sha512(password.encode()).hexdigest()
+    password_hash = hash_password(password)
     token_seed = secrets.token_hex(16)
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
@@ -203,7 +215,7 @@ def register_user(username, password, disp_name, email=None, is_admin=False):
 
 
 def verify_password(user, passwd):
-    password_hash = hashlib.sha512(passwd.encode()).hexdigest()
+    password_hash = hash_password(passwd)
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute('SELECT rowid FROM users WHERE username = ? AND password_hash = ?', (user, password_hash))
@@ -216,7 +228,7 @@ def update_password(user, passwd):
         user,
         '<hidden>' if configuration['hide_password_in_logs'] else passwd
     )
-    password_hash = hashlib.sha512(passwd.encode()).hexdigest()
+    password_hash = hash_password(passwd)
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute('UPDATE users SET password_hash = ? WHERE username = ?', (password_hash, user))
