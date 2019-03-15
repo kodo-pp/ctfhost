@@ -30,7 +30,7 @@ configuration = {
     # Language(s) to use. You can specify any number of fallback languages.
     # e.g. ['ru_RU', 'en_US'] leads to the most of the content being translated
     # to Russian but any strings missing in 'ru_RU' locale being translated to English
-    'lang_list':               ['ru_RU'],
+    'lang_list':               ['en_US', 'ru_RU'],
 
     # Path to task max_id file
     'task_maxid_path':         'db/tasks-etc/maxid.txt',

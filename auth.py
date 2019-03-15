@@ -123,6 +123,7 @@ def logout(session_id):
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
         cur.execute('DELETE FROM sessions WHERE session_id_hash = ?', (session_id_hash,))
+        db.commit()
 
 
 def get_user_info(username):
