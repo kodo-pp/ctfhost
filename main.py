@@ -46,7 +46,7 @@ class ApiHandler(tornado.web.RequestHandler):
                 self.write(json.dumps({'success': False, 'error_message': lc.get('no_such_api_function')}))
                 return
             except BaseException as e:
-                self.write(json.dumps({'success': False, 'error_message': lc.get(repr(e))}))
+                self.write(json.dumps({'success': False, 'error_message': lc.get(str(e))}))
                 logger.error('Exception occured while serving an API call: {}', repr(e))
                 print_exc()
                 return

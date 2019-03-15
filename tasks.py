@@ -670,6 +670,23 @@ def delete_group(group_id):
         raise GroupNotFoundError()
     shutil.rmtree(os.path.join(configuration['groups_path'], str(group_id)))
     # TODO: deal properly with orphans
+    adopt_orphans()
+
+
+def adopt_orphans():
+    groups = get_group_list()
+    for group in groups:
+        if not group_exists(group['parent']):
+            logger.info('Root group adopting orphaned group {}', group['group_id'])
+            group['parent'] = 0   # Root group
+            write_group(group['group_id'], group)
+    tasks = get_task_list()
+    for task in tasks:
+        if not task_exists(task.group):
+            logger.info('Root group adopting orphaned task {}', task.task_id)
+            task.group = 0   # Root group
+            write_task(task)
+
 
 
 def task_exists(task_id):
