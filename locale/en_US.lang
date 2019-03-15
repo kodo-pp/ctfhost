@@ -187,3 +187,5 @@ err_attachment_not_found            = Attachment not found
 err_not_enough_points               = Not enough points
 err_loop_detected                   = Loop detected
 err_invalid_inherit                 = Invalid inherit
+err_empty_task_name                 = Task name is empty
+err_empty_group_name                = Group name is empty

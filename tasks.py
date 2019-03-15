@@ -4,7 +4,9 @@ import os
 import re
 import shutil
 import time
+import secrets
 import subprocess as sp
+import traceback as bt
 from contextlib import closing
 from threading import Lock
 
@@ -21,6 +23,16 @@ from competition import competition
 
 last_solves = {}
 last_solves_lock = Lock()
+
+
+class EmptyTaskNameError(Exception):
+    def __str__(self):
+        return 'err_empty_task_name'
+
+
+class EmptyGroupNameError(Exception):
+    def __str__(self):
+        return 'err_empty_group_name'
 
 
 class TaskNotFoundError(Exception):
@@ -89,7 +101,7 @@ def get_attached_files(task_id):
 
 
 class Task:
-    def __init__(self, task_id, info):
+    def __init__(self, task_id, info, validate=True):
         self.task_id     = task_id
         self.title       = info['title']
         self.text        = info['text']
@@ -102,7 +114,9 @@ class Task:
         self.hints       = info['hints']
         self.files       = list(get_attached_files(task_id))
         self.genfiles    = self.Genfiles(task_id)
-        self.validate()
+
+        if validate:
+            self.validate()
 
     class Genfiles:
         def __init__(self, task_id):
@@ -221,7 +235,7 @@ def get_group_seed(group):
     return get_group_seed(read_group(group['parent']))
 
 
-def get_task_list():
+def get_task_list(validate=True):
     tasks_path = configuration['tasks_path']
     os.makedirs(tasks_path, exist_ok=True)
     for task_dir in os.listdir(tasks_path):
@@ -233,8 +247,9 @@ def get_task_list():
             if not os.access(os.path.join(tasks_path, task_dir, 'task.json'), os.R_OK):
                 continue
             task_id = int(task_dir)
-            yield read_task(task_id)
+            yield read_task(task_id, validate=validate)
         except Exception as e:
+            bt.print_exc()
             logger.warning('Error loading task info: {}', repr(e))
 
 
@@ -366,6 +381,9 @@ def api_add_or_update_task(api, sess, args):
             )
         )
 
+    if title == '':
+        raise EmptyTaskNameError()
+
     if task_exists(task_id):
         logger.info('Modifying task {}', task_id)
         task = read_task(task_id)
@@ -420,14 +438,13 @@ def api_add_group(api, sess, args):
             )
         )
 
-
     if (type(seed) is not str or len(seed) != 16) and seed != 'inherit':
         raise ApiArgumentError(lc.get('api_argument_error').format(argument='seed'))
     elif parent == 0 and seed == 'inherit':
         raise InvalidInheritError()
 
     if name == '':
-        raise ApiArgumentError(lc.get('api_argument_error').format(argument='name'))
+        raise EmptyGroupNameError()
     if parent != 0:
         read_group(parent)
 
@@ -454,7 +471,7 @@ def api_rename_group(api, sess, args):
         )
 
     if new_name == '':
-        raise ApiArgumentError(lc.get('api_argument_error').format(argument='name'))
+        raise EmptyGroupNameError()
 
     logger.info('Renaming group ({}) to {}', group_id, new_name)
     group = read_group(group_id)
@@ -655,11 +672,8 @@ def api_delete_group(api, sess, args):
                 param='group_id',
             )
         )
-    try:
-        logger.info("Deleting group ({})", group_id)
-        delete_group(group_id)
-    except GroupNotFoundError:
-        raise Exception(lc.get('group_does_not_exist').format(group_id=group_id))
+    logger.info("Deleting group ({})", group_id)
+    delete_group(group_id)
 
     http.write(json.dumps({'success': True}))
 
@@ -684,24 +698,26 @@ def delete_group(group_id):
     if not group_exists(group_id):
         raise GroupNotFoundError()
     shutil.rmtree(os.path.join(configuration['groups_path'], str(group_id)))
-    # TODO: deal properly with orphans
     adopt_orphans()
 
 
 def adopt_orphans():
     groups = get_group_list()
     for group in groups:
-        if not group_exists(group['parent']):
+        if not group_exists(group['parent']) and group['parent'] != 0:
             logger.info('Root group adopting orphaned group {}', group['group_id'])
             group['parent'] = 0   # Root group
+            if group['seed'] == 'inherit':
+                group['seed'] = secrets.token_hex(8)
             write_group(group['group_id'], group)
-    tasks = get_task_list()
+    tasks = get_task_list(validate=False)
     for task in tasks:
-        if not task_exists(task.group):
+        if not group_exists(task.group) and task.group != 0:
             logger.info('Root group adopting orphaned task {}', task.task_id)
             task.group = 0   # Root group
+            if task.seed == 'inherit':
+                task.seed = secrets.token_hex(8)
             write_task(task)
-
 
 
 def task_exists(task_id):
@@ -748,7 +764,7 @@ def allocate_group_id():
         return 1
 
 
-def read_task(task_id):
+def read_task(task_id, validate=True):
     if type(task_id) is not int:
         raise TaskNotFoundError()
     task_dir = os.path.join(configuration['tasks_path'], str(task_id))
@@ -757,7 +773,7 @@ def read_task(task_id):
         with open(task_file) as f:
             task_str = f.read()
         task = json.loads(task_str)
-        return Task(task_id, task)
+        return Task(task_id, task, validate=validate)
     except FileNotFoundError:
         raise TaskNotFoundError()
 

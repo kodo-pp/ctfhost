@@ -187,3 +187,5 @@ err_attachment_not_found            = Файл не найден
 err_not_enough_points               = Недостаточно очков
 err_loop_detected                   = Обнаружен цикл
 err_invalid_inherit                 = Недопустимое наследование
+err_empty_task_name                 = Не задано название задания
+err_empty_group_name                = Не задано название группы
