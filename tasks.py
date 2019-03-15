@@ -24,28 +24,43 @@ last_solves_lock = Lock()
 
 
 class TaskNotFoundError(Exception):
-    pass
+    def __str__(self):
+        return 'err_task_not_found'
+
 
 class GroupNotFoundError(Exception):
-    pass
+    def __str__(self):
+        return 'err_group_not_found'
+
 
 class HintNotFoundError(Exception):
-    pass
+    def __str__(self):
+        return 'err_hint_not_found'
+
 
 class NotEnoughPointsError(Exception):
-    pass
+    def __str__(self):
+        return 'err_not_enough_points'
+
 
 class GroupReparentError(Exception):
-    pass
+    def __str__(self):
+        return 'err_loop_detected'
+
 
 class TooFrequentSubmissions(Exception):
     pass
 
+
 class InvalidInheritError(Exception):
-    pass
+    def __str__(self):
+        return 'err_invalid_inherit'
+
 
 class AttachmentNotFoundError(Exception):
-    pass
+    def __str__(self):
+        return 'err_attachment_not_found'
+
 
 
 def get_attachment(task_id, team_name, filename):
@@ -233,7 +248,7 @@ def read_group(group_id):
         group = json.loads(group_str)
         return {'group_id': group_id, 'name': group['name'], 'parent': group['parent'], 'seed': group['seed']}
     except FileNotFoundError:
-        raise GroupNotFoundError(group_id)
+        raise GroupNotFoundError()
 
 
 def write_group(group):
@@ -350,7 +365,7 @@ def api_add_or_update_task(api, sess, args):
                 argument='seed',
             )
         )
-    
+
     if task_exists(task_id):
         logger.info('Modifying task {}', task_id)
         task = read_task(task_id)
@@ -404,8 +419,8 @@ def api_add_group(api, sess, args):
                 param='parent',
             )
         )
-    
-    
+
+
     if (type(seed) is not str or len(seed) != 16) and seed != 'inherit':
         raise ApiArgumentError(lc.get('api_argument_error').format(argument='seed'))
     elif parent == 0 and seed == 'inherit':
@@ -469,7 +484,7 @@ def api_reparent_group(api, sess, args):
         reparent_group(group_id, new_parent)
     else:
         logger.warning('Cannot reparent group ({}): new parent: ({})', group_id, new_parent)
-        raise GroupReparentError(lc.get('parent_loop_detected'))
+        raise GroupReparentError()
 
     http.write(json.dumps({'success': True}))
 
@@ -524,7 +539,7 @@ def api_get_task(api, sess, args):
     http = args['http_handler']
     request = json.loads(http.request.body)
     task_id = request['task_id']
-    
+
     try:
         task_id = int(task_id)
     except (ValueError, TypeError) as e:
@@ -538,7 +553,7 @@ def api_get_task(api, sess, args):
         task = read_task(task_id)
     except TaskNotFoundError:
         raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
-    
+
     http.write(json.dumps({'success': True, 'task': task.to_dict()}))
 
 
@@ -547,7 +562,7 @@ def api_submit_flag(api, sess, args):
     request = json.loads(http.request.body)
     task_id = request['task_id']
     flag_data = request['flag']
-    
+
     if not competition.is_running() and not sess.is_admin:
         raise Exception(lc.get('competition_is_not_running'))
 
@@ -593,7 +608,7 @@ def api_submit_flag(api, sess, args):
         logger.warning('Team {} submitted a flag for already solved task with ID {}', sess.username, task_id)
         http.write(json.dumps({'success': False, 'error_message': lc.get('task_already_solved')}))
         return
-        
+
 
     logger.info('Flag submission from team {} for task with ID {} - {}'.format(
         sess.username,
@@ -622,7 +637,7 @@ def api_delete_task(api, sess, args):
         delete_task(task_id)
     except TaskNotFoundError:
         raise Exception(lc.get('task_does_not_exist').format(task_id=task_id))
-    
+
     http.write(json.dumps({'success': True}))
 
 
@@ -645,7 +660,7 @@ def api_delete_group(api, sess, args):
         delete_group(group_id)
     except GroupNotFoundError:
         raise Exception(lc.get('group_does_not_exist').format(group_id=group_id))
-    
+
     http.write(json.dumps({'success': True}))
 
 
@@ -735,7 +750,7 @@ def allocate_group_id():
 
 def read_task(task_id):
     if type(task_id) is not int:
-        raise TaskNotFoundError(task_id)
+        raise TaskNotFoundError()
     task_dir = os.path.join(configuration['tasks_path'], str(task_id))
     task_file = os.path.join(task_dir, 'task.json')
     try:
@@ -744,13 +759,13 @@ def read_task(task_id):
         task = json.loads(task_str)
         return Task(task_id, task)
     except FileNotFoundError:
-        raise TaskNotFoundError(task_id)
+        raise TaskNotFoundError()
 
 
 def write_task(task):
     task_id = task.task_id
     if type(task_id) is not int:
-        raise TaskNotFoundError(task_id)
+        raise TaskNotFoundError()
     task_dir = os.path.join(configuration['tasks_path'], str(task_id))
     os.makedirs(task_dir, exist_ok=True)
     task_file = os.path.join(task_dir, 'task.json')
@@ -761,7 +776,7 @@ def write_task(task):
 
 def read_group(group_id):
     if type(group_id) is not int:
-        raise GroupNotFoundError(group_id)
+        raise GroupNotFoundError()
     group_dir = os.path.join(configuration['groups_path'], str(group_id))
     group_file = os.path.join(group_dir, 'group.json')
     try:
@@ -771,12 +786,12 @@ def read_group(group_id):
         group['group_id'] = group_id
         return group
     except FileNotFoundError:
-        raise GroupNotFoundError(group_id)
+        raise GroupNotFoundError()
 
 
 def write_group(group_id, group_dict):
     if type(group_id) is not int:
-        raise GroupNotFoundError(group_id)
+        raise GroupNotFoundError()
     group_dir = os.path.join(configuration['groups_path'], str(group_id))
     os.makedirs(group_dir, exist_ok=True)
     group_file = os.path.join(group_dir, 'group.json')
@@ -845,7 +860,7 @@ def get_hint(task_id, hint_hexid):
     task = read_task(task_id)
     return find_hint(task, hint_hexid)
 
-    
+
 def access_hint(task_id, hint_hexid, team_name):
     if type(task_id) is not int:
         raise TypeError('task_id', str(type(task_id)))
