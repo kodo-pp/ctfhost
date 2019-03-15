@@ -3,7 +3,6 @@
 
 import sqlite3
 from sys import argv, path
-from hashlib import sha512
 from os import urandom, access, R_OK, _exit as exit, rename
 from os.path import realpath
 from base64 import b64encode
@@ -15,6 +14,7 @@ from configuration import configuration
 
 
 db_path = configuration['db_path']
+hash_function = configuration['secure_hash_function']
 sql_script_path = 'scripts/bootstrap.sql'
 password_raw_length = 12
 
@@ -50,7 +50,7 @@ def main():
     password_raw = urandom(password_raw_length)
     password = b64encode(password_raw).decode()
     print('Your CTFHost root password is "{}". Keep it private!'.format(password))
-    password_hash = sha512(password.encode()).hexdigest()
+    password_hash = hash_function(password.encode()).hexdigest()
 
     token_seed = token_hex(16)
     sql = sql.replace('@@_PASSWORD_HASH_@@', password_hash).replace('@@_TOKEN_SEED_@@', token_seed)
