@@ -340,9 +340,6 @@ def api_set_admin(api, sess, args):
     http.write(json.dumps({'success': True}))
 
 
-
-
-
 api.add('change_password', api_change_password, access_level=USER)
 api.add('logout_team',     api_logout_team,     access_level=ADMIN)
 api.add('delete_team',     api_delete_team,     access_level=ADMIN)
