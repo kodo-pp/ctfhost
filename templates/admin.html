@@ -447,7 +447,7 @@
         <p>
           <label for="task-editor-seed-input">{{ lc['taskeditor_seed'] }}</label>
           <div class="w3-row-padding">
-            <div class="w3-col s12 m8 l9">
+            <div class="w3-col s12 m6 l8">
               <input
                 type="text"
                 id="task-editor-seed-input"
@@ -458,7 +458,7 @@
                 required
               >
             </div>
-            <div class="w3-col s12 m4 l3">
+            <div class="w3-col s12 m6 l4">
               <a class="w3-button w3-green block" href="javascript:taskeditor_randomize_seed()">
                 {{ lc['taskeditor_randomize_seed'] }}
               </a>
@@ -646,7 +646,7 @@
               </div>
               <h5>{{ lc['parent_group'] }}</h5>
               <div class="w3-row-padding">
-                <div class="w3-col s12 m6 l8">
+                <div class="w3-col s12 m5 l8">
                   <select
                     class="w3-input w3-border"
                     id="group-parent{{ group['group_id'] }}"
@@ -663,7 +663,7 @@
                     {% end %}
                   </select>
                 </div>
-                <div class="w3-col s12 m6 l4">
+                <div class="w3-col s12 m7 l4">
                   <a
                     href="javascript:update_group_parent({{ group['group_id'] }})"
                     class="w3-button w3-green block"
