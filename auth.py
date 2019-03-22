@@ -247,7 +247,7 @@ def update_password(user, passwd):
 def team_exists(team_name):
     with closing(sqlite3.connect(configuration['db_path'])) as db:
         cur = db.cursor()
-        cur.execute('SELECT FROM users WHERE username = ? LIMIT 1', (team_name,))
+        cur.execute('SELECT rowid FROM users WHERE username = ? LIMIT 1', (team_name,))
         return len(cur.fetchall()) > 0
 
 
