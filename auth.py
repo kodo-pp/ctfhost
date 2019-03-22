@@ -266,6 +266,8 @@ def logout_team(team_name):
 
 
 def delete_team(team_name):
+    if not team_exists(team_name):
+        raise TeamNotFoundError()
     logger.warning(
         'DELETING team {}',
         team_name,
