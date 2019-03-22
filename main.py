@@ -471,15 +471,18 @@ def make_app():
         (r'/get_attachment/(.*)', GetAttachmentHandler),
         (r'/favicon.ico', FaviconHandler),
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': './static'})
-    ], debug=True)
+    ], debug=configuration['debug'])
 
 
 def main():
     lc.select_languages(configuration['lang_list'])
 
     app = make_app()
-    app.listen(8888)
-    logger.info('Listening on port 8888')
+    host = configuration['host']
+    port = configuration['port']
+    app.listen(port=port, address=host)
+    logger.info('Listening on {}:{}', host, port)
+    logger.info('Running in {} mode', 'debug' if configuration['debug'] else 'production')
     tornado.ioloop.IOLoop.current().start()
 
 

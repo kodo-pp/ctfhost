@@ -60,5 +60,14 @@ configuration = {
     'secure_hash_function':    util.make_hash_function(hashlib.sha3_256),
 
     # Path to global hash salt file
-    'global_salt_path':        'db/salt.txt'
+    'global_salt_path':        'db/salt.txt',
+
+    # Port to listen on
+    'port':                    8899,
+
+    # Address to bind to
+    'host':                    '0.0.0.0',
+
+    # Debug mode
+    'debug':                   False,
 }
