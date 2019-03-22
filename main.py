@@ -249,7 +249,7 @@ class AdminRegHandler(tornado.web.RequestHandler):
             email = self.get_argument('email', None)
             is_admin = self.get_argument('is_admin', None)
 
-            if is_admin is None or is_admin not in ['on', 'off']:
+            if is_admin is not None and is_admin not in ['on', 'off']:
                 self.write(render_template('reg_error.html', error=lc.get('api_invalid_data_type').format(
                     param = 'is_admin',
                     expected = lc.get('bool'),

@@ -335,6 +335,9 @@
 
       function set_admin(username, value)
       {
+        if (!confirm(locale_messages[value ? 'confirm_make_admin' : 'confirm_revoke_admin'])) {
+          return;
+        }
         let data = {
           'team_name': username,
           'value': value,
