@@ -191,3 +191,4 @@ err_empty_task_name                 = Task name is empty
 err_empty_group_name                = Group name is empty
 competition_is_not_running          = Competition is not running
 logout_no_session                   = Cannot log out: no session active
+err_team_not_found                  = Team not found

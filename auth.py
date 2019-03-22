@@ -17,6 +17,11 @@ from localization import lc
 from api import api, GUEST, USER, ADMIN, ApiArgumentError
 
 
+class TeamNotFoundError(Exception):
+    def __str__(self):
+        return 'err_team_not_found'
+
+
 class Session:
     def __init__(self, id, username, expires_at, is_admin):
         self.id = id
@@ -239,7 +244,16 @@ def update_password(user, passwd):
         db.commit()
 
 
+def team_exists(team_name):
+    with closing(sqlite3.connect(configuration['db_path'])) as db:
+        cur = db.cursor()
+        cur.execute('SELECT FROM users WHERE username = ? LIMIT 1', (team_name,))
+        return len(cur.fetchall()) > 0
+
+
 def logout_team(team_name):
+    if not team_exists(team_name):
+        raise TeamNotFoundError()
     logger.info(
         'Terminating all session of team {}',
         team_name,
