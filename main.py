@@ -400,7 +400,6 @@ class TasksHandler(tornado.web.RequestHandler):
                     tasks          = task_list,
                     team           = current_team,
                     hint_purchases = hint_purchases,
-                    get_token      = task_gen.get_token.__get__(session.username),
                 )
             )
 
