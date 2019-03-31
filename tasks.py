@@ -92,8 +92,8 @@ def check_flag_with_program(prog, flag, task, token, team_name):
     return result.returncode == 0
 
 
-def get_attached_files(task_id):
-    task_files_dir = os.path.join(configuration['tasks_path'], str(task_id), 'files')
+def get_attached_files(task_id, token):
+    task_files_dir = os.path.join(configuration['tasks_path'], str(task_id), 'generated', token, 'files')
     os.makedirs(task_files_dir, exist_ok=True)
     for entry in os.scandir(task_files_dir):
         if entry.is_file():
@@ -112,11 +112,14 @@ class Task:
         self.order       = info['order']
         self.seed        = info['seed']
         self.hints       = info['hints']
-        self.files       = list(get_attached_files(task_id))
+        self.files       = None #list(get_attached_files(task_id))
         self.genfiles    = self.Genfiles(task_id)
 
         if validate:
             self.validate()
+
+    def get_attached_files(self, token):
+        return list(get_attached_files(self.task_id, token))
 
     class Genfiles:
         def __init__(self, task_id):
