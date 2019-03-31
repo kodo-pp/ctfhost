@@ -92,8 +92,11 @@ def check_flag_with_program(prog, flag, task, token, team_name):
     return result.returncode == 0
 
 
-def get_attached_files(task_id):
-    task_files_dir = os.path.join(configuration['tasks_path'], str(task_id), 'files')
+def get_attached_files(task_id, token):
+    if token is not None:
+        task_files_dir = os.path.join(configuration['tasks_path'], str(task_id), 'generated', token, 'files')
+    else:
+        task_files_dir = os.path.join(configuration['tasks_path'], str(task_id), 'files')
     os.makedirs(task_files_dir, exist_ok=True)
     for entry in os.scandir(task_files_dir):
         if entry.is_file():
@@ -112,11 +115,14 @@ class Task:
         self.order       = info['order']
         self.seed        = info['seed']
         self.hints       = info['hints']
-        self.files       = list(get_attached_files(task_id))
+        self.files       = list(get_attached_files(task_id, None))
         self.genfiles    = self.Genfiles(task_id)
 
         if validate:
             self.validate()
+
+    def get_attached_files(self, token):
+        return list(get_attached_files(self.task_id, token))
 
     class Genfiles:
         def __init__(self, task_id):
@@ -772,6 +778,7 @@ def read_task(task_id, validate=True):
     try:
         with open(task_file) as f:
             task_str = f.read()
+        os.makedirs(os.path.join(task_dir, 'files'), exist_ok=True)
         task = json.loads(task_str)
         return Task(task_id, task, validate=validate)
     except FileNotFoundError:
