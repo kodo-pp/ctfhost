@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import date_fmt
 import hashlib
-import util
+
+from . import date_fmt
+from . import util
 
 
 configuration = {

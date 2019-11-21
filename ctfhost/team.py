@@ -1,14 +1,14 @@
-import sqlite3
 import json
+import sqlite3
 import time
 from contextlib import closing
 from datetime import datetime
 
 from loguru import logger
 
-import tasks
-import util
-from configuration import configuration
+from . import tasks
+from . import util
+from .configuration import configuration
 
 
 class TaskAlreadySolved(Exception):

@@ -1,6 +1,6 @@
 from loguru import logger
 
-from localization import lc
+from .localization import lc
 
 
 GUEST = 0
@@ -31,7 +31,7 @@ class ApiArgumentError(Exception):
 class Api:
     def __init__(self):
         self.handlers = {}
-    
+
     def add(self, name, func, access_level):
         if self.has(name):
             raise KeyError(name)
@@ -42,7 +42,7 @@ class Api:
 
     def remove(self, name):
         self.handlers.pop(name)
-    
+
     def handle(self, name, session, args=None):
         if session is None:
             access_level = GUEST

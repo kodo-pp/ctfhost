@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
-import sqlite3
-import hashlib
-import time
-import os
-import json
-import secrets
-import re
 import copy
+import hashlib
+import json
+import os
+import re
+import secrets
+import sqlite3
+import time
 from contextlib import closing
 
 from loguru import logger
 
-from configuration import configuration
-from localization import lc
-from api import api, GUEST, USER, ADMIN, ApiArgumentError
+from .api import api, GUEST, USER, ADMIN, ApiArgumentError
+from .configuration import configuration
+from .localization import lc
 
 
 class TeamNotFoundError(Exception):

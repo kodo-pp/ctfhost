@@ -4,9 +4,9 @@ import time
 
 from loguru import logger
 
-import util
-from api import api, ADMIN
-from configuration import configuration
+from . import util
+from .api import api, ADMIN
+from .configuration import configuration
 
 
 class Competition:
@@ -95,13 +95,13 @@ def api_competition_ctl(api, sess, args):
         )
 
     time_fmt = lambda unix_ts: time.strftime("%Y-%m-%d %H:%M:%S (UTC)", time.localtime(unix_ts))
-    
+
     logger.info('Updating competition configuration: {}', {
         'start_time': time_fmt(start_time),
         'end_time': time_fmt(end_time),
         'allow_team_self_registration': allow_team_self_registration,
     })
-    
+
     global competition
     competition.start_time = start_time
     competition.end_time = end_time

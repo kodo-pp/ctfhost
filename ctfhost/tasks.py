@@ -1,10 +1,10 @@
-import sqlite3
 import json
 import os
 import re
-import shutil
-import time
 import secrets
+import shutil
+import sqlite3
+import time
 import subprocess as sp
 import traceback as bt
 from contextlib import closing
@@ -13,12 +13,12 @@ from threading import Lock
 import markdown as md
 from loguru import logger
 
-import team
-import task_gen
-from configuration import configuration
-from api import api, GUEST, USER, ADMIN, ApiArgumentError
-from localization import lc
-from competition import competition
+from . import task_gen
+from . import team
+from .api import api, GUEST, USER, ADMIN, ApiArgumentError
+from .competition import competition
+from .configuration import configuration
+from .localization import lc
 
 
 last_solves = {}

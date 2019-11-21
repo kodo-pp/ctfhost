@@ -5,9 +5,9 @@ import re
 
 from tornado.template import Template, Loader
 
-import configuration as conf
-from localization import lc
-from competition import competition
+from . import configuration as conf
+from .competition import competition
+from .localization import lc
 
 template_loader = None
 

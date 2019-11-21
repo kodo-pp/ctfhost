@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sqlite3
 import hashlib
-import os
-import time
 import json
+import os
+import sqlite3
+import time
 from traceback import print_exc
 
 import tornado.ioloop
 import tornado.web
 from loguru import logger
 
-import auth
-import tasks
-import team
-import task_gen
-import locks
-from competition import competition
-from localization import Localization, lc
-from configuration import configuration
-from template import render_template
-from api import api, ApiKeyError
+from . import auth
+from . import locks
+from . import task_gen
+from . import tasks
+from . import team
+from .api import api, ApiKeyError
+from .competition import competition
+from .configuration import configuration
+from .localization import Localization, lc
+from .template import render_template
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -113,7 +113,7 @@ class GetAttachmentHandler(tornado.web.RequestHandler):
             filename = self.get_argument('file', None)
             if filename is None:
                 raise tornado.web.HTTPError(404)
-            
+
             try:
                 filepath = tasks.get_attachment(task_id=task_id, team_name=session.username, filename=filename)
             except tasks.AttachmentNotFoundError:
@@ -126,7 +126,7 @@ class GetAttachmentHandler(tornado.web.RequestHandler):
                 if len(data) == 0:
                     break
                 self.write(data)
-            self.finish() 
+            self.finish()
 
 
 class ChangePasswordHandler(tornado.web.RequestHandler):
@@ -189,7 +189,7 @@ class ChangePasswordSubmitHandler(tornado.web.RequestHandler):
                     )
                 )
                 return
-            
+
             auth.update_password(session.username, password)
             self.write(render_template('change_password_ok.html', session=session))
 
@@ -259,8 +259,8 @@ class AdminRegHandler(tornado.web.RequestHandler):
                 is_admin = True
             else:
                 is_admin = False
-                
-            
+
+
             if username is None or username == '':
                 self.write(render_template('reg_error.html', error=lc.get('no_username')))
                 return
@@ -357,7 +357,7 @@ class RegHandler(tornado.web.RequestHandler):
             password_c = self.get_argument('password-c', None)
             disp_name = self.get_argument('disp-name', None)
             email = self.get_argument('email', None)
-            
+
             if username is None or username == '':
                 self.write(render_template('reg_error.html', error=lc.get('no_username')))
                 return

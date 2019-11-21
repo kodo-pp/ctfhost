@@ -1,17 +1,17 @@
+import hashlib
+import json
 import os
 import sys
-import hashlib
-import traceback
-import json
 import time
+import traceback
 
 from loguru import logger
 
-import tasks
-import util
-import team
-from configuration import configuration
-from api import api, ADMIN, USER, GUEST, ApiArgumentError
+from . import tasks
+from . import team
+from . import util
+from .api import api, ADMIN, USER, GUEST, ApiArgumentError
+from .configuration import configuration
 
 
 class PresetNotFoundError(Exception):
@@ -20,7 +20,7 @@ class PresetNotFoundError(Exception):
 
 def get_token(team_name, task_id):
     task = tasks.read_task(task_id)
-    
+
     team_seed = team.read_team(team_name).seed
     task_seed = task.get_seed()
     ctfhost_seed = util.get_ctfhost_seed()
@@ -42,7 +42,7 @@ def read_preset(preset_name):
         raise PresetNotFoundError()
     with open(preset_filename) as f:
         return f.read()
-    
+
 
 def make_task_generation_config_from_preset(task_id, preset_name):
     if type(task_id) is not int:
@@ -80,7 +80,7 @@ def make_default_task_generation_config(task_id):
         # Guarantees that config will be available at the moment of exit
         write_task_generation_config(task_id, read_group_generation_config(task.group))
         logger.info('Inheriting task ({}) generation config from group ({})', task_id, task.group)
-    
+
 
 def make_group_generation_config_from_preset(group_id, preset_name):
     if type(group_id) is not int:
@@ -249,7 +249,7 @@ def api_update_gen_config(api, sess, args):
                     param='task_id',
                 )
             )
-        
+
         write_task_generation_config(task_id, new_config)
         http.write(json.dumps({'success': True}))
     elif what == 'group':
@@ -263,7 +263,7 @@ def api_update_gen_config(api, sess, args):
                     param='group_id',
                 )
             )
-        
+
         write_group_generation_config(group_id, new_config)
         http.write(json.dumps({'success': True}))
     else:
