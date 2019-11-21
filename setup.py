@@ -14,7 +14,7 @@ setup(
         'tornado',
     ],
     entry_points = {
-        'console_script': [
+        'console_scripts': [
             'ctfhost = ctfhost.__main__:main',
         ]
     },
