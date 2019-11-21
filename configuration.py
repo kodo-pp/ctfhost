@@ -53,7 +53,7 @@ configuration = {
 
     # Path to competition configuration file
     'competition_config_path': 'db/competition-ctl/competition-ctl.json',
-    
+
     # Hash function used to hash passwords and session IDs
     # Change to util.make_hash_function(hashlib.sha256) or something like that if sha3 functions are not available
     # WARNING: if you change this function, all sessions and passwords in the database will become invalid!
@@ -69,5 +69,5 @@ configuration = {
     'host':                    '0.0.0.0',
 
     # Debug mode
-    'debug':                   False,
+    'debug':                   True,
 }
